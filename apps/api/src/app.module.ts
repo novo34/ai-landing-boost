@@ -35,9 +35,11 @@ import { PlatformN8NFlowsModule } from './modules/platform/n8n-flows/platform-n8
 import { PlansModule } from './modules/platform/plans/plans.module';
 import { OperationsModule } from './modules/platform/operations/operations.module';
 import { EmailModule } from './modules/email/email.module';
+import { CryptoModule } from './modules/crypto/crypto.module';
 
 @Module({
   imports: [
+    CryptoModule, // Módulo global de cifrado
     // Rate Limiting: Configuración global
     ThrottlerModule.forRoot([
       {

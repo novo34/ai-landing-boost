@@ -49,7 +49,12 @@ JWT_REFRESH_SECRET=your-super-secret-jwt-key-change-in-production-min-32-chars
 Abre en el navegador o usa PowerShell:
 
 ```powershell
-$body = @{email='klever@admin.com';password='KleverAdmin2024!'} | ConvertTo-Json
+# ⚠️ IMPORTANTE: Usa credenciales de prueba, nunca contraseñas reales
+# Configura las variables de entorno primero:
+# $env:TEST_EMAIL="test@example.com"
+# $env:TEST_PASSWORD="your_test_password"
+
+$body = @{email=$env:TEST_EMAIL;password=$env:TEST_PASSWORD} | ConvertTo-Json
 Invoke-WebRequest -Uri 'http://localhost:3001/auth/login' -Method POST -Body $body -ContentType 'application/json'
 ```
 

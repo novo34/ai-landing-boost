@@ -5,16 +5,22 @@ async function testLoginEndpoint() {
   console.log('🧪 Probando endpoint de login...\n');
   console.log(`URL: ${API_URL}/auth/login\n`);
 
+  // Usar variables de entorno para credenciales de prueba
+  // Ejemplo: TEST_EMAIL=test@example.com TEST_PASSWORD=yourpassword npm run test:endpoint
+  const testEmail = process.env.TEST_EMAIL;
+  const testPassword = process.env.TEST_PASSWORD;
+
+  if (!testEmail || !testPassword) {
+    console.error('❌ Error: TEST_EMAIL y TEST_PASSWORD deben estar configurados como variables de entorno');
+    console.error('   Ejemplo: TEST_EMAIL=test@example.com TEST_PASSWORD=yourpassword npm run test:endpoint');
+    return;
+  }
+
   const testCases = [
     {
-      email: 'klever@admin.com',
-      password: 'KleverAdmin2024!',
-      name: 'Klever Admin',
-    },
-    {
-      email: 'jorge@admin.com',
-      password: 'JorgeAdmin2024!',
-      name: 'Jorge Admin',
+      email: testEmail,
+      password: testPassword,
+      name: 'Test User',
     },
   ];
 
@@ -82,7 +88,7 @@ async function testLoginEndpoint() {
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        email: 'klever@admin.com',
+        email: testEmail || 'test@example.com',
         password: 'password_incorrecta',
       }),
     });

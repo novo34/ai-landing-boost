@@ -15,7 +15,7 @@ import { LoginDto } from './dto/login.dto';
 import { $Enums } from '@prisma/client';
 import { GoogleProfile } from './strategies/google.strategy';
 import { MicrosoftProfile } from './strategies/microsoft.strategy';
-import { EncryptionUtil } from '../whatsapp/utils/encryption.util';
+import { CryptoService } from '../crypto/crypto.service';
 import { N8nEventService } from '../n8n-integration/services/n8n-event.service';
 import { createData } from '../../common/prisma/create-data.helper';
 import { CacheService } from '../../common/cache/cache.service';
@@ -39,6 +39,7 @@ export class AuthService {
   constructor(
     private prisma: PrismaService,
     private jwtService: JwtService,
+    private cryptoService: CryptoService,
     private emailDeliveryService: EmailDeliveryService,
     private n8nEventService: N8nEventService,
     private cacheService: CacheService,
@@ -341,10 +342,29 @@ export class AuthService {
       });
 
       if (user) {
-        // Asociar SSO a usuario existente
-        // Encriptar tokens OAuth antes de guardar
-        const encryptedAccessToken = profile.accessToken ? EncryptionUtil.encrypt(profile.accessToken) : null;
-        const encryptedRefreshToken = profile.refreshToken ? EncryptionUtil.encrypt(profile.refreshToken) : null;
+        // Obtener tenantId del usuario existente (necesario para context binding)
+        const activeMembership = user.tenantmembership.find(
+          (m) => m.tenant.status === $Enums.tenant_status.ACTIVE || m.tenant.status === $Enums.tenant_status.TRIAL,
+        ) || user.tenantmembership[0];
+        tenantId = activeMembership?.tenantId;
+
+        // Crear identity primero para obtener el ID (necesario para recordId en context binding)
+        // Usaremos un ID temporal y luego actualizaremos
+        const tempIdentityId = `temp-${Date.now()}`;
+        
+        // Encriptar tokens OAuth antes de guardar (usando CryptoService)
+        const encryptedAccessToken = profile.accessToken 
+          ? this.cryptoService.encryptJson(
+              { token: profile.accessToken },
+              { tenantId: tenantId || 'system', recordId: tempIdentityId }
+            ) as any
+          : null;
+        const encryptedRefreshToken = profile.refreshToken 
+          ? this.cryptoService.encryptJson(
+              { token: profile.refreshToken },
+              { tenantId: tenantId || 'system', recordId: tempIdentityId }
+            ) as any
+          : null;
         
         identity = await this.prisma.useridentity.create({
           data: createData({
@@ -360,11 +380,29 @@ export class AuthService {
           include: { user: { include: { tenantmembership: { include: { tenant: true } } } } },
         });
 
-        // Obtener tenantId del usuario existente
-        const activeMembership = user.tenantmembership.find(
-          (m) => m.tenant.status === $Enums.tenant_status.ACTIVE || m.tenant.status === $Enums.tenant_status.TRIAL,
-        ) || user.tenantmembership[0];
-        tenantId = activeMembership?.tenantId;
+        // Re-cifrar con el recordId real (para context binding correcto)
+        if (identity.id !== tempIdentityId && tenantId) {
+          if (profile.accessToken) {
+            const finalEncryptedAccessToken = this.cryptoService.encryptJson(
+              { token: profile.accessToken },
+              { tenantId, recordId: identity.id }
+            );
+            await this.prisma.useridentity.update({
+              where: { id: identity.id },
+              data: { accessToken: finalEncryptedAccessToken as any },
+            });
+          }
+          if (profile.refreshToken) {
+            const finalEncryptedRefreshToken = this.cryptoService.encryptJson(
+              { token: profile.refreshToken },
+              { tenantId, recordId: identity.id }
+            );
+            await this.prisma.useridentity.update({
+              where: { id: identity.id },
+              data: { refreshToken: finalEncryptedRefreshToken as any },
+            });
+          }
+        }
 
         // Emitir evento n8n de SSO vinculado
         if (tenantId) {
@@ -411,9 +449,22 @@ export class AuthService {
             }),
           });
 
-          // Encriptar tokens OAuth antes de guardar
-          const encryptedAccessToken = profile.accessToken ? EncryptionUtil.encrypt(profile.accessToken) : null;
-          const encryptedRefreshToken = profile.refreshToken ? EncryptionUtil.encrypt(profile.refreshToken) : null;
+          // Crear identity primero para obtener el ID (necesario para recordId en context binding)
+          const tempIdentityId = `temp-${Date.now()}`;
+          
+          // Encriptar tokens OAuth antes de guardar (usando CryptoService)
+          const encryptedAccessToken = profile.accessToken 
+            ? this.cryptoService.encryptJson(
+                { token: profile.accessToken },
+                { tenantId: tenant.id, recordId: tempIdentityId }
+              ) as any
+            : null;
+          const encryptedRefreshToken = profile.refreshToken 
+            ? this.cryptoService.encryptJson(
+                { token: profile.refreshToken },
+                { tenantId: tenant.id, recordId: tempIdentityId }
+              ) as any
+            : null;
 
           const newIdentity = await tx.useridentity.create({
             data: createData({
@@ -427,6 +478,30 @@ export class AuthService {
               refreshToken: encryptedRefreshToken,
             }),
           });
+
+          // Re-cifrar con el recordId real (para context binding correcto)
+          if (newIdentity.id !== tempIdentityId) {
+            if (profile.accessToken) {
+              const finalEncryptedAccessToken = this.cryptoService.encryptJson(
+                { token: profile.accessToken },
+                { tenantId: tenant.id, recordId: newIdentity.id }
+              );
+              await tx.useridentity.update({
+                where: { id: newIdentity.id },
+                data: { accessToken: finalEncryptedAccessToken as any },
+              });
+            }
+            if (profile.refreshToken) {
+              const finalEncryptedRefreshToken = this.cryptoService.encryptJson(
+                { token: profile.refreshToken },
+                { tenantId: tenant.id, recordId: newIdentity.id }
+              );
+              await tx.useridentity.update({
+                where: { id: newIdentity.id },
+                data: { refreshToken: finalEncryptedRefreshToken as any },
+              });
+            }
+          }
 
           return { user: newUser, tenant, identity: newIdentity };
         });
@@ -507,9 +582,28 @@ export class AuthService {
       });
 
       if (user) {
-        // Encriptar tokens OAuth antes de guardar
-        const encryptedAccessToken = profile.accessToken ? EncryptionUtil.encrypt(profile.accessToken) : null;
-        const encryptedRefreshToken = profile.refreshToken ? EncryptionUtil.encrypt(profile.refreshToken) : null;
+        // Obtener tenantId del usuario existente (necesario para context binding)
+        const activeMembership = user.tenantmembership.find(
+          (m) => m.tenant.status === $Enums.tenant_status.ACTIVE || m.tenant.status === $Enums.tenant_status.TRIAL,
+        ) || user.tenantmembership[0];
+        tenantId = activeMembership?.tenantId;
+
+        // Crear identity primero para obtener el ID (necesario para recordId en context binding)
+        const tempIdentityId = `temp-${Date.now()}`;
+        
+        // Encriptar tokens OAuth antes de guardar (usando CryptoService)
+        const encryptedAccessToken = profile.accessToken 
+          ? this.cryptoService.encryptJson(
+              { token: profile.accessToken },
+              { tenantId: tenantId || 'system', recordId: tempIdentityId }
+            ) as any
+          : null;
+        const encryptedRefreshToken = profile.refreshToken 
+          ? this.cryptoService.encryptJson(
+              { token: profile.refreshToken },
+              { tenantId: tenantId || 'system', recordId: tempIdentityId }
+            ) as any
+          : null;
         
         identity = await this.prisma.useridentity.create({
           data: createData({
@@ -525,11 +619,29 @@ export class AuthService {
           include: { user: { include: { tenantmembership: { include: { tenant: true } } } } },
         });
 
-        // Obtener tenantId del usuario existente
-        const activeMembership = user.tenantmembership.find(
-          (m) => m.tenant.status === $Enums.tenant_status.ACTIVE || m.tenant.status === $Enums.tenant_status.TRIAL,
-        ) || user.tenantmembership[0];
-        tenantId = activeMembership?.tenantId;
+        // Re-cifrar con el recordId real (para context binding correcto)
+        if (identity.id !== tempIdentityId && tenantId) {
+          if (profile.accessToken) {
+            const finalEncryptedAccessToken = this.cryptoService.encryptJson(
+              { token: profile.accessToken },
+              { tenantId, recordId: identity.id }
+            );
+            await this.prisma.useridentity.update({
+              where: { id: identity.id },
+              data: { accessToken: finalEncryptedAccessToken as any },
+            });
+          }
+          if (profile.refreshToken) {
+            const finalEncryptedRefreshToken = this.cryptoService.encryptJson(
+              { token: profile.refreshToken },
+              { tenantId, recordId: identity.id }
+            );
+            await this.prisma.useridentity.update({
+              where: { id: identity.id },
+              data: { refreshToken: finalEncryptedRefreshToken as any },
+            });
+          }
+        }
 
         // Emitir evento n8n de SSO vinculado
         if (tenantId) {
@@ -575,9 +687,22 @@ export class AuthService {
             }),
           });
 
-          // Encriptar tokens OAuth antes de guardar
-          const encryptedAccessToken = profile.accessToken ? EncryptionUtil.encrypt(profile.accessToken) : null;
-          const encryptedRefreshToken = profile.refreshToken ? EncryptionUtil.encrypt(profile.refreshToken) : null;
+          // Crear identity primero para obtener el ID (necesario para recordId en context binding)
+          const tempIdentityId = `temp-${Date.now()}`;
+          
+          // Encriptar tokens OAuth antes de guardar (usando CryptoService)
+          const encryptedAccessToken = profile.accessToken 
+            ? this.cryptoService.encryptJson(
+                { token: profile.accessToken },
+                { tenantId: tenant.id, recordId: tempIdentityId }
+              ) as any
+            : null;
+          const encryptedRefreshToken = profile.refreshToken 
+            ? this.cryptoService.encryptJson(
+                { token: profile.refreshToken },
+                { tenantId: tenant.id, recordId: tempIdentityId }
+              ) as any
+            : null;
           
           const newIdentity = await tx.useridentity.create({
             data: createData({
@@ -591,6 +716,30 @@ export class AuthService {
               refreshToken: encryptedRefreshToken,
             }),
           });
+
+          // Re-cifrar con el recordId real (para context binding correcto)
+          if (newIdentity.id !== tempIdentityId) {
+            if (profile.accessToken) {
+              const finalEncryptedAccessToken = this.cryptoService.encryptJson(
+                { token: profile.accessToken },
+                { tenantId: tenant.id, recordId: newIdentity.id }
+              );
+              await tx.useridentity.update({
+                where: { id: newIdentity.id },
+                data: { accessToken: finalEncryptedAccessToken as any },
+              });
+            }
+            if (profile.refreshToken) {
+              const finalEncryptedRefreshToken = this.cryptoService.encryptJson(
+                { token: profile.refreshToken },
+                { tenantId: tenant.id, recordId: newIdentity.id }
+              );
+              await tx.useridentity.update({
+                where: { id: newIdentity.id },
+                data: { refreshToken: finalEncryptedRefreshToken as any },
+              });
+            }
+          }
 
           return { user: newUser, tenant, identity: newIdentity };
         });

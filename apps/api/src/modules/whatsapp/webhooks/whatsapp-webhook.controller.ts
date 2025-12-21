@@ -14,7 +14,6 @@ import { Request, Response } from 'express';
 import { Public } from '../../auth/decorators/public.decorator';
 import { WhatsAppMessagingService } from '../whatsapp-messaging.service';
 import { PrismaService } from '../../../prisma/prisma.service';
-import { EncryptionUtil } from '../utils/encryption.util';
 import { EvolutionProvider } from '../providers/evolution.provider';
 import { WhatsAppCloudProvider } from '../providers/whatsapp-cloud.provider';
 import { ConversationOrchestratorService } from '../../conversations/orchestrator.service';

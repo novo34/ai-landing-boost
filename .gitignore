@@ -24,6 +24,13 @@ apps/web/.next/**
 apps/api/.env
 apps/web/.env
 
+# Files with credentials or sensitive information
+*CREDENCIALES*.md
+*PASSWORD*.md
+*SECRET*.md
+*credentials*.md
+*passwords*.md
+
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json

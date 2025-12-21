@@ -3,8 +3,20 @@ const bcrypt = require("bcrypt");
 const prisma = new PrismaClient();
 
 async function testLogin() {
-  const email = "kmfponce@gmail.com";
-  const password = "PlatformOwner2024!";
+  // Usar variables de entorno para mayor seguridad
+  // Ejemplo: TEST_EMAIL=test@example.com TEST_PASSWORD=yourpassword node test-login-direct.js
+  const email = process.env.TEST_EMAIL;
+  const password = process.env.TEST_PASSWORD;
+
+  if (!email || !password) {
+    console.error(
+      "❌ Error: TEST_EMAIL y TEST_PASSWORD deben estar configurados como variables de entorno"
+    );
+    console.error(
+      "   Ejemplo: TEST_EMAIL=test@example.com TEST_PASSWORD=yourpassword node test-login-direct.js"
+    );
+    process.exit(1);
+  }
 
   console.log("🧪 Probando login directo...\n");
 
@@ -67,7 +79,7 @@ async function testLogin() {
     console.log("\n✅ Login debería funcionar correctamente");
     console.log("\n📋 Resumen:");
     console.log(`   Email: ${email}`);
-    console.log(`   Contraseña: ${password}`);
+    // No mostrar la contraseña por seguridad
     console.log(`   Platform Role: ${user.platformRole || "N/A"}`);
     console.log(`   Tenant: ${activeMembership.tenant.name}`);
     console.log(`   Rol en Tenant: ${activeMembership.role}`);

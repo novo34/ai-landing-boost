@@ -3,8 +3,20 @@ const bcrypt = require("bcrypt");
 const prisma = new PrismaClient();
 
 async function resetPassword() {
-  const email = "kmfponce@gmail.com";
-  const newPassword = "PlatformOwner2024!";
+  // Usar variables de entorno para mayor seguridad
+  // Ejemplo: RESET_EMAIL=user@example.com RESET_PASSWORD=newpassword node reset-password.js
+  const email = process.env.RESET_EMAIL;
+  const newPassword = process.env.RESET_PASSWORD;
+
+  if (!email || !newPassword) {
+    console.error(
+      "❌ Error: RESET_EMAIL y RESET_PASSWORD deben estar configurados como variables de entorno"
+    );
+    console.error(
+      "   Ejemplo: RESET_EMAIL=user@example.com RESET_PASSWORD=newpassword node reset-password.js"
+    );
+    process.exit(1);
+  }
 
   console.log("🔐 Reseteando contraseña para:", email);
 
@@ -32,9 +44,9 @@ async function resetPassword() {
     });
 
     console.log("✅ Contraseña actualizada exitosamente");
-    console.log(`\n📋 Credenciales:`);
+    console.log(`\n📋 Usuario actualizado:`);
     console.log(`   Email: ${email}`);
-    console.log(`   Contraseña: ${newPassword}`);
+    // No mostrar la contraseña por seguridad
 
     // Verificar que la contraseña funciona
     const updatedUser = await prisma.user.findUnique({

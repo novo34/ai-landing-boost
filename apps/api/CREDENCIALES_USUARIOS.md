@@ -1,48 +1,21 @@
 # Credenciales de Usuarios - AI Landing Boost
 
-## Usuarios Creados
+⚠️ **IMPORTANTE DE SEGURIDAD:** Este archivo NO debe contener contraseñas reales. Las contraseñas deben gestionarse de forma segura.
 
-### 👤 Klever - Administrador
-- **Email:** `klever@admin.com`
-- **Contraseña:** `KleverAdmin2024!`
-- **Nombre:** Klever Admin
-- **Rol:** ADMIN
-- **Tenant:** AI Landing Boost
+## Usuarios de Prueba
 
-### 👤 Klever - Cliente
-- **Email:** `klever@cliente.com`
-- **Contraseña:** `KleverCliente2024!`
-- **Nombre:** Klever Cliente
-- **Rol:** AGENT (Cliente/Usuario estándar)
-- **Tenant:** AI Landing Boost
+Para desarrollo y pruebas, puedes crear usuarios usando el script de creación. Las contraseñas deben configurarse mediante variables de entorno o cambiarse después de la creación inicial.
 
-### 👤 Jorge - Administrador
-- **Email:** `jorge@admin.com`
-- **Contraseña:** `JorgeAdmin2024!`
-- **Nombre:** Jorge Admin
-- **Rol:** ADMIN
-- **Tenant:** AI Landing Boost
+### Configuración de Usuarios de Prueba
 
-### 👤 Jorge - Cliente
-- **Email:** `jorge@cliente.com`
-- **Contraseña:** `JorgeCliente2024!`
-- **Nombre:** Jorge Cliente
-- **Rol:** AGENT (Cliente/Usuario estándar)
-- **Tenant:** AI Landing Boost
+Los scripts de creación de usuarios aceptan variables de entorno para mayor seguridad:
 
-### 👤 Owner (Super Administrador)
-- **Email:** `owner@admin.com`
-- **Contraseña:** `Owner2024!`
-- **Nombre:** Owner Admin
-- **Rol:** OWNER (Dueño del tenant)
-- **Tenant:** AI Landing Boost
+```bash
+# Ejemplo de uso seguro
+TEST_EMAIL=test@example.com TEST_PASSWORD=your_secure_password npm run create-users
+```
 
-### 👤 Viewer (Solo Lectura)
-- **Email:** `viewer@test.com`
-- **Contraseña:** `Viewer2024!`
-- **Nombre:** Usuario Viewer
-- **Rol:** VIEWER (Solo lectura)
-- **Tenant:** AI Landing Boost
+### Roles Disponibles
 
 ---
 

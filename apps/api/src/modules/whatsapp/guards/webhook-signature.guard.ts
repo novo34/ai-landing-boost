@@ -2,7 +2,8 @@ import { Injectable, CanActivate, ExecutionContext, UnauthorizedException, Logge
 import { Request } from 'express';
 import { WebhookSignatureUtil } from '../utils/webhook-signature.util';
 import { PrismaService } from '../../../prisma/prisma.service';
-import { EncryptionUtil } from '../utils/encryption.util';
+import { CryptoService } from '../../crypto/crypto.service';
+import { EncryptedBlobV1 } from '../../crypto/crypto.types';
 import { $Enums } from '@prisma/client';
 
 /**
@@ -15,7 +16,10 @@ import { $Enums } from '@prisma/client';
 export class WebhookSignatureGuard implements CanActivate {
   private readonly logger = new Logger(WebhookSignatureGuard.name);
 
-  constructor(private prisma: PrismaService) {}
+  constructor(
+    private prisma: PrismaService,
+    private cryptoService: CryptoService,
+  ) {}
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
     const request = context.switchToHttp().getRequest<Request>();
@@ -71,9 +75,18 @@ export class WebhookSignatureGuard implements CanActivate {
     // Obtener App Secret desde credenciales encriptadas
     let appSecret: string;
     try {
-      const decrypted = EncryptionUtil.decrypt(account.credentials);
-      const creds = JSON.parse(decrypted);
-      appSecret = creds.appSecret || creds.app_secret;
+      // Intentar formato nuevo (EncryptedBlobV1)
+      if (account.credentials && typeof account.credentials === 'object' && 'v' in account.credentials) {
+        const blob = account.credentials as EncryptedBlobV1;
+        const creds = this.cryptoService.decryptJson<any>(blob, {
+          tenantId: account.tenantId,
+          recordId: account.id,
+        });
+        appSecret = creds.appSecret || creds.app_secret;
+      } else {
+        // Formato legacy (string) - no soportado en guard, debe migrarse
+        throw new Error('Legacy format not supported. Please re-create the account.');
+      }
     } catch (error) {
       this.logger.error(`Failed to decrypt credentials for account ${account.id}: ${error instanceof Error ? error.message : 'Unknown error'}`);
       throw new UnauthorizedException({

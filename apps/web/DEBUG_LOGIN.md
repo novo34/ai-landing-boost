@@ -61,7 +61,10 @@ Si no ves esto, el backend no está recibiendo la petición.
 ### 5. Probar Endpoint Directamente
 
 ```powershell
-$body = @{email='klever@admin.com';password='KleverAdmin2024!'} | ConvertTo-Json
+# ⚠️ IMPORTANTE: Usa variables de entorno para credenciales
+# $env:TEST_EMAIL="test@example.com"
+# $env:TEST_PASSWORD="your_test_password"
+$body = @{email=$env:TEST_EMAIL;password=$env:TEST_PASSWORD} | ConvertTo-Json
 Invoke-WebRequest -Uri 'http://localhost:3001/auth/login' -Method POST -Body $body -ContentType 'application/json' | Select-Object StatusCode, Content
 ```
 

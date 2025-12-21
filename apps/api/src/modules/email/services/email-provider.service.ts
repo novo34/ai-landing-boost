@@ -1,6 +1,7 @@
 import { Injectable, Logger, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../../../prisma/prisma.service';
-import { EmailCryptoService } from './email-crypto.service';
+import { CryptoService } from '../../crypto/crypto.service';
+import { EncryptedBlobV1 } from '../../crypto/crypto.types';
 import * as nodemailer from 'nodemailer';
 import { Transporter } from 'nodemailer';
 
@@ -22,7 +23,7 @@ export class EmailProviderService {
 
   constructor(
     private prisma: PrismaService,
-    private cryptoService: EmailCryptoService,
+    private cryptoService: CryptoService,
   ) {}
 
   /**
@@ -61,7 +62,28 @@ export class EmailProviderService {
    * Construye configuración SMTP desde modelo de DB
    */
   private async buildSmtpConfig(settings: any): Promise<SmtpConfig> {
-    const password = this.cryptoService.decrypt(settings.password);
+    // Descifrar password (soporta formato legacy y nuevo)
+    let password: string;
+    try {
+      // Intentar formato nuevo (EncryptedBlobV1)
+      if (settings.password && typeof settings.password === 'object' && 'v' in settings.password) {
+        const blob = settings.password as EncryptedBlobV1;
+        // Determinar tenantId y recordId
+        const tenantId = settings.tenantId || 'platform';
+        const recordId = settings.tenantId || settings.id || 'platform-smtp';
+        const decrypted = this.cryptoService.decryptJson<{ password: string }>(blob, {
+          tenantId,
+          recordId,
+        });
+        password = decrypted.password;
+      } else {
+        // Formato legacy (string) - no soportado, debe migrarse
+        throw new Error('Legacy format not supported. Please update SMTP settings.');
+      }
+    } catch (error) {
+      this.logger.error(`Failed to decrypt SMTP password: ${error instanceof Error ? error.message : 'Unknown error'}`);
+      throw new Error('Failed to decrypt SMTP password. Please update SMTP settings.');
+    }
 
     return {
       fromName: settings.fromName,

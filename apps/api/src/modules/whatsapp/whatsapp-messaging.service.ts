@@ -6,7 +6,8 @@ import {
 } from '@nestjs/common';
 import { createData } from '../../common/prisma/create-data.helper';
 import { PrismaService } from '../../prisma/prisma.service';
-import { EncryptionUtil } from './utils/encryption.util';
+import { CryptoService } from '../crypto/crypto.service';
+import { EncryptedBlobV1 } from '../crypto/crypto.types';
 import { EvolutionProvider } from './providers/evolution.provider';
 import { WhatsAppCloudProvider } from './providers/whatsapp-cloud.provider';
 import { $Enums } from '@prisma/client';
@@ -17,6 +18,7 @@ export class WhatsAppMessagingService {
 
   constructor(
     private prisma: PrismaService,
+    private cryptoService: CryptoService,
     private evolutionProvider: EvolutionProvider,
     private whatsappCloudProvider: WhatsAppCloudProvider,
   ) {}
@@ -56,8 +58,29 @@ export class WhatsAppMessagingService {
       });
     }
 
-    // Desencriptar credenciales
-    const credentials = JSON.parse(EncryptionUtil.decrypt(account.credentials));
+    // Desencriptar credenciales (soporta formato legacy y nuevo)
+    let credentials: any;
+    try {
+      // Intentar formato nuevo (EncryptedBlobV1)
+      if (account.credentials && typeof account.credentials === 'object' && 'v' in account.credentials) {
+        const blob = account.credentials as EncryptedBlobV1;
+        credentials = this.cryptoService.decryptJson<any>(blob, {
+          tenantId,
+          recordId: account.id,
+        });
+      } else {
+        // Formato legacy (string) - usar método de compatibilidad
+        // Nota: Esto debería migrarse gradualmente
+        throw new Error('Legacy format not supported in messaging service. Please re-create the account.');
+      }
+    } catch (error: any) {
+      this.logger.error(`Failed to decrypt credentials for account ${account.id}: ${error.message}`);
+      throw new BadRequestException({
+        success: false,
+        error_key: 'whatsapp.invalid_credentials_format',
+        message: 'No se pudieron desencriptar las credenciales de la cuenta.',
+      });
+    }
 
     // Enviar mensaje a través del proveedor
     try {

@@ -5,17 +5,13 @@
 ### 1. Creación de Usuarios
 Se crearon exitosamente los siguientes usuarios en la base de datos:
 
-#### Usuarios para Klever:
-- **Admin:** `klever@admin.com` / `KleverAdmin2024!` (Rol: ADMIN)
-- **Cliente:** `klever@cliente.com` / `KleverCliente2024!` (Rol: AGENT)
+#### Usuarios de Prueba
+⚠️ **IMPORTANTE:** Las contraseñas deben configurarse mediante variables de entorno o cambiarse después de la creación.
 
-#### Usuarios para Jorge:
-- **Admin:** `jorge@admin.com` / `JorgeAdmin2024!` (Rol: ADMIN)
-- **Cliente:** `jorge@cliente.com` / `JorgeCliente2024!` (Rol: AGENT)
-
-#### Otros usuarios de prueba:
-- **Owner:** `owner@admin.com` / `Owner2024!` (Rol: OWNER)
-- **Viewer:** `viewer@test.com` / `Viewer2024!` (Rol: VIEWER)
+Para crear usuarios de prueba, usa el script con variables de entorno:
+```bash
+CREATE_USERS_CONFIG='[{"email":"test@example.com","password":"securepass","name":"Test User","role":"ADMIN"}]' npm run create-users
+```
 
 Todos los usuarios están asociados al tenant "AI Landing Boost" y tienen el email verificado.
 
@@ -88,5 +84,5 @@ npx ts-node -r tsconfig-paths/register scripts/create-users.ts
 
 ## 🔐 Credenciales de Acceso
 
-Ver archivo `CREDENCIALES_USUARIOS.md` para la lista completa de usuarios y contraseñas.
+⚠️ **IMPORTANTE DE SEGURIDAD:** Las contraseñas no deben estar documentadas en el repositorio. Usa variables de entorno o un gestor de secretos para gestionar credenciales.
 

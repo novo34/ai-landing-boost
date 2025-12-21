@@ -11,8 +11,16 @@
 import axios from 'axios';
 
 const API_URL = process.env.API_URL || 'http://localhost:3001';
-const EMAIL = process.env.TEST_EMAIL || 'klever@admin.com';
-const PASSWORD = process.env.TEST_PASSWORD || 'password123';
+// Usar variables de entorno para credenciales - NUNCA hardcodear contraseñas
+// Ejemplo: TEST_EMAIL=test@example.com TEST_PASSWORD=yourpassword npm run script:create-channel-agent
+const EMAIL = process.env.TEST_EMAIL;
+const PASSWORD = process.env.TEST_PASSWORD;
+
+if (!EMAIL || !PASSWORD) {
+  console.error('❌ Error: TEST_EMAIL y TEST_PASSWORD deben estar configurados como variables de entorno');
+  console.error('   Ejemplo: TEST_EMAIL=test@example.com TEST_PASSWORD=yourpassword npm run script:create-channel-agent');
+  process.exit(1);
+}
 
 interface LoginResponse {
   success: boolean;

@@ -4,12 +4,12 @@
   "private": true,
   "description": "NestJS API for AI Landing Boost SaaS",
   "scripts": {
-    "build": "nest build",
+    "build": "nest build && node -e \"const fs = require('fs'); const path = require('path'); const distMain = path.join(__dirname, 'dist', 'main.js'); const distSrcMain = path.join(__dirname, 'dist', 'src', 'main.js'); if (fs.existsSync(distSrcMain) && !fs.existsSync(distMain)) { try { fs.linkSync(distSrcMain, distMain); } catch(e) { fs.copyFileSync(distSrcMain, distMain); } }\"",
     "format": "prettier --write \"src/**/*.ts\" \"test/**/*.ts\"",
-    "start": "nest start",
+    "start": "node dist/src/main",
     "start:dev": "nest start --watch",
     "start:debug": "nest start --debug --watch",
-    "start:prod": "node dist/main",
+    "start:prod": "node dist/src/main",
     "lint": "eslint \"{src,apps,libs,test}/**/*.ts\" --fix",
     "test": "jest",
     "test:watch": "jest --watch",
@@ -24,7 +24,8 @@
     "prisma:reset": "prisma migrate reset",
     "postinstall": "prisma generate",
     "prebuild": "prisma generate",
-    "create-users": "ts-node -r tsconfig-paths/register scripts/create-users.ts"
+    "create-users": "ts-node -r tsconfig-paths/register scripts/create-users.ts",
+    "migrate-crypto-legacy": "ts-node -r tsconfig-paths/register scripts/migrate-crypto-legacy.ts"
   },
   "dependencies": {
     "@aws-sdk/client-s3": "^3.700.0",

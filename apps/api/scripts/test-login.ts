@@ -32,12 +32,11 @@ async function testLogin() {
     }
 
     // 3. Verificar cada usuario
-    const testUsers = [
-      'klever@admin.com',
-      'klever@cliente.com',
-      'jorge@admin.com',
-      'jorge@cliente.com',
-    ];
+    // Usar variables de entorno para emails de prueba
+    const testUsersEnv = process.env.TEST_USERS;
+    const testUsers = testUsersEnv 
+      ? testUsersEnv.split(',').map(u => u.trim())
+      : []; // Si no hay usuarios configurados, lista vacía
 
     for (const testEmail of testUsers) {
       console.log(`\n🔍 Verificando usuario: ${testEmail}`);
@@ -66,13 +65,10 @@ async function testLogin() {
       }
 
       // Probar contraseña
+      // Usar variable de entorno para contraseña de prueba
       if (user.passwordHash) {
-        const testPasswords = [
-          'KleverAdmin2024!',
-          'KleverCliente2024!',
-          'JorgeAdmin2024!',
-          'JorgeCliente2024!',
-        ];
+        const testPassword = process.env.TEST_PASSWORD;
+        const testPasswords = testPassword ? [testPassword] : [];
 
         let passwordMatch = false;
         for (const testPwd of testPasswords) {
@@ -117,8 +113,14 @@ async function testLogin() {
 
     // 5. Probar login directamente
     console.log('\n\n4️⃣ Probando login directo...');
-    const testEmail = 'klever@admin.com';
-    const testPassword = 'KleverAdmin2024!';
+    const testEmail = process.env.TEST_EMAIL;
+    const testPassword = process.env.TEST_PASSWORD;
+
+    if (!testEmail || !testPassword) {
+      console.log('⚠️  TEST_EMAIL y TEST_PASSWORD no configurados, omitiendo prueba de login directo');
+      console.log('   Configura: TEST_EMAIL=test@example.com TEST_PASSWORD=yourpassword');
+      return;
+    }
 
     const testUser = await prisma.user.findUnique({
       where: { email: testEmail },

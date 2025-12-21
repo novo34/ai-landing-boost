@@ -8,13 +8,13 @@
 const axios = require("axios");
 
 const API_URL = process.env.API_URL || "http://localhost:3001";
-// Credenciales del usuario
+// Credenciales del usuario - Usar variables de entorno para mayor seguridad
+// Ejemplo: TEST_EMAIL=test@example.com TEST_PASSWORD=yourpassword node script.js
 const CREDENTIALS = [
-  { email: "klever@admin.com", password: "KleverAdmin2024!" },
-  { email: "kmfponce@gmail.com", password: "PlatformOwner2024!" },
-  { email: "jorge@admin.com", password: "password123" },
-  { email: "klever@cliente.com", password: "password123" },
-  { email: "jorge@cliente.com", password: "password123" },
+  {
+    email: process.env.TEST_EMAIL || "test@example.com",
+    password: process.env.TEST_PASSWORD || "",
+  },
 ];
 
 async function loginWithCredentials(email, password) {

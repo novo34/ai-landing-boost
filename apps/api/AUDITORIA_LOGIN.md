@@ -98,13 +98,14 @@ El DTO requiere:
 - `password`: debe ser string
 
 **Solución:**
-Asegurarse de que el frontend envíe:
+Asegurarse de que el frontend envíe las credenciales correctas:
 ```json
 {
-  "email": "klever@admin.com",
-  "password": "KleverAdmin2024!"
+  "email": "usuario@ejemplo.com",
+  "password": "contraseña_segura"
 }
 ```
+⚠️ **IMPORTANTE:** Usa variables de entorno para las credenciales de prueba, nunca las hardcodees.
 
 ## 🧪 Pasos para Diagnosticar
 
@@ -130,7 +131,7 @@ Content-Type: application/json
 
 {
   "email": "klever@admin.com",
-  "password": "KleverAdmin2024!"
+  "password": "contraseña_segura"  // ⚠️ Usa variables de entorno, nunca hardcodees contraseñas
 }
 ```
 
@@ -210,7 +211,10 @@ npm run create-users
 
 ### Probar login desde terminal (PowerShell)
 ```powershell
-$body = @{email='klever@admin.com';password='KleverAdmin2024!'} | ConvertTo-Json
+# ⚠️ IMPORTANTE: Usa variables de entorno para credenciales
+# $env:TEST_EMAIL="test@example.com"
+# $env:TEST_PASSWORD="your_test_password"
+$body = @{email=$env:TEST_EMAIL;password=$env:TEST_PASSWORD} | ConvertTo-Json
 $response = Invoke-WebRequest -Uri 'http://localhost:3001/auth/login' -Method POST -Body $body -ContentType 'application/json'
 $response.Content
 ```

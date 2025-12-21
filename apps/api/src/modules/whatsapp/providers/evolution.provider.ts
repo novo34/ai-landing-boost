@@ -1,6 +1,7 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { BaseWhatsAppProvider, AccountInfo } from './base.provider';
 import axios, { AxiosInstance } from 'axios';
+import { validateEvolutionBaseUrl } from '../../crypto/utils/url-validation.util';
 
 /**
  * EvolutionProvider
@@ -26,10 +27,10 @@ export class EvolutionProvider extends BaseWhatsAppProvider {
         return false;
       }
 
-      const url = baseUrl || this.defaultBaseUrl;
-      
-      // Normalizar URL (remover barra final si existe y espacios)
-      const normalizedUrl = url.trim().replace(/\/$/, '');
+      // Validar y normalizar baseUrl (protección SSRF)
+      const normalizedUrl = baseUrl 
+        ? validateEvolutionBaseUrl(baseUrl, false) // Solo HTTPS
+        : validateEvolutionBaseUrl(this.defaultBaseUrl, false);
       
       this.logger.debug(`Validating credentials for instance: ${instanceName} at ${normalizedUrl}`);
       
@@ -80,10 +81,11 @@ export class EvolutionProvider extends BaseWhatsAppProvider {
   async getAccountInfo(credentials: any): Promise<AccountInfo> {
     try {
       const { apiKey, instanceName, baseUrl } = credentials;
-      const url = baseUrl || this.defaultBaseUrl;
       
-      // Normalizar URL (remover barra final si existe)
-      const normalizedUrl = url.replace(/\/$/, '');
+      // Validar y normalizar baseUrl (protección SSRF)
+      const normalizedUrl = baseUrl 
+        ? validateEvolutionBaseUrl(baseUrl, false) // Solo HTTPS
+        : validateEvolutionBaseUrl(this.defaultBaseUrl, false);
 
       let response;
       try {
@@ -167,9 +169,13 @@ export class EvolutionProvider extends BaseWhatsAppProvider {
   async getQRCode(credentials: any): Promise<string | null> {
     try {
       const { apiKey, instanceName, baseUrl } = credentials;
-      const url = baseUrl || this.defaultBaseUrl;
+      
+      // Validar y normalizar baseUrl (protección SSRF)
+      const normalizedUrl = baseUrl 
+        ? validateEvolutionBaseUrl(baseUrl, false) // Solo HTTPS
+        : validateEvolutionBaseUrl(this.defaultBaseUrl, false);
 
-      const response = await axios.get(`${url}/instance/connect/${instanceName}`, {
+      const response = await axios.get(`${normalizedUrl}/instance/connect/${instanceName}`, {
         headers: { apikey: apiKey },
         timeout: 10000,
       });
@@ -196,10 +202,14 @@ export class EvolutionProvider extends BaseWhatsAppProvider {
   async sendMessage(credentials: any, to: string, message: string): Promise<void> {
     try {
       const { apiKey, instanceName, baseUrl } = credentials;
-      const url = baseUrl || this.defaultBaseUrl;
+      
+      // Validar y normalizar baseUrl (protección SSRF)
+      const normalizedUrl = baseUrl 
+        ? validateEvolutionBaseUrl(baseUrl, false) // Solo HTTPS
+        : validateEvolutionBaseUrl(this.defaultBaseUrl, false);
 
       await axios.post(
-        `${url}/message/sendText/${instanceName}`,
+        `${normalizedUrl}/message/sendText/${instanceName}`,
         {
           number: to,
           text: message,

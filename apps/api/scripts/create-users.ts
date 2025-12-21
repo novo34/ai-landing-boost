@@ -129,50 +129,25 @@ async function main() {
     const mainTenant = await getOrCreateTenant('AI Landing Boost', 'ai-landing-boost');
 
     // Definir usuarios a crear
-    const usersToCreate: UserToCreate[] = [
-      // Klever - Admin
-      {
-        email: 'klever@admin.com',
-        password: 'KleverAdmin2024!',
-        name: 'Klever Admin',
-        role: $Enums.tenantmembership_role.ADMIN,
-      },
-      // Klever - Cliente (AGENT)
-      {
-        email: 'klever@cliente.com',
-        password: 'KleverCliente2024!',
-        name: 'Klever Cliente',
-        role: $Enums.tenantmembership_role.AGENT,
-      },
-      // Jorge - Admin
-      {
-        email: 'jorge@admin.com',
-        password: 'JorgeAdmin2024!',
-        name: 'Jorge Admin',
-        role: $Enums.tenantmembership_role.ADMIN,
-      },
-      // Jorge - Cliente (AGENT)
-      {
-        email: 'jorge@cliente.com',
-        password: 'JorgeCliente2024!',
-        name: 'Jorge Cliente',
-        role: $Enums.tenantmembership_role.AGENT,
-      },
-      // Usuario OWNER (super admin)
-      {
-        email: 'owner@admin.com',
-        password: 'Owner2024!',
-        name: 'Owner Admin',
-        role: $Enums.tenantmembership_role.OWNER,
-      },
-      // Usuario VIEWER (solo lectura)
-      {
-        email: 'viewer@test.com',
-        password: 'Viewer2024!',
-        name: 'Usuario Viewer',
-        role: $Enums.tenantmembership_role.VIEWER,
-      },
-    ];
+    // ⚠️ IMPORTANTE: Para mayor seguridad, usa variables de entorno o un archivo de configuración externo
+    // Ejemplo: CREATE_USERS_CONFIG='[{"email":"test@example.com","password":"securepass","name":"Test User","role":"ADMIN"}]' npm run create-users
+    const usersConfigEnv = process.env.CREATE_USERS_CONFIG;
+    let usersToCreate: UserToCreate[] = [];
+
+    if (usersConfigEnv) {
+      try {
+        usersToCreate = JSON.parse(usersConfigEnv);
+      } catch (error) {
+        console.error('❌ Error al parsear CREATE_USERS_CONFIG. Debe ser un JSON válido.');
+        console.error('   Ejemplo: CREATE_USERS_CONFIG=\'[{"email":"test@example.com","password":"securepass","name":"Test","role":"ADMIN"}]\'');
+        process.exit(1);
+      }
+    } else {
+      console.warn('⚠️  CREATE_USERS_CONFIG no está configurado. No se crearán usuarios.');
+      console.warn('   Para crear usuarios, configura la variable de entorno:');
+      console.warn('   CREATE_USERS_CONFIG=\'[{"email":"test@example.com","password":"securepass","name":"Test User","role":"ADMIN"}]\'');
+      return;
+    }
 
     const results: Array<{ email: string; password: string; role: $Enums.tenantmembership_role; name: string }> = [];
 
@@ -191,7 +166,7 @@ async function main() {
     console.log('═'.repeat(80));
     results.forEach((user) => {
       console.log(`Email: ${user.email}`);
-      console.log(`Contraseña: ${user.password}`);
+      // No mostrar contraseñas por seguridad
       console.log(`Nombre: ${user.name}`);
       console.log(`Rol: ${user.role}`);
       console.log('─'.repeat(80));

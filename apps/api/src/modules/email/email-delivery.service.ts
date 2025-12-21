@@ -2,7 +2,8 @@ import { Injectable, Logger } from '@nestjs/common';
 import { PrismaService } from '../../prisma/prisma.service';
 import { EmailQueueService } from './services/email-queue.service';
 import { EmailProviderService } from './services/email-provider.service';
-import { EmailCryptoService } from './services/email-crypto.service';
+import { CryptoService } from '../crypto/crypto.service';
+import { EncryptedBlobV1 } from '../crypto/crypto.types';
 import { EmailI18nService } from './services/email-i18n.service';
 import { v4 as uuidv4 } from 'uuid';
 import { SmtpSettingsDto } from './dto/smtp-settings.dto';
@@ -18,7 +19,7 @@ export class EmailDeliveryService {
     private prisma: PrismaService,
     private queueService: EmailQueueService,
     private providerService: EmailProviderService,
-    private cryptoService: EmailCryptoService,
+    private cryptoService: CryptoService,
     private i18nService: EmailI18nService,
   ) {}
 
@@ -65,13 +66,22 @@ export class EmailDeliveryService {
 
     // Solo actualizar password si se proporciona uno nuevo (no vacío)
     if (dto.password && dto.password.trim() !== '') {
-      updateData.password = this.cryptoService.encrypt(dto.password);
+      // Cifrar password usando CryptoService (formato EncryptedBlobV1)
+      const recordId = existingSettings?.id || `tenant-smtp-${tenantId}-${Date.now()}`;
+      updateData.password = this.cryptoService.encryptJson(
+        { password: dto.password },
+        { tenantId, recordId }
+      ) as any;
     } else if (existingSettings) {
       // Mantener el password existente si no se proporciona uno nuevo
       updateData.password = existingSettings.password;
     } else {
       // Si no existe configuración y no se proporciona password, usar uno vacío
-      updateData.password = this.cryptoService.encrypt('');
+      const recordId = `tenant-smtp-${tenantId}-${Date.now()}`;
+      updateData.password = this.cryptoService.encryptJson(
+        { password: '' },
+        { tenantId, recordId }
+      ) as any;
     }
 
     const settings = await (this.prisma as any).tenantsmtpsettings.upsert({
@@ -136,13 +146,22 @@ export class EmailDeliveryService {
 
     // Solo actualizar password si se proporciona uno nuevo (no vacío)
     if (dto.password && dto.password.trim() !== '') {
-      updateData.password = this.cryptoService.encrypt(dto.password);
+      // Cifrar password usando CryptoService (recordId = settings.id para platform SMTP)
+      const recordId = existingSettings?.id || `platform-smtp-${Date.now()}`;
+      updateData.password = this.cryptoService.encryptJson(
+        { password: dto.password },
+        { tenantId: 'platform', recordId }
+      ) as any;
     } else if (existingSettings) {
       // Mantener el password existente si no se proporciona uno nuevo
       updateData.password = existingSettings.password;
     } else {
       // Si no existe configuración y no se proporciona password, usar uno vacío
-      updateData.password = this.cryptoService.encrypt('');
+      const recordId = `platform-smtp-${Date.now()}`;
+      updateData.password = this.cryptoService.encryptJson(
+        { password: '' },
+        { tenantId: 'platform', recordId }
+      ) as any;
     }
 
     const settings = existingSettings

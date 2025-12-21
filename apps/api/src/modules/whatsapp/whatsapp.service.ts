@@ -5,7 +5,9 @@ import {
   Logger,
 } from '@nestjs/common';
 import { PrismaService } from '../../prisma/prisma.service';
-import { EncryptionUtil } from './utils/encryption.util';
+import { CryptoService } from '../crypto/crypto.service';
+import { EncryptedBlobV1 } from '../crypto/crypto.types';
+import { validateEvolutionBaseUrl } from '../crypto/utils/url-validation.util';
 import { EvolutionProvider } from './providers/evolution.provider';
 import { WhatsAppCloudProvider } from './providers/whatsapp-cloud.provider';
 import { $Enums } from '@prisma/client';
@@ -19,9 +21,98 @@ export class WhatsAppService {
 
   constructor(
     private prisma: PrismaService,
+    private cryptoService: CryptoService,
     private evolutionProvider: EvolutionProvider,
     private whatsappCloudProvider: WhatsAppCloudProvider,
   ) {}
+
+  /**
+   * Helper para detectar si las credenciales están en formato legacy (string)
+   * 
+   * NOTA: El formato legacy ya no está soportado.
+   * Todos los datos deben estar migrados a EncryptedBlobV1.
+   */
+  private isLegacyFormat(credentials: any): boolean {
+    if (!credentials || typeof credentials !== 'string') {
+      return false;
+    }
+    // Verificar si es un objeto JSON (EncryptedBlobV1) parseado como string
+    try {
+      const parsed = JSON.parse(credentials);
+      if (parsed && typeof parsed === 'object' && parsed.v === 1 && parsed.alg === 'aes-256-gcm') {
+        return false; // Es formato nuevo
+      }
+    } catch {
+      // No es JSON válido
+    }
+    return true; // Es formato legacy (string con formato iv:tag:encrypted)
+  }
+
+  /**
+   * Helper para descifrar credenciales (solo formato nuevo EncryptedBlobV1)
+   * 
+   * NOTA: El formato legacy ya no está soportado.
+   * Todos los datos deben estar migrados a EncryptedBlobV1 usando el script de migración.
+   */
+  private async decryptCredentials(
+    credentials: any,
+    tenantId: string,
+    recordId: string,
+  ): Promise<{ decrypted?: any; migratedBlob?: EncryptedBlobV1 } | any> {
+    // Validar que es formato nuevo (EncryptedBlobV1)
+    if (this.isLegacyFormat(credentials)) {
+      throw new Error(
+        `Legacy format detected for record ${recordId}. Please run the migration script: npm run migrate-crypto-legacy`
+      );
+    }
+
+    // Usar CryptoService (formato nuevo)
+    try {
+      const blob = credentials as EncryptedBlobV1;
+      const decrypted = this.cryptoService.decryptJson<any>(blob, {
+        tenantId,
+        recordId,
+      });
+
+      // Migración on-read si es necesario
+      if (this.cryptoService.needsMigration(blob)) {
+        const migratedBlob = this.cryptoService.migrateBlob(blob, {
+          tenantId,
+          recordId,
+        });
+        // Actualizar en BD (esto se hace en el método que llama)
+        return { decrypted, migratedBlob };
+      }
+
+      return decrypted;
+    } catch (error) {
+      this.logger.warn(`Failed to decrypt credentials for record ${recordId}`);
+      throw error;
+    }
+  }
+
+  /**
+   * Helper para cifrar credenciales (siempre usa el nuevo formato)
+   */
+  private encryptCredentials(
+    credentials: any,
+    tenantId: string,
+    recordId: string,
+  ): EncryptedBlobV1 {
+    return this.cryptoService.encryptJson(credentials, { tenantId, recordId });
+  }
+
+  /**
+   * Helper para obtener credenciales enmascaradas
+   */
+  private getMaskedCredentials(creds: any, provider: $Enums.tenantwhatsappaccount_provider): string {
+    if (provider === $Enums.tenantwhatsappaccount_provider.EVOLUTION_API) {
+      return this.cryptoService.mask(creds.apiKey || '');
+    } else if (provider === $Enums.tenantwhatsappaccount_provider.WHATSAPP_CLOUD) {
+      return this.cryptoService.mask(creds.accessToken || '');
+    }
+    return '****';
+  }
 
   /**
    * Obtiene todas las cuentas de WhatsApp del tenant
@@ -42,22 +133,32 @@ export class WhatsAppService {
       orderBy: { createdAt: 'desc' },
     });
 
-    return {
-      success: true,
-      data: accounts.map((acc) => {
+    // Procesar cuentas y manejar migraciones
+    const processedAccounts = await Promise.all(
+      accounts.map(async (acc) => {
         // Obtener credenciales enmascaradas
         let maskedCredentials = '****';
-        try {
-          const decrypted = EncryptionUtil.decrypt(acc.credentials);
-          const creds = JSON.parse(decrypted);
-          // Enmascarar según el proveedor
-          if (acc.provider === $Enums.tenantwhatsappaccount_provider.EVOLUTION_API) {
-            maskedCredentials = EncryptionUtil.mask(creds.apiKey || '');
-          } else if (acc.provider === $Enums.tenantwhatsappaccount_provider.WHATSAPP_CLOUD) {
-            maskedCredentials = EncryptionUtil.mask(creds.accessToken || '');
+        
+        // No intentar descifrar si el status es DISCONNECTED (requiere reconexión)
+        if (acc.status !== $Enums.tenantwhatsappaccount_status.DISCONNECTED) {
+          try {
+            const result = await this.decryptCredentials(acc.credentials, tenantId, acc.id);
+            const creds = result.decrypted || result;
+            maskedCredentials = this.getMaskedCredentials(creds, acc.provider);
+            
+            // Si hay migración pendiente, actualizar en BD (sin bloquear request)
+            if (result.migratedBlob) {
+              this.prisma.tenantwhatsappaccount.update({
+                where: { id: acc.id },
+                data: { credentials: result.migratedBlob as any },
+              }).catch(err => {
+                // No romper el request si falla la migración, solo loguear
+                this.logger.warn(`Failed to migrate credentials for account ${acc.id}: ${err.message}`);
+              });
+            }
+          } catch (error) {
+            this.logger.warn(`Failed to decrypt credentials for account ${acc.id}`);
           }
-        } catch (error) {
-          this.logger.warn(`Failed to decrypt credentials for account ${acc.id}`);
         }
 
         return {
@@ -75,7 +176,12 @@ export class WhatsAppService {
             masked: maskedCredentials,
           },
         };
-      }),
+      })
+    );
+
+    return {
+      success: true,
+      data: processedAccounts,
     };
   }
 
@@ -100,12 +206,16 @@ export class WhatsAppService {
     // Obtener credenciales enmascaradas
     let maskedCredentials = '****';
     try {
-      const decrypted = EncryptionUtil.decrypt(account.credentials);
-      const creds = JSON.parse(decrypted);
-      if (account.provider === $Enums.tenantwhatsappaccount_provider.EVOLUTION_API) {
-        maskedCredentials = EncryptionUtil.mask(creds.apiKey || '');
-      } else if (account.provider === $Enums.tenantwhatsappaccount_provider.WHATSAPP_CLOUD) {
-        maskedCredentials = EncryptionUtil.mask(creds.accessToken || '');
+      const result = await this.decryptCredentials(account.credentials, tenantId, account.id);
+      const creds = result.decrypted || result;
+      maskedCredentials = this.getMaskedCredentials(creds, account.provider);
+      
+      // Si hay migración pendiente, actualizar en BD
+      if (result.migratedBlob) {
+        await this.prisma.tenantwhatsappaccount.update({
+          where: { id: account.id },
+          data: { credentials: result.migratedBlob as any },
+        });
       }
     } catch (error) {
       this.logger.warn(`Failed to decrypt credentials for account ${account.id}`);
@@ -136,6 +246,19 @@ export class WhatsAppService {
    * Crea una nueva cuenta de WhatsApp
    */
   async createAccount(tenantId: string, dto: CreateAccountDto) {
+    // Validar baseUrl si es Evolution API (protección SSRF)
+    if (dto.provider === $Enums.tenantwhatsappaccount_provider.EVOLUTION_API && dto.credentials.baseUrl) {
+      try {
+        dto.credentials.baseUrl = validateEvolutionBaseUrl(dto.credentials.baseUrl, false);
+      } catch (error: any) {
+        throw new BadRequestException({
+          success: false,
+          error_key: 'whatsapp.invalid_base_url',
+          message: error.message || 'Base URL inválida o no permitida',
+        });
+      }
+    }
+
     // Validar credenciales contra el proveedor
     this.logger.debug(`Validating credentials for provider: ${dto.provider}`);
     const isValid = await this.validateCredentials(dto.provider, dto.credentials);
@@ -163,8 +286,10 @@ export class WhatsAppService {
       });
     }
 
-    // Encriptar credenciales
-    const encryptedCredentials = EncryptionUtil.encrypt(JSON.stringify(dto.credentials));
+    // Cifrar credenciales usando el nuevo formato
+    // Nota: accountId aún no existe, usamos un ID temporal que se actualizará después
+    const tempRecordId = `temp-${Date.now()}`;
+    const encryptedCredentials = this.encryptCredentials(dto.credentials, tenantId, tempRecordId);
 
     // Verificar si ya existe una cuenta con el mismo número
         const existingAccount = await this.prisma.tenantwhatsappaccount.findFirst({
@@ -189,19 +314,26 @@ export class WhatsAppService {
     }
 
     // Crear cuenta
-        const account = await this.prisma.tenantwhatsappaccount.create({
+    const account = await this.prisma.tenantwhatsappaccount.create({
       data: createData({
         tenantId,
         provider: dto.provider,
         phoneNumber: accountInfo.phoneNumber,
         status: accountInfo.status === 'connected' ? $Enums.tenantwhatsappaccount_status.CONNECTED : $Enums.tenantwhatsappaccount_status.PENDING,
-        credentials: encryptedCredentials,
+        credentials: encryptedCredentials as any, // Prisma JSON type
         displayName: accountInfo.displayName,
         instanceName: dto.credentials.instanceName || null,
         qrCodeUrl,
         connectedAt: accountInfo.status === 'connected' ? new Date() : null,
         lastCheckedAt: new Date(),
       }),
+    });
+
+    // Re-cifrar con el recordId real (para context binding correcto)
+    const finalEncryptedCredentials = this.encryptCredentials(dto.credentials, tenantId, account.id);
+    await this.prisma.tenantwhatsappaccount.update({
+      where: { id: account.id },
+      data: { credentials: finalEncryptedCredentials as any },
     });
 
     return {
@@ -240,6 +372,19 @@ export class WhatsAppService {
 
     // Si se actualizan credenciales, validarlas y encriptarlas
     if (dto.credentials) {
+      // Validar baseUrl si es Evolution API (protección SSRF)
+      if (account.provider === $Enums.tenantwhatsappaccount_provider.EVOLUTION_API && dto.credentials.baseUrl) {
+        try {
+          dto.credentials.baseUrl = validateEvolutionBaseUrl(dto.credentials.baseUrl, false);
+        } catch (error: any) {
+          throw new BadRequestException({
+            success: false,
+            error_key: 'whatsapp.invalid_base_url',
+            message: error.message || 'Base URL inválida o no permitida',
+          });
+        }
+      }
+
       const isValid = await this.validateCredentials(account.provider, dto.credentials);
       if (!isValid) {
         throw new BadRequestException({
@@ -249,7 +394,7 @@ export class WhatsAppService {
       }
 
       const accountInfo = await this.getAccountInfo(account.provider, dto.credentials);
-      updateData.credentials = EncryptionUtil.encrypt(JSON.stringify(dto.credentials));
+      updateData.credentials = this.encryptCredentials(dto.credentials, tenantId, accountId);
       updateData.displayName = accountInfo.displayName;
       updateData.status = accountInfo.status === 'connected' ? $Enums.tenantwhatsappaccount_status.CONNECTED : $Enums.tenantwhatsappaccount_status.PENDING;
       updateData.connectedAt = accountInfo.status === 'connected' ? new Date() : account.connectedAt;
@@ -344,11 +489,18 @@ export class WhatsAppService {
         });
       }
 
-      // Desencriptar credenciales
-      let credentials;
+      // Descifrar credenciales
+      let credentials: any;
+      let migratedBlob: EncryptedBlobV1 | null = null;
       try {
-        credentials = JSON.parse(EncryptionUtil.decrypt(account.credentials));
-      } catch (error) {
+        const result = await this.decryptCredentials(account.credentials, tenantId, accountId);
+        if (result && typeof result === 'object' && 'decrypted' in result) {
+          credentials = result.decrypted;
+          migratedBlob = result.migratedBlob || null;
+        } else {
+          credentials = result;
+        }
+      } catch (error: any) {
         this.logger.error(`Failed to decrypt credentials for account ${accountId}: ${error.message}`);
         throw new BadRequestException({
           success: false,
@@ -398,14 +550,21 @@ export class WhatsAppService {
           });
         }
 
+        const updateData: any = {
+          status: $Enums.tenantwhatsappaccount_status.CONNECTED,
+          displayName: accountInfo.displayName,
+          lastCheckedAt: new Date(),
+          connectedAt: account.connectedAt || new Date(),
+        };
+        
+        // Si hay migración pendiente, incluir el blob migrado
+        if (migratedBlob) {
+          updateData.credentials = migratedBlob as any;
+        }
+        
         await this.prisma.tenantwhatsappaccount.update({
           where: { id: accountId },
-          data: {
-            status: $Enums.tenantwhatsappaccount_status.CONNECTED,
-            displayName: accountInfo.displayName,
-            lastCheckedAt: new Date(),
-            connectedAt: account.connectedAt || new Date(),
-          },
+          data: updateData,
         });
 
         return {
@@ -469,11 +628,18 @@ export class WhatsAppService {
         });
       }
 
-      // Desencriptar credenciales
-      let credentials;
+      // Descifrar credenciales
+      let credentials: any;
+      let migratedBlob: EncryptedBlobV1 | null = null;
       try {
-        credentials = JSON.parse(EncryptionUtil.decrypt(account.credentials));
-      } catch (error) {
+        const result = await this.decryptCredentials(account.credentials, tenantId, accountId);
+        if (result && typeof result === 'object' && 'decrypted' in result) {
+          credentials = result.decrypted;
+          migratedBlob = result.migratedBlob || null;
+        } else {
+          credentials = result;
+        }
+      } catch (error: any) {
         this.logger.error(`Failed to decrypt credentials for account ${accountId}: ${error.message}`);
         throw new BadRequestException({
           success: false,
@@ -494,13 +660,20 @@ export class WhatsAppService {
       }
 
       // Actualizar estado a PENDING
+      const updateData: any = {
+        status: $Enums.tenantwhatsappaccount_status.PENDING,
+        qrCodeUrl,
+        lastCheckedAt: new Date(),
+      };
+      
+      // Si hay migración pendiente, incluir el blob migrado
+      if (migratedBlob) {
+        updateData.credentials = migratedBlob as any;
+      }
+      
       await this.prisma.tenantwhatsappaccount.update({
         where: { id: accountId },
-        data: {
-          status: $Enums.tenantwhatsappaccount_status.PENDING,
-          qrCodeUrl,
-          lastCheckedAt: new Date(),
-        },
+        data: updateData,
       });
 
       return {
@@ -552,8 +725,24 @@ export class WhatsAppService {
       });
     }
 
-    // Desencriptar credenciales
-    const credentials = JSON.parse(EncryptionUtil.decrypt(account.credentials));
+    // Descifrar credenciales
+    let credentials: any;
+    let migratedBlob: EncryptedBlobV1 | null = null;
+    const result = await this.decryptCredentials(account.credentials, tenantId, accountId);
+    if (result && typeof result === 'object' && 'decrypted' in result) {
+      credentials = result.decrypted;
+      migratedBlob = result.migratedBlob || null;
+    } else {
+      credentials = result;
+    }
+    
+    // Si hay migración pendiente, actualizar en BD
+    if (migratedBlob) {
+      await this.prisma.tenantwhatsappaccount.update({
+        where: { id: accountId },
+        data: { credentials: migratedBlob as any },
+      });
+    }
 
     // Obtener QR code
     const qrCodeUrl = await this.getProviderQRCode(account.provider, credentials);

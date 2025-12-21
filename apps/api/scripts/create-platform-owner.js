@@ -5,9 +5,21 @@ const { randomUUID } = require("crypto");
 const prisma = new PrismaClient();
 
 async function createPlatformOwner() {
-  const email = "kmfponce@gmail.com";
-  const password = "PlatformOwner2024!"; // Contraseña temporal, debería cambiarse
-  const name = "Platform Owner";
+  // Usar variables de entorno para mayor seguridad
+  // Ejemplo: PLATFORM_OWNER_EMAIL=owner@example.com PLATFORM_OWNER_PASSWORD=securepassword npm run script:create-platform-owner
+  const email = process.env.PLATFORM_OWNER_EMAIL;
+  const password = process.env.PLATFORM_OWNER_PASSWORD;
+  const name = process.env.PLATFORM_OWNER_NAME || "Platform Owner";
+
+  if (!email || !password) {
+    console.error(
+      "❌ Error: PLATFORM_OWNER_EMAIL y PLATFORM_OWNER_PASSWORD deben estar configurados como variables de entorno"
+    );
+    console.error(
+      "   Ejemplo: PLATFORM_OWNER_EMAIL=owner@example.com PLATFORM_OWNER_PASSWORD=securepassword npm run script:create-platform-owner"
+    );
+    process.exit(1);
+  }
 
   console.log("🚀 Creando usuario Platform Owner...\n");
 
@@ -68,9 +80,8 @@ async function createPlatformOwner() {
     console.log(`   Nombre: ${user.name}`);
     console.log(`   Platform Role: ${user.platformRole}`);
     console.log(`   ID: ${user.id}`);
-    console.log(`\n⚠️  Contraseña temporal: ${password}`);
     console.log(
-      `   Por favor, cambia la contraseña después del primer inicio de sesión.`
+      `\n⚠️  IMPORTANTE: Por favor, cambia la contraseña después del primer inicio de sesión.`
     );
 
     return user;

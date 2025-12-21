@@ -15,7 +15,8 @@ import { CreateCalendarRuleDto } from './dto/create-calendar-rule.dto';
 import { UpdateCalendarRuleDto } from './dto/update-calendar-rule.dto';
 import { GetAvailabilityDto } from './dto/get-availability.dto';
 import { CalComProvider } from './providers/cal-com.provider';
-import { EncryptionUtil } from '../whatsapp/utils/encryption.util';
+import { CryptoService } from '../crypto/crypto.service';
+import { EncryptedBlobV1 } from '../crypto/crypto.types';
 import { $Enums } from '@prisma/client';
 
 @Injectable()
@@ -24,6 +25,7 @@ export class CalendarService {
 
   constructor(
     private prisma: PrismaService,
+    private cryptoService: CryptoService,
     private calComProvider: CalComProvider,
     @Optional() @Inject('GoogleCalendarProvider') private googleCalendarProvider: any,
   ) {}
@@ -52,7 +54,11 @@ export class CalendarService {
     // Desencriptar credenciales para mostrar (solo metadata, no credenciales completas)
     const integrationsWithMaskedCredentials = integrations.map((integration) => ({
       ...integration,
-      credentials: EncryptionUtil.mask(integration.credentials),
+      credentials: this.cryptoService.mask(
+        typeof integration.credentials === 'string' 
+          ? integration.credentials 
+          : JSON.stringify(integration.credentials)
+      ),
     }));
 
     return {
@@ -95,7 +101,7 @@ export class CalendarService {
       success: true,
       data: {
         ...integration,
-        credentials: EncryptionUtil.mask(integration.credentials),
+        credentials: this.cryptoService.mask(integration.credentials),
       },
     };
   }
@@ -116,25 +122,41 @@ export class CalendarService {
       });
     }
 
-    // Encriptar credenciales
-    const encryptedCredentials = EncryptionUtil.encrypt(
-      JSON.stringify(dto.credentials),
+    // Crear integración primero para obtener el ID (necesario para recordId en context binding)
+    const tempIntegrationId = `temp-${Date.now()}`;
+    
+    // Encriptar credenciales usando CryptoService
+    const encryptedCredentials = this.cryptoService.encryptJson(
+      dto.credentials,
+      { tenantId, recordId: tempIntegrationId }
     );
 
         const integration = await this.prisma.calendarintegration.create({
       data: createData({
         tenantId,
         provider: dto.provider,
-        credentials: encryptedCredentials,
+        credentials: encryptedCredentials as any,
         status: dto.status || 'ACTIVE',
       }),
     });
+
+    // Re-cifrar con el recordId real (para context binding correcto)
+    if (integration.id !== tempIntegrationId) {
+      const finalEncryptedCredentials = this.cryptoService.encryptJson(
+        dto.credentials,
+        { tenantId, recordId: integration.id }
+      );
+      await this.prisma.calendarintegration.update({
+        where: { id: integration.id },
+        data: { credentials: finalEncryptedCredentials as any },
+      });
+    }
 
     return {
       success: true,
       data: {
         ...integration,
-        credentials: EncryptionUtil.mask(integration.credentials),
+        credentials: this.cryptoService.mask(JSON.stringify(dto.credentials)),
       },
     };
   }
@@ -177,13 +199,16 @@ export class CalendarService {
 
     // Encriptar credenciales si se actualizan
     const encryptedCredentials = dto.credentials
-      ? EncryptionUtil.encrypt(JSON.stringify(dto.credentials))
+      ? this.cryptoService.encryptJson(
+          dto.credentials,
+          { tenantId, recordId: integrationId }
+        )
       : undefined;
 
         const updated = await this.prisma.calendarintegration.update({
       where: { id: integrationId },
       data: {
-        credentials: encryptedCredentials,
+        credentials: encryptedCredentials as any,
         status: dto.status,
       },
     });
@@ -192,7 +217,13 @@ export class CalendarService {
       success: true,
       data: {
         ...updated,
-        credentials: EncryptionUtil.mask(updated.credentials),
+        credentials: this.cryptoService.mask(
+          dto.credentials 
+            ? JSON.stringify(dto.credentials)
+            : typeof updated.credentials === 'string' 
+              ? updated.credentials 
+              : JSON.stringify(updated.credentials)
+        ),
       },
     };
   }
@@ -465,9 +496,11 @@ export class CalendarService {
         });
       }
 
-      // Desencriptar credenciales
-      const decryptedCredentials = JSON.parse(
-        EncryptionUtil.decrypt(rule.calendarintegration.credentials),
+      // Desencriptar credenciales (soporta formato legacy y nuevo)
+      const decryptedCredentials = this.decryptCalendarCredentials(
+        rule.calendarintegration.credentials,
+        tenantId,
+        rule.calendarintegration.id,
       );
 
       // Obtener disponibilidad del provider
@@ -528,8 +561,10 @@ export class CalendarService {
 
     for (const integration of integrations) {
       try {
-        const decryptedCredentials = JSON.parse(
-          EncryptionUtil.decrypt(integration.credentials),
+        const decryptedCredentials = this.decryptCalendarCredentials(
+          integration.credentials,
+          tenantId,
+          integration.id,
         );
         const provider = this.getProvider(integration.provider);
         const slots = await provider.getAvailability(
@@ -584,9 +619,11 @@ export class CalendarService {
       });
     }
 
-    // Desencriptar credenciales
-    const decryptedCredentials = JSON.parse(
-      EncryptionUtil.decrypt(integration.credentials),
+    // Desencriptar credenciales (soporta formato legacy y nuevo)
+    const decryptedCredentials = this.decryptCalendarCredentials(
+      integration.credentials,
+      tenantId,
+      integrationId,
     );
 
     // Obtener provider y crear evento
@@ -620,9 +657,11 @@ export class CalendarService {
       });
     }
 
-    // Desencriptar credenciales
-    const decryptedCredentials = JSON.parse(
-      EncryptionUtil.decrypt(integration.credentials),
+    // Desencriptar credenciales (soporta formato legacy y nuevo)
+    const decryptedCredentials = this.decryptCalendarCredentials(
+      integration.credentials,
+      tenantId,
+      integrationId,
     );
 
     // Obtener provider y cancelar evento
@@ -641,6 +680,32 @@ export class CalendarService {
       success: true,
       data: { cancelled: true },
     };
+  }
+
+  /**
+   * Helper para descifrar credenciales de calendario (soporta formato legacy y nuevo)
+   */
+  private decryptCalendarCredentials(
+    credentials: any,
+    tenantId: string,
+    recordId: string,
+  ): any {
+    // Intentar formato nuevo (EncryptedBlobV1)
+    if (credentials && typeof credentials === 'object' && 'v' in credentials) {
+      const blob = credentials as EncryptedBlobV1;
+      return this.cryptoService.decryptJson<any>(blob, {
+        tenantId,
+        recordId,
+      });
+    }
+    
+    // Formato legacy (string) - no soportado, debe migrarse
+    // Por ahora, lanzar error para forzar migración
+    throw new BadRequestException({
+      success: false,
+      error_key: 'calendar.legacy_credentials_format',
+      message: 'Las credenciales están en formato antiguo. Por favor, actualiza la integración.',
+    });
   }
 
   /**
