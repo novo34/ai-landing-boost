@@ -1,0 +1,628 @@
+{
+  "title": "Platform Beheerpaneel",
+  "nav": {
+    "dashboard": "Dashboard",
+    "tenants": "Tenants",
+    "billing": "Facturering",
+    "plans": "Plannen",
+    "tickets": "Support Tickets",
+    "chat": "Chat met Klanten",
+    "instances": "Instanties",
+    "regions": "Data Regio's",
+    "audit": "Audit",
+    "operations": {
+      "title": "Eigen Operaties",
+      "agents": "Mijn Agenten",
+      "channels": "Mijn Kanalen",
+      "conversations": "Mijn Gesprekken",
+      "leads": "Mijn Leads",
+      "n8n": "Mijn N8N Flows"
+    },
+    "settings": "Instellingen"
+  },
+  "dashboard": {
+    "title": "Platform Dashboard",
+    "metrics": {
+      "tenants": {
+        "total": "Totaal Tenants",
+        "active": "Actieve Tenants",
+        "trial": "In Proefperiode",
+        "suspended": "Geschorst",
+        "new_last_30_days": "Nieuw (30 dagen)"
+      },
+      "users": {
+        "total": "Totaal Gebruikers",
+        "active_last_30_days": "Actief (30 dagen)"
+      },
+      "revenue": {
+        "mrr": "MRR",
+        "arr": "ARR",
+        "current_month": "Huidige Maand",
+        "previous_month": "Vorige Maand",
+        "growth": "Groei"
+      },
+      "usage": {
+        "agents": "Actieve Agenten",
+        "channels": "Geconfigureerde Kanalen",
+        "conversations": "Gesprekken",
+        "messages": "Verwerkte Berichten"
+      },
+      "health": {
+        "payment_failed": "Mislukte Betalingen",
+        "near_limits": "Bijna Limieten",
+        "avg_response_time": "Gemiddelde Reactietijd"
+      }
+    }
+  },
+  "tenants": {
+    "title": "Tenant Beheer",
+    "list": {
+      "title": "Tenant Lijst",
+      "search_placeholder": "Zoeken op naam, email of slug...",
+      "filters": {
+        "status": "Status",
+        "plan": "Plan",
+        "country": "Land",
+        "date_range": "Datum Bereik",
+        "subscription_status": "Abonnement Status"
+      },
+      "columns": {
+        "name": "Naam",
+        "slug": "Slug",
+        "status": "Status",
+        "plan": "Plan",
+        "subscription_status": "Abonnement Status",
+        "country": "Land",
+        "users": "Gebruikers",
+        "agents": "Agenten",
+        "created_at": "Aangemaakt op",
+        "last_activity": "Laatste Activiteit",
+        "actions": "Acties"
+      },
+      "actions": {
+        "view": "Details Bekijken",
+        "edit": "Bewerken",
+        "suspend": "Schorsen",
+        "reactivate": "Heractiveren",
+        "delete": "Verwijderen",
+        "configure": "Configureren"
+      }
+    },
+    "create": {
+      "title": "Nieuwe Tenant Aanmaken",
+      "form": {
+        "name": "Tenant Naam",
+        "name_placeholder": "Mijn Bedrijf",
+        "slug": "Slug",
+        "slug_placeholder": "mijn-bedrijf",
+        "country": "Land",
+        "data_region": "Data Regio",
+        "default_locale": "Standaard Taal",
+        "time_zone": "Tijdzone",
+        "owner_email": "Eigenaar Email",
+        "owner_name": "Eigenaar Naam",
+        "initial_plan": "Initieel Plan",
+        "initial_status": "Initiele Status",
+        "trial_ends_at": "Einde Proefperiode"
+      },
+      "success": "Tenant succesvol aangemaakt",
+      "error": "Fout bij aanmaken tenant"
+    },
+    "edit": {
+      "title": "Tenant Bewerken",
+      "success": "Tenant succesvol bijgewerkt",
+      "error": "Fout bij bijwerken tenant"
+    },
+    "details": {
+      "title": "Tenant Details",
+      "basic_info": "Basisinformatie",
+      "subscription": "Abonnement",
+      "metrics": "Metrieken",
+      "users": "Gebruikers",
+      "history": "Geschiedenis",
+      "logs": "Activiteit Logs"
+    },
+    "suspend": {
+      "title": "Tenant Schorsen",
+      "confirm": "Weet u zeker dat u deze tenant wilt schorsen?",
+      "reason": "Reden voor schorsing",
+      "reason_placeholder": "Voer de reden voor schorsing in...",
+      "success": "Tenant succesvol geschorst",
+      "error": "Fout bij schorsen tenant"
+    },
+    "reactivate": {
+      "title": "Tenant Heractiveren",
+      "confirm": "Weet u zeker dat u deze tenant wilt heractiveren?",
+      "success": "Tenant succesvol heractiveerd",
+      "error": "Fout bij heractiveren tenant"
+    },
+    "delete": {
+      "title": "Tenant Verwijderen",
+      "confirm": "Weet u zeker dat u deze tenant wilt verwijderen? Deze actie kan niet ongedaan worden gemaakt.",
+      "warning": "Het volgende wordt verwijderd:",
+      "warning_users": "{{count}} gebruikers",
+      "warning_conversations": "{{count}} gesprekken",
+      "warning_data": "Alle bijbehorende gegevens",
+      "success": "Tenant succesvol verwijderd",
+      "error": "Fout bij verwijderen tenant"
+    },
+    "status": {
+      "active": "Actief",
+      "trial": "Proefperiode",
+      "suspended": "Geschorst",
+      "cancelled": "Geannuleerd"
+    }
+  },
+  "billing": {
+    "title": "Facturering Beheer",
+    "subscription": {
+      "title": "Abonnement",
+      "plan": "Huidig Plan",
+      "status": "Status",
+      "start_date": "Startdatum",
+      "next_billing": "Volgende Facturering",
+      "payment_method": "Betalingsmethode",
+      "change_plan": "Plan Wijzigen",
+      "apply_adjustment": "Aanpassing Toepassen"
+    },
+    "payment_failed": {
+      "title": "Mislukte Betalingen",
+      "days_since_payment": "Dagen sinds laatste betaling",
+      "failed_attempts": "Mislukte pogingen",
+      "amount_due": "Verschuldigd bedrag",
+      "extend_grace": "Genadeperiode Verlengen",
+      "mark_paid": "Markeren als Betaald",
+      "contact": "Klant Contacteren"
+    },
+    "adjustment": {
+      "title": "Aanpassing Toepassen",
+      "type": "Type",
+      "amount": "Bedrag",
+      "reason": "Reden",
+      "apply_date": "Toepassingsdatum",
+      "types": {
+        "discount": "Korting",
+        "credit": "Krediet",
+        "adjustment": "Aanpassing"
+      }
+    }
+  },
+  "plans": {
+    "title": "Plan Beheer",
+    "list": {
+      "title": "Abonnement Plannen",
+      "columns": {
+        "name": "Naam",
+        "price_monthly": "Maandelijks Prijs",
+        "price_yearly": "Jaarlijks Prijs",
+        "limits": "Limieten",
+        "status": "Status",
+        "tenants": "Geabonneerde Tenants",
+        "revenue": "Omzet",
+        "actions": "Acties"
+      }
+    },
+    "create": {
+      "title": "Plan Aanmaken",
+      "form": {
+        "name": "Naam",
+        "description": "Beschrijving",
+        "price_monthly": "Maandelijks Prijs (centen)",
+        "price_yearly": "Jaarlijks Prijs (centen)",
+        "currency": "Valuta",
+        "max_agents": "Max Agenten",
+        "max_channels": "Max Kanalen",
+        "max_messages": "Max Berichten",
+        "features": "Functies"
+      },
+      "success": "Plan succesvol aangemaakt"
+    },
+    "edit": {
+      "title": "Plan Bewerken",
+      "success": "Plan succesvol bijgewerkt"
+    },
+    "delete": {
+      "title": "Plan Verwijderen",
+      "confirm": "Weet u zeker dat u dit plan wilt verwijderen?",
+      "warning": "Kan niet worden verwijderd als er tenants zijn geabonneerd",
+      "success": "Plan succesvol verwijderd"
+    }
+  },
+  "tickets": {
+    "title": "Support Tickets",
+    "list": {
+      "title": "Ticket Lijst",
+      "filters": {
+        "status": "Status",
+        "category": "Categorie",
+        "priority": "Prioriteit",
+        "assigned_to": "Toegewezen aan",
+        "tenant": "Tenant"
+      },
+      "columns": {
+        "id": "ID",
+        "subject": "Onderwerp",
+        "tenant": "Tenant",
+        "category": "Categorie",
+        "priority": "Prioriteit",
+        "status": "Status",
+        "assigned_to": "Toegewezen aan",
+        "created_at": "Aangemaakt",
+        "last_activity": "Laatste Activiteit",
+        "actions": "Acties"
+      }
+    },
+    "create": {
+      "title": "Ticket Aanmaken",
+      "form": {
+        "subject": "Onderwerp",
+        "description": "Beschrijving",
+        "category": "Categorie",
+        "priority": "Prioriteit",
+        "tenant": "Tenant (optioneel)"
+      },
+      "success": "Ticket succesvol aangemaakt"
+    },
+    "details": {
+      "title": "Ticket Details",
+      "messages": "Berichten",
+      "add_message": "Bericht Toevoegen",
+      "internal_note": "Interne Notitie",
+      "assign": "Toewijzen",
+      "change_status": "Status Wijzigen",
+      "close": "Sluiten"
+    },
+    "status": {
+      "open": "Open",
+      "in_progress": "In Uitvoering",
+      "waiting_client": "Wachten op Klant",
+      "resolved": "Opgelost",
+      "closed": "Gesloten"
+    },
+    "priority": {
+      "low": "Laag",
+      "medium": "Gemiddeld",
+      "high": "Hoog",
+      "critical": "Kritisch"
+    },
+    "category": {
+      "technical": "Technisch",
+      "billing": "Facturering",
+      "configuration": "Configuratie",
+      "feature_request": "Functieverzoek",
+      "other": "Anders"
+    }
+  },
+  "leads": {
+    "title": "Leads CRM",
+    "list": {
+      "title": "Leads Lijst",
+      "filters": {
+        "status": "Status",
+        "stage": "Fase",
+        "source": "Bron",
+        "assigned_to": "Toegewezen aan"
+      },
+      "columns": {
+        "name": "Naam",
+        "email": "Email",
+        "phone": "Telefoon",
+        "source": "Bron",
+        "status": "Status",
+        "stage": "Fase",
+        "assigned_to": "Toegewezen aan",
+        "created_at": "Gemaakt",
+        "updated_at": "Bijgewerkt",
+        "actions": "Acties"
+      }
+    },
+    "pipeline": {
+      "title": "Verkooppijplijn",
+      "metrics": {
+        "total": "Totaal",
+        "conversion_rate": "Conversiepercentage",
+        "by_stage": "Per Fase",
+        "by_source": "Per Bron"
+      }
+    },
+    "details": {
+      "title": "Lead Details",
+      "info": "Informatie",
+      "notes": "Notities",
+      "history": "Geschiedenis",
+      "add_note": "Notitie Toevoegen"
+    },
+    "status": {
+      "new": "Nieuw",
+      "contacted": "Gecontacteerd",
+      "qualified": "Gekwalificeerd",
+      "opportunity": "Kans",
+      "customer": "Klant",
+      "lost": "Verloren"
+    },
+    "stage": {
+      "lead_captured": "Lead Vastgelegd",
+      "contacted": "Gecontacteerd",
+      "qualified": "Gekwalificeerd",
+      "demo": "Demo",
+      "proposal": "Voorstel",
+      "negotiation": "Onderhandeling",
+      "closed_won": "Gesloten - Gewonnen",
+      "closed_lost": "Gesloten - Verloren"
+    },
+    "source": {
+      "whatsapp": "WhatsApp",
+      "webchat": "Webchat",
+      "landing": "Landingspagina",
+      "manual": "Handmatig",
+      "import": "Importeren"
+    }
+  },
+  "n8n_flows": {
+    "title": "Platform N8N Flows",
+    "list": {
+      "title": "Automatiseringsflows",
+      "filters": {
+        "category": "Categorie",
+        "is_active": "Status"
+      },
+      "columns": {
+        "name": "Naam",
+        "category": "Categorie",
+        "status": "Status",
+        "created_at": "Gemaakt",
+        "actions": "Acties"
+      }
+    },
+    "create": {
+      "title": "Flow Maken",
+      "form": {
+        "name": "Naam",
+        "description": "Beschrijving",
+        "category": "Categorie",
+        "workflow": "Workflow (JSON)"
+      },
+      "success": "Flow succesvol aangemaakt"
+    },
+    "details": {
+      "title": "Flow Details",
+      "workflow": "Workflow",
+      "executions": "Uitvoeringen",
+      "logs": "Logs"
+    },
+    "categories": {
+      "onboarding": "Onboarding",
+      "notifications": "Meldingen",
+      "leads": "Leads",
+      "reports": "Rapporten",
+      "operations": "Operaties"
+    }
+  },
+  "chat": {
+    "title": "Chat met Klanten",
+    "conversations": {
+      "title": "Actieve Gesprekken",
+      "no_conversations": "Geen actieve gesprekken",
+      "start_conversation": "Gesprek Starten",
+      "with_tenant": "met {{tenant}}"
+    },
+    "messages": {
+      "type_message": "Typ een bericht...",
+      "send": "Verzenden",
+      "file": "Bestand",
+      "image": "Afbeelding",
+      "typing": "typt...",
+      "online": "Online",
+      "offline": "Offline"
+    }
+  },
+  "instances": {
+    "title": "Instantie Beheer",
+    "list": {
+      "title": "SaaS Instanties",
+      "columns": {
+        "name": "Naam",
+        "domain": "Domein",
+        "status": "Status",
+        "tenants": "Tenants",
+        "created_at": "Aangemaakt",
+        "actions": "Acties"
+      }
+    },
+    "create": {
+      "title": "Instantie Aanmaken",
+      "form": {
+        "name": "Naam",
+        "domain": "Domein",
+        "database_url": "Database URL",
+        "stripe_key": "Stripe Sleutel",
+        "n8n_url": "N8N URL"
+      },
+      "success": "Instantie succesvol aangemaakt"
+    },
+    "switch": {
+      "title": "Instantie Wisselen",
+      "current": "Huidige Instantie",
+      "select": "Selecteer Instantie"
+    }
+  },
+  "regions": {
+    "title": "Data Regio's",
+    "list": {
+      "title": "Verdeling per Regio",
+      "columns": {
+        "region": "Regio",
+        "tenants": "Tenants",
+        "compliance": "Naleving",
+        "actions": "Acties"
+      }
+    },
+    "migrate": {
+      "title": "Tenant Migreren naar Andere Regio",
+      "confirm": "Weet u zeker dat u deze tenant wilt migreren?",
+      "warning": "Deze operatie kan enkele minuten duren",
+      "success": "Migratie succesvol gestart"
+    },
+    "regions": {
+      "eu": "Europa (AVG)",
+      "ch": "Zwitserland (nDSG)",
+      "us": "Verenigde Staten",
+      "apac": "Azië-Pacific"
+    }
+  },
+  "audit": {
+    "title": "Audit Logs",
+    "list": {
+      "title": "Actie Geschiedenis",
+      "filters": {
+        "action": "Actie",
+        "resource_type": "Resource Type",
+        "resource_id": "Resource ID",
+        "user": "Gebruiker",
+        "date_range": "Datum Bereik"
+      },
+      "columns": {
+        "timestamp": "Tijdstempel",
+        "user": "Gebruiker",
+        "action": "Actie",
+        "resource": "Resource",
+        "details": "Details",
+        "ip": "IP"
+      },
+      "export": "Logs Exporteren"
+    },
+    "actions": {
+      "create_tenant": "Tenant Aanmaken",
+      "update_tenant": "Tenant Bijwerken",
+      "suspend_tenant": "Tenant Schorsen",
+      "reactivate_tenant": "Tenant Heractiveren",
+      "delete_tenant": "Tenant Verwijderen",
+      "change_plan": "Plan Wijzigen",
+      "apply_adjustment": "Aanpassing Toepassen"
+    }
+  },
+  "operations": {
+    "agents": {
+      "title": "Mijn Agenten",
+      "description": "Agenten voor lead generatie en SaaS verkopen"
+    },
+    "channels": {
+      "title": "Mijn Kanalen",
+      "description": "Kanalen geconfigureerd voor eigen operaties"
+    },
+    "conversations": {
+      "title": "Mijn Gesprekken",
+      "description": "Gesprekken van eigen SaaS tenant"
+    },
+    "leads": {
+      "title": "Mijn Leads",
+      "description": "CRM van leads gegenereerd door eigen agenten",
+      "pipeline": {
+        "title": "Verkoop Pipeline",
+        "stages": {
+          "lead_captured": "Lead Vastgelegd",
+          "contacted": "Gecontacteerd",
+          "qualified": "Gekwalificeerd",
+          "demo": "Demo",
+          "proposal": "Voorstel",
+          "negotiation": "Onderhandeling",
+          "closed_won": "Gesloten - Gewonnen",
+          "closed_lost": "Gesloten - Verloren"
+        }
+      },
+      "create": {
+        "title": "Lead Aanmaken",
+        "form": {
+          "name": "Naam",
+          "email": "Email",
+          "phone": "Telefoon",
+          "source": "Bron",
+          "interest": "Interesse",
+          "notes": "Notities"
+        }
+      },
+      "add_note": {
+        "title": "Notitie Toevoegen",
+        "placeholder": "Schrijf een notitie..."
+      }
+    },
+    "n8n": {
+      "title": "N8N Flows",
+      "description": "Automatisering van interne processen",
+      "categories": {
+        "onboarding": "Onboarding",
+        "notifications": "Meldingen",
+        "leads": "Leads",
+        "reports": "Rapporten",
+        "operations": "Operaties"
+      },
+      "create": {
+        "title": "Flow Aanmaken",
+        "form": {
+          "name": "Naam",
+          "description": "Beschrijving",
+          "category": "Categorie",
+          "workflow": "Workflow (JSON)"
+        }
+      },
+      "activate": "Activeren",
+      "deactivate": "Deactiveren",
+      "logs": "Logs Bekijken"
+    }
+  },
+  "errors": {
+    "unauthorized": "U heeft geen toestemming om deze sectie te openen",
+    "tenant_not_found": "Tenant niet gevonden",
+    "slug_exists": "Slug bestaat al",
+    "invalid_email": "Ongeldig email",
+    "invalid_country": "Ongeldig land",
+    "cannot_suspend_self": "U kunt uw eigen tenant niet schorsen",
+    "cannot_delete_self": "U kunt uw eigen tenant niet verwijderen",
+    "plan_in_use": "Kan niet worden verwijderd als er tenants zijn geabonneerd",
+    "migration_failed": "Data migratie mislukt",
+    "instance_not_found": "Instantie niet gevonden",
+    "instance_domain_exists": "Instantie domein bestaat al",
+    "instance_has_tenants": "Kan niet worden verwijderd als er tenants zijn toegewezen",
+    "ticket_not_found": "Ticket niet gevonden",
+    "ticket_already_closed": "Ticket is al gesloten",
+    "lead_not_found": "Lead niet gevonden",
+    "flow_not_found": "Flow niet gevonden",
+    "flow_already_active": "Flow is al actief",
+    "flow_already_inactive": "Flow is al inactief",
+    "flow_not_found_or_not_activated": "Flow niet gevonden of niet geactiveerd",
+    "n8n_not_configured": "N8N is niet geconfigureerd",
+    "n8n_connection_error": "N8N verbindingsfout",
+    "n8n_activation_failed": "Fout bij activeren flow in N8N",
+    "plan_not_found": "Plan niet gevonden",
+    "plan_slug_exists": "Plan slug bestaat al",
+    "plan_has_subscriptions": "Kan niet worden verwijderd als er actieve abonnementen zijn"
+  },
+  "success": {
+    "tenant_created": "Tenant succesvol aangemaakt",
+    "tenant_updated": "Tenant succesvol bijgewerkt",
+    "tenant_suspended": "Tenant succesvol geschorst",
+    "tenant_reactivated": "Tenant succesvol heractiveerd",
+    "tenant_deleted": "Tenant succesvol verwijderd",
+    "plan_changed": "Plan succesvol gewijzigd",
+    "plan_created": "Plan succesvol aangemaakt",
+    "plan_updated": "Plan succesvol bijgewerkt",
+    "plan_deleted": "Plan succesvol verwijderd",
+    "adjustment_applied": "Aanpassing succesvol toegepast",
+    "ticket_created": "Ticket succesvol aangemaakt",
+    "ticket_updated": "Ticket succesvol bijgewerkt",
+    "ticket_closed": "Ticket succesvol gesloten",
+    "message_sent": "Bericht succesvol verzonden",
+    "lead_created": "Lead succesvol aangemaakt",
+    "lead_updated": "Lead succesvol bijgewerkt",
+    "note_added": "Notitie succesvol toegevoegd",
+    "flow_created": "Flow succesvol aangemaakt",
+    "flow_updated": "Flow succesvol bijgewerkt",
+    "flow_activated": "Flow succesvol geactiveerd",
+    "flow_deactivated": "Flow succesvol gedeactiveerd",
+    "flow_deleted": "Flow succesvol verwijderd",
+    "instance_created": "Instantie succesvol aangemaakt",
+    "instance_updated": "Instantie succesvol bijgewerkt",
+    "instance_deleted": "Instantie succesvol verwijderd",
+    "tenant_assigned_to_instance": "Tenant succesvol toegewezen aan instantie"
+  }
+}

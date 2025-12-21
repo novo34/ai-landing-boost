@@ -1,0 +1,182 @@
+{
+  "nav": {
+    "producto": "Product",
+    "comoFunciona": "How It Works",
+    "beneficios": "Benefits",
+    "roi": "ROI Calculator",
+    "faq": "FAQ",
+    "calcularRoi": "Calculate ROI",
+    "login": "Log In",
+    "menu": "Menu",
+    "cerrarMenu": "Close menu",
+    "abrirMenu": "Open menu",
+    "main_navigation": "Main navigation",
+    "home_aria": "AutomAI - Home",
+    "change_language": "Change language",
+    "language": "Language"
+  },
+  "hero": {
+    "badge": "AI Automation Agency",
+    "title": "Automate Your Business with",
+    "titleHighlight": "Artificial Intelligence",
+    "subtitle": "We develop custom AI agents that automate repetitive tasks, serve customers 24/7, and reduce operational costs by up to 70%.",
+    "ctaPrimary": "Calculate my ROI",
+    "ctaSecondary": "Talk to an Expert",
+    "trustCompanies": "Companies Automated",
+    "trustSavings": "Cost Reduction",
+    "trustSupport": "Automatic Support"
+  },
+  "product": {
+    "title": "AI Automation",
+    "titleHighlight": "Solutions",
+    "subtitle": "Three fundamental pillars to transform your company's operations with artificial intelligence.",
+    "whatsapp": {
+      "title": "WhatsApp Automation",
+      "description": "Conversational agents that handle inquiries, schedule appointments, and manage orders 24/7 on WhatsApp Business."
+    },
+    "processes": {
+      "title": "Process Automation",
+      "description": "Intelligent workflows that connect your tools and eliminate repetitive manual tasks."
+    },
+    "compliance": {
+      "title": "GDPR Compliance",
+      "description": "All our solutions comply with European data protection and privacy regulations."
+    }
+  },
+  "howItWorks": {
+    "title": "How It Works",
+    "titleHighlight": "Our Process",
+    "subtitle": "A structured 6-phase process to ensure the success of your automation project.",
+    "step1": {
+      "title": "Process Analysis",
+      "description": "We identify repetitive tasks and bottlenecks in your current operations."
+    },
+    "step2": {
+      "title": "Solution Design",
+      "description": "We create a customized automation architecture for your business."
+    },
+    "step3": {
+      "title": "Agent Development",
+      "description": "We build and train your AI agent with your business knowledge."
+    },
+    "step4": {
+      "title": "Integration",
+      "description": "We connect the agent with your existing systems: CRM, ERP, WhatsApp, etc."
+    },
+    "step5": {
+      "title": "Testing and Optimization",
+      "description": "We thoroughly test and adjust performance before launch."
+    },
+    "step6": {
+      "title": "Deployment and Support",
+      "description": "We activate the solution in production with continuous monitoring and support."
+    }
+  },
+  "benefits": {
+    "title": "Benefits of",
+    "titleHighlight": "Automating with AI",
+    "subtitle": "Transform your business operations and gain real, measurable competitive advantages.",
+    "benefit1": "70% reduction in repetitive administrative tasks",
+    "benefit2": "Automated customer service 24 hours, 7 days",
+    "benefit3": "Instant responses with no waiting time",
+    "benefit4": "Scalability without increasing staff",
+    "benefit5": "Integration with existing systems (CRM, ERP, etc.)",
+    "benefit6": "Automatic analysis and reporting of metrics",
+    "benefit7": "Guaranteed GDPR regulatory compliance",
+    "benefit8": "Positive ROI in less than 6 months",
+    "useCasesTitle": "Main Use Cases",
+    "useCase1": "Customer service",
+    "useCase2": "Appointment management",
+    "useCase3": "Order processing",
+    "useCase4": "Technical support",
+    "useCase5": "Lead qualification",
+    "useCase6": "Customer onboarding"
+  },
+  "roi": {
+    "title": "Calculate your",
+    "titleHighlight": "Return on Investment",
+    "subtitle": "Discover how much you can save by automating your team's repetitive tasks.",
+    "calculatorTitle": "ROI Calculator",
+    "numPeople": "People in repetitive tasks",
+    "hoursPerWeek": "Hours/week in automatable tasks",
+    "hourlyCost": "Employee cost/hour (with SS)",
+    "automationRate": "Automation percentage",
+    "currentYearlyCost": "Current Annual Cost",
+    "estimatedSavings": "Potential Annual Savings",
+    "projectBudgetMin": "Minimum Initial Investment",
+    "projectBudgetMax": "Maximum Initial Investment",
+    "monthlyRetainer": "Monthly Maintenance",
+    "cta": "Request Personalized Quote",
+    "note": "Estimated values. Will be adjusted in the personalized analysis session.",
+    "calculate": "Calculate",
+    "sector": "Sector (optional)",
+    "sectorPlaceholder": "Select your sector",
+    "sectorRetail": "Retail / E-commerce",
+    "sectorHealthcare": "Healthcare / Clinics",
+    "sectorLegal": "Legal / Law Firms",
+    "sectorRealEstate": "Real Estate",
+    "sectorOther": "Other"
+  },
+  "faq": {
+    "title": "Frequently",
+    "titleHighlight": "Asked Questions",
+    "subtitle": "Answers to the most common questions about AI automation.",
+    "q1": "How long does it take to implement an AI agent?",
+    "a1": "Implementation time varies depending on project complexity. A basic WhatsApp agent can be operational in 2-4 weeks, while a more complex automation solution may require 6-12 weeks. During the initial consultation, we provide a detailed timeline for your specific case.",
+    "q2": "Do I need technical knowledge to use the solution?",
+    "a2": "No, our solutions are designed to be used by non-technical staff. We provide an intuitive interface to manage and monitor agents, plus complete training for your team. Technical support is included to resolve any questions.",
+    "q3": "How does it integrate with my current systems?",
+    "a3": "Our AI agents integrate with most business systems: CRM (Salesforce, HubSpot, Pipedrive), ERP, e-commerce platforms, ticketing systems, and more. We use standard APIs and develop custom connectors when necessary.",
+    "q4": "What security and privacy guarantees do you offer?",
+    "a4": "All our solutions comply with GDPR and LOPDGDD. We implement end-to-end encryption, secure storage on European servers, and strict access controls. We sign confidentiality agreements and can adapt to specific security requirements for your sector.",
+    "q5": "What happens if the agent doesn't know how to answer something?",
+    "a5": "Agents are designed to automatically escalate to a human when they detect queries outside their scope or when the user requests it. Additionally, the system continuously learns from these interactions to improve future responses.",
+    "q6": "What is the maintenance cost after implementation?",
+    "a6": "We offer monthly maintenance plans that include: 24/7 monitoring, security updates, performance adjustments, and technical support. The typical cost is between 10-15% of the initial project value per year, although it varies depending on the scope of service required.",
+    "noAnswer": "Can't find the answer you're looking for?",
+    "contact": "Contact us directly"
+  },
+  "footer": {
+    "description": "Agency specialized in business automation with artificial intelligence. We transform your business operations.",
+    "services": "Services",
+    "company": "Company",
+    "legal": "Legal",
+    "service1": "WhatsApp Automation",
+    "service2": "AI Agents",
+    "service3": "Integrations",
+    "service4": "Consulting",
+    "company1": "About Us",
+    "company2": "Success Stories",
+    "company3": "Blog",
+    "company4": "Careers",
+    "legal1": "Privacy Policy",
+    "legal2": "Terms of Service",
+    "legal3": "Cookie Policy",
+    "legal4": "Legal Notice",
+    "copyright": "All rights reserved.",
+    "compliance": "Solutions compliant with GDPR, LOPDGDD and European data protection regulations. Servers located in the European Union."
+  },
+  "common": {
+    "loading": "Loading...",
+    "error": "Error",
+    "success": "Success",
+    "submit": "Submit",
+    "cancel": "Cancel",
+    "save": "Save",
+    "name": "Name",
+    "email": "Email",
+    "phone": "Phone",
+    "company": "Company",
+    "message": "Message",
+    "required": "Required",
+    "invalidEmail": "Invalid email"
+  },
+  "roi_calculator": {
+    "form_submit_error": "Error submitting form",
+    "form_submit_success": "We have received your request. We will contact you soon.",
+    "form_submit_error_description": "There was an error submitting your request. Please try again.",
+    "form_submit_error_retry": "Error submitting. Please try again.",
+    "roi_chart_alt": "Return on investment chart - Visualization of growth and savings with AI automation"
+  }
+}
+

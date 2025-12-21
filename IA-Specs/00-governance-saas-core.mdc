@@ -1,0 +1,200 @@
+# Gobernanza SaaS Core - Núcleo de Estándares
+
+> **Versión:** 2.0  
+> **Fecha:** 2025-01-XX  
+> **Referencia:** `.cursorrules`, `LEER/specs/00-governance.mdc`
+
+---
+
+## Propósito de IA-Specs
+
+La carpeta `IA-Specs/` contiene el **núcleo de estándares SaaS** que debe seguir todo desarrollo futuro del **SaaS multi-tenant para agencias de IA de citas por WhatsApp y otros canales**.
+
+Este SaaS está orientado a:
+- Clientes de **España (UE)** y **Suiza**
+- Agentes de citas por WhatsApp (primera fase), y más adelante agentes de venta, agentes de voz, etc.
+- Requisitos clave: **Mobile FIRST**, **AI FIRST**, multi-tenant profesional, escalable y mantenible
+
+**Stack tecnológico base:**
+- **Backend:** NestJS + Prisma + MySQL (single database, single schema con `tenant_id`)
+- **Frontend:** Next.js (App Router) + React + TypeScript + Tailwind CSS + shadcn/ui
+- **Integraciones:** Evolution API (WhatsApp), cal.com, Google Calendar, Stripe, n8n (motor interno)
+
+**Nota importante:** n8n se usa **únicamente como motor interno de orquestación**, NO como SaaS multi-tenant para respetar la licencia de n8n.
+
+Estos estándares son:
+
+- **Reusables:** Aplicables a cualquier módulo o feature del sistema
+- **Modernos:** Basados en buenas prácticas SaaS actuales
+- **Obligatorios:** Deben ser referenciados en todos los planes (`plan-*`) y desarrollos (`develop-*`)
+- **Evolutivos:** Pueden actualizarse siguiendo el proceso de gobernanza definido
+
+---
+
+## Fases de Trabajo
+
+### Fase `plan-*`
+
+**Comando:** `plan-{descripcion}` (ej: `plan-frontend-refactor`, `plan-api-v2`)
+
+**Reglas:**
+
+- ✅ **PERMITIDO:**
+  - Crear documentos Markdown en `ai-specs/changes/` o equivalente
+  - Leer y analizar código existente
+  - Leer documentación (`docs/`, `.cursorrules`, `IA-Specs/`, `LEER/`)
+  - Buscar código con herramientas de búsqueda
+  - Crear plan detallado con estructura, archivos afectados, pasos de implementación
+
+- ❌ **PROHIBIDO:**
+  - Modificar código fuente (`.ts`, `.tsx`, `.js`, `.jsx`, `.sql`, etc.)
+  - Crear archivos de implementación
+  - Ejecutar migraciones
+  - Modificar configuración (`.env`, etc.)
+  - Ejecutar comandos que modifiquen el sistema
+
+**Objetivo:** Definir plan de cambio completo antes de implementar.
+
+**Salida esperada:** Archivo `ai-specs/changes/{ID}_{NOMBRE}_PLAN.md` (o equivalente) con plan detallado.
+
+**Referencias obligatorias:** El plan DEBE referenciar los estándares relevantes de `IA-Specs/`:
+- `Referencia: IA-Specs/01-saas-architecture-and-stack.mdc`
+- `Referencia: IA-Specs/05-frontend-standards.mdc`
+- etc.
+
+---
+
+### Fase `spec-*`
+
+**Comando:** `spec-{descripcion}` (ej: `spec-new-module`, `spec-api-contract`)
+
+**Reglas:**
+
+- ✅ **PERMITIDO:**
+  - Crear especificaciones técnicas detalladas
+  - Definir contratos de API (OpenAPI/Swagger)
+  - Documentar esquemas de datos
+  - Crear diagramas y arquitectura
+
+- ❌ **PROHIBIDO:**
+  - Modificar código fuente
+  - Implementar funcionalidad
+
+**Objetivo:** Definir especificaciones técnicas antes de planificar implementación.
+
+**Salida esperada:** Especificación técnica completa que luego se convierte en plan `plan-*`.
+
+---
+
+### Fase `develop-*`
+
+**Comando:** `develop-{plan-id}` (ej: `develop-100-planner-v2`, `develop-200-backend-crm`)
+
+**Reglas:**
+
+- ✅ **PERMITIDO:**
+  - Modificar código según plan aprobado
+  - Crear archivos según plan aprobado
+  - Ejecutar migraciones según plan aprobado
+  - Modificar configuración según plan aprobado
+  - Ejecutar tests y auto-corregir fallos
+
+- ❌ **PROHIBIDO:**
+  - Desviarse del plan sin crear nuevo plan primero
+  - Modificar archivos no listados en el plan
+  - Implementar funcionalidad no descrita en el plan
+  - Saltarse pasos del plan
+
+**Requisito previo:** Plan aprobado en `ai-specs/changes/` (o equivalente) con estado `[APPROVED]`.
+
+**Objetivo:** Implementar plan línea por línea.
+
+**Salida esperada:** Código implementado según plan, commits con referencia `[develop-{plan-id}]`.
+
+**Quality Gates obligatorios:** Ver `IA-Specs/07-testing-y-quality-gates.mdc`
+
+---
+
+### Fase `audit-*`
+
+**Comando:** `audit-{descripcion}` (ej: `audit-security`, `audit-multitenancy`)
+
+**Reglas:**
+
+- ✅ **PERMITIDO:**
+  - Leer código y documentación
+  - Ejecutar tests de auditoría
+  - Generar reportes de conformidad
+  - Identificar desviaciones de estándares
+
+- ❌ **PROHIBIDO:**
+  - Modificar código (solo lectura)
+
+**Objetivo:** Verificar cumplimiento de estándares y detectar problemas.
+
+**Salida esperada:** Reporte de auditoría con hallazgos y recomendaciones.
+
+---
+
+## Relación con `.cursorrules`
+
+Los estándares en `IA-Specs/` son **complementarios** a `.cursorrules`:
+
+- **`.cursorrules`:** Reglas específicas del proyecto, stack tecnológico, convenciones de código
+- **`IA-Specs/`:** Estándares arquitectónicos y de proceso reusables
+
+**Prioridad:**
+1. **IA-Specs/** - Estándares arquitectónicos (máxima prioridad)
+2. **`.cursorrules`** - Reglas de desarrollo del proyecto
+3. **Documentación específica** (`docs/`) - Referencia
+
+---
+
+## Flujo de Aprobación
+
+1. **Crear especificación (opcional):** `spec-{descripcion}` → genera especificación técnica
+2. **Crear plan:** `plan-{descripcion}` → genera `ai-specs/changes/{ID}_{NOMBRE}_PLAN.md`
+3. **Revisar plan:** Verificar que no rompe reglas de `IA-Specs/` y `.cursorrules`
+4. **Aprobar plan:** Marcar como `[APPROVED]` en el header del plan
+5. **Implementar:** `develop-{plan-id}` → seguir plan línea por línea
+6. **Auditar (opcional):** `audit-{descripcion}` → verificar cumplimiento
+
+---
+
+## Reglas de Trazabilidad
+
+- Cada cambio DEBE referenciar un plan aprobado
+- Cada plan DEBE listar archivos afectados
+- Cada plan DEBE incluir checklist de verificación pre/post
+- Cada plan DEBE referenciar estándares relevantes de `IA-Specs/`
+- Commits DEBEN incluir referencia al plan: `[develop-100] Implementar...`
+
+---
+
+## Prohibiciones Absolutas
+
+- ❌ Modificar código sin plan aprobado (excepto correcciones menores documentadas)
+- ❌ Crear páginas/endpoints nuevos sin plan
+- ❌ Renombrar/eliminar archivos sin plan de limpieza
+- ❌ Duplicar componentes/utilidades existentes
+- ❌ Ignorar estándares en `IA-Specs/`
+- ❌ Hardcodear texto visible al usuario (ver `IA-Specs/02-internacionalizacion-y-ux.mdc`)
+- ❌ Queries sin filtro por `tenant_id` (ver `IA-Specs/03-multitenancy-rbac-y-privacidad.mdc`)
+- ❌ Endpoints sin verificación de permisos (ver `IA-Specs/03-multitenancy-rbac-y-privacidad.mdc`)
+- ❌ Almacenar archivos grandes como BLOB en MySQL (ver `IA-Specs/01-saas-architecture-and-stack.mdc`)
+- ❌ Exponer n8n como SaaS multi-tenant (n8n es motor interno únicamente)
+
+---
+
+## Referencias
+
+- `IA-Specs/01-saas-architecture-and-stack.mdc` - Arquitectura y stack
+- `IA-Specs/02-internacionalizacion-y-ux.mdc` - i18n y UX
+- `IA-Specs/03-multitenancy-rbac-y-privacidad.mdc` - Multitenancy y RBAC
+- `IA-Specs/04-seguridad-y-compliance.mdc` - Seguridad
+- `IA-Specs/05-frontend-standards.mdc` - Estándares frontend
+- `IA-Specs/06-backend-standards.mdc` - Estándares backend
+- `IA-Specs/07-testing-y-quality-gates.mdc` - Testing y quality gates
+- `IA-Specs/08-ai-first-standards.mdc` - Estándares AI-first
+- `.cursorrules` - Reglas de desarrollo del proyecto
+- `LEER/` - Referencia histórica (NO modificar)

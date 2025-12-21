@@ -1,0 +1,171 @@
+{
+  "nav": {
+    "producto": "Product",
+    "comoFunciona": "Hoe het werkt",
+    "beneficios": "Voordelen",
+    "roi": "ROI-calculator",
+    "faq": "FAQ",
+    "calcularRoi": "ROI berekenen",
+    "login": "Inloggen",
+    "menu": "Menu",
+    "cerrarMenu": "Menu sluiten",
+    "abrirMenu": "Menu openen"
+  },
+  "hero": {
+    "badge": "IA-automatiseringsbureau",
+    "title": "Automatiseer uw bedrijf met",
+    "titleHighlight": "Kunstmatige Intelligentie",
+    "subtitle": "We ontwikkelen op maat gemaakte IA-agenten die repetitieve taken automatiseren, klanten 24/7 bedienen en operationele kosten tot 70% verlagen.",
+    "ctaPrimary": "Bereken mijn ROI",
+    "ctaSecondary": "Praat met een expert",
+    "trustCompanies": "Geautomatiseerde bedrijven",
+    "trustSavings": "Kostenbesparing",
+    "trustSupport": "Automatische ondersteuning"
+  },
+  "product": {
+    "title": "IA-automatiserings",
+    "titleHighlight": "oplossingen",
+    "subtitle": "Drie fundamentele pijlers om de bedrijfsvoering van uw bedrijf te transformeren met kunstmatige intelligentie.",
+    "whatsapp": {
+      "title": "WhatsApp-automatisering",
+      "description": "Conversatieagenten die vragen beantwoorden, afspraken inplannen en bestellingen 24/7 beheren op WhatsApp Business."
+    },
+    "processes": {
+      "title": "Procesautomatisering",
+      "description": "Slimme workflows die uw tools verbinden en repetitieve handmatige taken elimineren."
+    },
+    "compliance": {
+      "title": "AVG-naleving",
+      "description": "Al onze oplossingen voldoen aan de Europese gegevensbeschermings- en privacyregelgeving."
+    }
+  },
+  "howItWorks": {
+    "title": "Hoe het werkt",
+    "titleHighlight": "Ons proces",
+    "subtitle": "Een gestructureerd 6-fasen proces om het succes van uw automatiseringsproject te garanderen.",
+    "step1": {
+      "title": "Procesanalyse",
+      "description": "We identificeren repetitieve taken en knelpunten in uw huidige bedrijfsvoering."
+    },
+    "step2": {
+      "title": "Oplossingsontwerp",
+      "description": "We creëren een op maat gemaakte automatiseringsarchitectuur voor uw bedrijf."
+    },
+    "step3": {
+      "title": "Agentontwikkeling",
+      "description": "We bouwen en trainen uw IA-agent met uw bedrijfskennis."
+    },
+    "step4": {
+      "title": "Integratie",
+      "description": "We verbinden de agent met uw bestaande systemen: CRM, ERP, WhatsApp, enz."
+    },
+    "step5": {
+      "title": "Testen en optimaliseren",
+      "description": "We testen grondig en passen de prestaties aan vóór de lancering."
+    },
+    "step6": {
+      "title": "Implementatie en ondersteuning",
+      "description": "We activeren de oplossing in productie met continue monitoring en ondersteuning."
+    }
+  },
+  "benefits": {
+    "title": "Voordelen van",
+    "titleHighlight": "automatisering met IA",
+    "subtitle": "Transformeer uw bedrijfsvoering en behaal echte, meetbare concurrentievoordelen.",
+    "benefit1": "70% reductie in repetitieve administratieve taken",
+    "benefit2": "Geautomatiseerde klantenservice 24 uur per dag, 7 dagen per week",
+    "benefit3": "Directe antwoorden zonder wachttijd",
+    "benefit4": "Schaalbaarheid zonder personeelsuitbreiding",
+    "benefit5": "Integratie met bestaande systemen (CRM, ERP, enz.)",
+    "benefit6": "Automatische analyse en rapportage van metrics",
+    "benefit7": "Gegarandeerde AVG-regelgevingsnaleving",
+    "benefit8": "Positief ROI in minder dan 6 maanden",
+    "useCasesTitle": "Belangrijkste use cases",
+    "useCase1": "Klantenservice",
+    "useCase2": "Afsprakenbeheer",
+    "useCase3": "Orderverwerking",
+    "useCase4": "Technische ondersteuning",
+    "useCase5": "Leadkwalificatie",
+    "useCase6": "Klantonboarding"
+  },
+  "roi": {
+    "title": "Bereken uw",
+    "titleHighlight": "Rendement op investering",
+    "subtitle": "Ontdek hoeveel u kunt besparen door de repetitieve taken van uw team te automatiseren.",
+    "calculatorTitle": "ROI-calculator",
+    "numPeople": "Mensen in repetitieve taken",
+    "hoursPerWeek": "Uren/week in automatiseerbare taken",
+    "hourlyCost": "Kosten/uur werknemer (met SS)",
+    "automationRate": "Automatiseringspercentage",
+    "currentYearlyCost": "Huidige jaarlijkse kosten",
+    "estimatedSavings": "Potentiële jaarlijkse besparingen",
+    "projectBudgetMin": "Minimale initiële investering",
+    "projectBudgetMax": "Maximale initiële investering",
+    "monthlyRetainer": "Maandelijks onderhoud",
+    "cta": "Vraag een gepersonaliseerde offerte aan",
+    "note": "Indicatieve schatting. De waarden worden aangepast in de gepersonaliseerde analysesessie.",
+    "calculate": "Berekenen",
+    "sector": "Sector (optioneel)",
+    "sectorPlaceholder": "Selecteer uw sector",
+    "sectorRetail": "Retail / E-commerce",
+    "sectorHealthcare": "Gezondheidszorg / Klinieken",
+    "sectorLegal": "Juridisch / Advocatenkantoren",
+    "sectorRealEstate": "Vastgoed",
+    "sectorOther": "Anders"
+  },
+  "faq": {
+    "title": "Veelgestelde",
+    "titleHighlight": "vragen",
+    "subtitle": "Antwoorden op de meest gestelde vragen over automatisering met IA.",
+    "q1": "Hoe lang duurt het om een IA-agent te implementeren?",
+    "a1": "De implementatietijd varieert afhankelijk van de complexiteit van het project. Een basis WhatsApp-agent kan binnen 2-4 weken operationeel zijn, terwijl een complexere automatiseringsoplossing 6-12 weken kan vereisen. Tijdens het eerste consult bieden we een gedetailleerde tijdlijn voor uw specifieke geval.",
+    "q2": "Heb ik technische kennis nodig om de oplossing te gebruiken?",
+    "a2": "Nee, onze oplossingen zijn ontworpen om te worden gebruikt door niet-technisch personeel. We bieden een intuïtieve interface om agenten te beheren en te monitoren, plus volledige training voor uw team. Technische ondersteuning is inbegrepen om vragen op te lossen.",
+    "q3": "Hoe integreert het met mijn huidige systemen?",
+    "a3": "Onze IA-agenten integreren met de meeste bedrijfssystemen: CRM (Salesforce, HubSpot, Pipedrive), ERP, e-commerceplatforms, ticketsystemen en meer. We gebruiken standaard API's en ontwikkelen aangepaste connectors wanneer dat nodig is.",
+    "q4": "Welke garanties voor veiligheid en privacy biedt u?",
+    "a4": "Al onze oplossingen voldoen aan de AVG en LOPDGDD. We implementeren end-to-end encryptie, veilige opslag op Europese servers en strenge toegangscontroles. We ondertekenen vertrouwelijkheidsovereenkomsten en kunnen ons aanpassen aan specifieke veiligheidsvereisten voor uw sector.",
+    "q5": "Wat gebeurt er als de agent iets niet weet te beantwoorden?",
+    "a5": "Agenten zijn ontworpen om automatisch te escaleren naar een mens wanneer ze vragen buiten hun bereik detecteren of wanneer de gebruiker dit vraagt. Bovendien leert het systeem continu van deze interacties om toekomstige antwoorden te verbeteren.",
+    "q6": "Wat zijn de onderhoudskosten na implementatie?",
+    "a6": "We bieden maandelijkse onderhoudsplannen die omvatten: 24/7 monitoring, beveiligingsupdates, prestatieaanpassingen en technische ondersteuning. De typische kosten zijn tussen 10-15% van de initiële projectwaarde per jaar, hoewel dit varieert afhankelijk van de reikwijdte van de vereiste service.",
+    "noAnswer": "Vindt u niet het antwoord dat u zoekt?",
+    "contact": "Neem direct contact met ons op"
+  },
+  "footer": {
+    "description": "Bureau gespecialiseerd in bedrijfsautomatisering met kunstmatige intelligentie. We transformeren de bedrijfsvoering van uw bedrijf.",
+    "services": "Diensten",
+    "company": "Bedrijf",
+    "legal": "Juridisch",
+    "service1": "WhatsApp-automatisering",
+    "service2": "IA-agenten",
+    "service3": "Integraties",
+    "service4": "Consultancy",
+    "company1": "Over ons",
+    "company2": "Succesverhalen",
+    "company3": "Blog",
+    "company4": "Carrières",
+    "legal1": "Privacybeleid",
+    "legal2": "Servicevoorwaarden",
+    "legal3": "Cookiebeleid",
+    "legal4": "Juridische kennisgeving",
+    "copyright": "Alle rechten voorbehouden.",
+    "compliance": "Oplossingen conform AVG, LOPDGDD en Europese gegevensbeschermingsregelgeving. Servers gevestigd in de Europese Unie."
+  },
+  "common": {
+    "loading": "Laden...",
+    "error": "Fout",
+    "success": "Succes",
+    "submit": "Verzenden",
+    "cancel": "Annuleren",
+    "save": "Opslaan",
+    "name": "Naam",
+    "email": "E-mail",
+    "phone": "Telefoon",
+    "company": "Bedrijf",
+    "message": "Bericht",
+    "required": "Verplicht",
+    "invalidEmail": "Ongeldig e-mailadres"
+  }
+}
+

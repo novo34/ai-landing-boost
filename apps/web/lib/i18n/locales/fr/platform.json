@@ -1,0 +1,628 @@
+{
+  "title": "Panneau d'Administration de la Plateforme",
+  "nav": {
+    "dashboard": "Tableau de bord",
+    "tenants": "Locataires",
+    "billing": "Facturation",
+    "plans": "Plans",
+    "tickets": "Tickets de Support",
+    "chat": "Chat avec les Clients",
+    "instances": "Instances",
+    "regions": "Régions de Données",
+    "audit": "Audit",
+    "operations": {
+      "title": "Opérations Propres",
+      "agents": "Mes Agents",
+      "channels": "Mes Canaux",
+      "conversations": "Mes Conversations",
+      "leads": "Mes Prospects",
+      "n8n": "Mes Flux N8N"
+    },
+    "settings": "Paramètres"
+  },
+  "dashboard": {
+    "title": "Tableau de Bord de la Plateforme",
+    "metrics": {
+      "tenants": {
+        "total": "Total des Locataires",
+        "active": "Locataires Actifs",
+        "trial": "En Essai",
+        "suspended": "Suspendus",
+        "new_last_30_days": "Nouveaux (30 jours)"
+      },
+      "users": {
+        "total": "Total des Utilisateurs",
+        "active_last_30_days": "Actifs (30 jours)"
+      },
+      "revenue": {
+        "mrr": "MRR",
+        "arr": "ARR",
+        "current_month": "Mois Actuel",
+        "previous_month": "Mois Précédent",
+        "growth": "Croissance"
+      },
+      "usage": {
+        "agents": "Agents Actifs",
+        "channels": "Canaux Configurés",
+        "conversations": "Conversations",
+        "messages": "Messages Traités"
+      },
+      "health": {
+        "payment_failed": "Paiements Échoués",
+        "near_limits": "Proche des Limites",
+        "avg_response_time": "Temps de Réponse Moyen"
+      }
+    }
+  },
+  "tenants": {
+    "title": "Gestion des Locataires",
+    "list": {
+      "title": "Liste des Locataires",
+      "search_placeholder": "Rechercher par nom, email ou slug...",
+      "filters": {
+        "status": "Statut",
+        "plan": "Plan",
+        "country": "Pays",
+        "date_range": "Plage de Dates",
+        "subscription_status": "Statut d'Abonnement"
+      },
+      "columns": {
+        "name": "Nom",
+        "slug": "Slug",
+        "status": "Statut",
+        "plan": "Plan",
+        "subscription_status": "Statut d'Abonnement",
+        "country": "Pays",
+        "users": "Utilisateurs",
+        "agents": "Agents",
+        "created_at": "Créé le",
+        "last_activity": "Dernière Activité",
+        "actions": "Actions"
+      },
+      "actions": {
+        "view": "Voir les Détails",
+        "edit": "Modifier",
+        "suspend": "Suspendre",
+        "reactivate": "Réactiver",
+        "delete": "Supprimer",
+        "configure": "Configurer"
+      }
+    },
+    "create": {
+      "title": "Créer un Nouveau Locataire",
+      "form": {
+        "name": "Nom du Locataire",
+        "name_placeholder": "Mon Entreprise",
+        "slug": "Slug",
+        "slug_placeholder": "mon-entreprise",
+        "country": "Pays",
+        "data_region": "Région de Données",
+        "default_locale": "Langue par Défaut",
+        "time_zone": "Fuseau Horaire",
+        "owner_email": "Email du Propriétaire",
+        "owner_name": "Nom du Propriétaire",
+        "initial_plan": "Plan Initial",
+        "initial_status": "Statut Initial",
+        "trial_ends_at": "Fin de l'Essai"
+      },
+      "success": "Locataire créé avec succès",
+      "error": "Erreur lors de la création du locataire"
+    },
+    "edit": {
+      "title": "Modifier le Locataire",
+      "success": "Locataire mis à jour avec succès",
+      "error": "Erreur lors de la mise à jour du locataire"
+    },
+    "details": {
+      "title": "Détails du Locataire",
+      "basic_info": "Informations de Base",
+      "subscription": "Abonnement",
+      "metrics": "Métriques",
+      "users": "Utilisateurs",
+      "history": "Historique",
+      "logs": "Journaux d'Activité"
+    },
+    "suspend": {
+      "title": "Suspendre le Locataire",
+      "confirm": "Êtes-vous sûr de vouloir suspendre ce locataire ?",
+      "reason": "Raison de la suspension",
+      "reason_placeholder": "Entrez la raison de la suspension...",
+      "success": "Locataire suspendu avec succès",
+      "error": "Erreur lors de la suspension du locataire"
+    },
+    "reactivate": {
+      "title": "Réactiver le Locataire",
+      "confirm": "Êtes-vous sûr de vouloir réactiver ce locataire ?",
+      "success": "Locataire réactivé avec succès",
+      "error": "Erreur lors de la réactivation du locataire"
+    },
+    "delete": {
+      "title": "Supprimer le Locataire",
+      "confirm": "Êtes-vous sûr de vouloir supprimer ce locataire ? Cette action ne peut pas être annulée.",
+      "warning": "Les éléments suivants seront supprimés :",
+      "warning_users": "{{count}} utilisateurs",
+      "warning_conversations": "{{count}} conversations",
+      "warning_data": "Toutes les données associées",
+      "success": "Locataire supprimé avec succès",
+      "error": "Erreur lors de la suppression du locataire"
+    },
+    "status": {
+      "active": "Actif",
+      "trial": "Essai",
+      "suspended": "Suspendu",
+      "cancelled": "Annulé"
+    }
+  },
+  "billing": {
+    "title": "Gestion de la Facturation",
+    "subscription": {
+      "title": "Abonnement",
+      "plan": "Plan Actuel",
+      "status": "Statut",
+      "start_date": "Date de Début",
+      "next_billing": "Prochaine Facturation",
+      "payment_method": "Méthode de Paiement",
+      "change_plan": "Changer de Plan",
+      "apply_adjustment": "Appliquer un Ajustement"
+    },
+    "payment_failed": {
+      "title": "Paiements Échoués",
+      "days_since_payment": "Jours depuis le dernier paiement",
+      "failed_attempts": "Tentatives échouées",
+      "amount_due": "Montant dû",
+      "extend_grace": "Prolonger la Période de Grâce",
+      "mark_paid": "Marquer comme Payé",
+      "contact": "Contacter le Client"
+    },
+    "adjustment": {
+      "title": "Appliquer un Ajustement",
+      "type": "Type",
+      "amount": "Montant",
+      "reason": "Raison",
+      "apply_date": "Date d'Application",
+      "types": {
+        "discount": "Remise",
+        "credit": "Crédit",
+        "adjustment": "Ajustement"
+      }
+    }
+  },
+  "plans": {
+    "title": "Gestion des Plans",
+    "list": {
+      "title": "Plans d'Abonnement",
+      "columns": {
+        "name": "Nom",
+        "price_monthly": "Prix Mensuel",
+        "price_yearly": "Prix Annuel",
+        "limits": "Limites",
+        "status": "Statut",
+        "tenants": "Locataires Abonnés",
+        "revenue": "Revenus",
+        "actions": "Actions"
+      }
+    },
+    "create": {
+      "title": "Créer un Plan",
+      "form": {
+        "name": "Nom",
+        "description": "Description",
+        "price_monthly": "Prix Mensuel (centimes)",
+        "price_yearly": "Prix Annuel (centimes)",
+        "currency": "Devise",
+        "max_agents": "Agents Max",
+        "max_channels": "Canaux Max",
+        "max_messages": "Messages Max",
+        "features": "Fonctionnalités"
+      },
+      "success": "Plan créé avec succès"
+    },
+    "edit": {
+      "title": "Modifier le Plan",
+      "success": "Plan mis à jour avec succès"
+    },
+    "delete": {
+      "title": "Supprimer le Plan",
+      "confirm": "Êtes-vous sûr de vouloir supprimer ce plan ?",
+      "warning": "Impossible de supprimer s'il y a des locataires abonnés",
+      "success": "Plan supprimé avec succès"
+    }
+  },
+  "tickets": {
+    "title": "Tickets de Support",
+    "list": {
+      "title": "Liste des Tickets",
+      "filters": {
+        "status": "Statut",
+        "category": "Catégorie",
+        "priority": "Priorité",
+        "assigned_to": "Assigné à",
+        "tenant": "Locataire"
+      },
+      "columns": {
+        "id": "ID",
+        "subject": "Sujet",
+        "tenant": "Locataire",
+        "category": "Catégorie",
+        "priority": "Priorité",
+        "status": "Statut",
+        "assigned_to": "Assigné à",
+        "created_at": "Créé",
+        "last_activity": "Dernière Activité",
+        "actions": "Actions"
+      }
+    },
+    "create": {
+      "title": "Créer un Ticket",
+      "form": {
+        "subject": "Sujet",
+        "description": "Description",
+        "category": "Catégorie",
+        "priority": "Priorité",
+        "tenant": "Locataire (optionnel)"
+      },
+      "success": "Ticket créé avec succès"
+    },
+    "details": {
+      "title": "Détails du Ticket",
+      "messages": "Messages",
+      "add_message": "Ajouter un Message",
+      "internal_note": "Note Interne",
+      "assign": "Assigner",
+      "change_status": "Changer le Statut",
+      "close": "Fermer"
+    },
+    "status": {
+      "open": "Ouvert",
+      "in_progress": "En Cours",
+      "waiting_client": "En Attente du Client",
+      "resolved": "Résolu",
+      "closed": "Fermé"
+    },
+    "priority": {
+      "low": "Basse",
+      "medium": "Moyenne",
+      "high": "Haute",
+      "critical": "Critique"
+    },
+    "category": {
+      "technical": "Technique",
+      "billing": "Facturation",
+      "configuration": "Configuration",
+      "feature_request": "Demande de fonctionnalité",
+      "other": "Autre"
+    }
+  },
+  "leads": {
+    "title": "CRM des Prospects",
+    "list": {
+      "title": "Liste des Prospects",
+      "filters": {
+        "status": "Statut",
+        "stage": "Étape",
+        "source": "Source",
+        "assigned_to": "Assigné à"
+      },
+      "columns": {
+        "name": "Nom",
+        "email": "Email",
+        "phone": "Téléphone",
+        "source": "Source",
+        "status": "Statut",
+        "stage": "Étape",
+        "assigned_to": "Assigné à",
+        "created_at": "Créé",
+        "updated_at": "Mis à jour",
+        "actions": "Actions"
+      }
+    },
+    "pipeline": {
+      "title": "Pipeline de Ventes",
+      "metrics": {
+        "total": "Total",
+        "conversion_rate": "Taux de Conversion",
+        "by_stage": "Par Étape",
+        "by_source": "Par Source"
+      }
+    },
+    "details": {
+      "title": "Détails du Prospect",
+      "info": "Informations",
+      "notes": "Notes",
+      "history": "Historique",
+      "add_note": "Ajouter une Note"
+    },
+    "status": {
+      "new": "Nouveau",
+      "contacted": "Contacté",
+      "qualified": "Qualifié",
+      "opportunity": "Opportunité",
+      "customer": "Client",
+      "lost": "Perdu"
+    },
+    "stage": {
+      "lead_captured": "Prospect Capturé",
+      "contacted": "Contacté",
+      "qualified": "Qualifié",
+      "demo": "Démonstration",
+      "proposal": "Proposition",
+      "negotiation": "Négociation",
+      "closed_won": "Fermé - Gagné",
+      "closed_lost": "Fermé - Perdu"
+    },
+    "source": {
+      "whatsapp": "WhatsApp",
+      "webchat": "Webchat",
+      "landing": "Page d'Atterrissage",
+      "manual": "Manuel",
+      "import": "Importation"
+    }
+  },
+  "n8n_flows": {
+    "title": "Flux N8N de Plateforme",
+    "list": {
+      "title": "Flux d'Automatisation",
+      "filters": {
+        "category": "Catégorie",
+        "is_active": "Statut"
+      },
+      "columns": {
+        "name": "Nom",
+        "category": "Catégorie",
+        "status": "Statut",
+        "created_at": "Créé",
+        "actions": "Actions"
+      }
+    },
+    "create": {
+      "title": "Créer un Flux",
+      "form": {
+        "name": "Nom",
+        "description": "Description",
+        "category": "Catégorie",
+        "workflow": "Workflow (JSON)"
+      },
+      "success": "Flux créé avec succès"
+    },
+    "details": {
+      "title": "Détails du Flux",
+      "workflow": "Workflow",
+      "executions": "Exécutions",
+      "logs": "Journaux"
+    },
+    "categories": {
+      "onboarding": "Onboarding",
+      "notifications": "Notifications",
+      "leads": "Prospects",
+      "reports": "Rapports",
+      "operations": "Opérations"
+    }
+  },
+  "chat": {
+    "title": "Chat avec les Clients",
+    "conversations": {
+      "title": "Conversations Actives",
+      "no_conversations": "Aucune conversation active",
+      "start_conversation": "Démarrer une Conversation",
+      "with_tenant": "avec {{tenant}}"
+    },
+    "messages": {
+      "type_message": "Tapez un message...",
+      "send": "Envoyer",
+      "file": "Fichier",
+      "image": "Image",
+      "typing": "en train d'écrire...",
+      "online": "En ligne",
+      "offline": "Hors ligne"
+    }
+  },
+  "instances": {
+    "title": "Gestion des Instances",
+    "list": {
+      "title": "Instances SaaS",
+      "columns": {
+        "name": "Nom",
+        "domain": "Domaine",
+        "status": "Statut",
+        "tenants": "Locataires",
+        "created_at": "Créé",
+        "actions": "Actions"
+      }
+    },
+    "create": {
+      "title": "Créer une Instance",
+      "form": {
+        "name": "Nom",
+        "domain": "Domaine",
+        "database_url": "URL de la Base de Données",
+        "stripe_key": "Clé Stripe",
+        "n8n_url": "URL N8N"
+      },
+      "success": "Instance créée avec succès"
+    },
+    "switch": {
+      "title": "Changer d'Instance",
+      "current": "Instance Actuelle",
+      "select": "Sélectionner une Instance"
+    }
+  },
+  "regions": {
+    "title": "Régions de Données",
+    "list": {
+      "title": "Distribution par Région",
+      "columns": {
+        "region": "Région",
+        "tenants": "Locataires",
+        "compliance": "Conformité",
+        "actions": "Actions"
+      }
+    },
+    "migrate": {
+      "title": "Migrer le Locataire vers une Autre Région",
+      "confirm": "Êtes-vous sûr de vouloir migrer ce locataire ?",
+      "warning": "Cette opération peut prendre plusieurs minutes",
+      "success": "Migration démarrée avec succès"
+    },
+    "regions": {
+      "eu": "Europe (RGPD)",
+      "ch": "Suisse (LPDn)",
+      "us": "États-Unis",
+      "apac": "Asie-Pacifique"
+    }
+  },
+  "audit": {
+    "title": "Journaux d'Audit",
+    "list": {
+      "title": "Historique des Actions",
+      "filters": {
+        "action": "Action",
+        "resource_type": "Type de Ressource",
+        "resource_id": "ID de Ressource",
+        "user": "Utilisateur",
+        "date_range": "Plage de Dates"
+      },
+      "columns": {
+        "timestamp": "Horodatage",
+        "user": "Utilisateur",
+        "action": "Action",
+        "resource": "Ressource",
+        "details": "Détails",
+        "ip": "IP"
+      },
+      "export": "Exporter les Journaux"
+    },
+    "actions": {
+      "create_tenant": "Créer un Locataire",
+      "update_tenant": "Mettre à jour le Locataire",
+      "suspend_tenant": "Suspendre le Locataire",
+      "reactivate_tenant": "Réactiver le Locataire",
+      "delete_tenant": "Supprimer le Locataire",
+      "change_plan": "Changer de Plan",
+      "apply_adjustment": "Appliquer un Ajustement"
+    }
+  },
+  "operations": {
+    "agents": {
+      "title": "Mes Agents",
+      "description": "Agents pour la génération de prospects et les ventes SaaS"
+    },
+    "channels": {
+      "title": "Mes Canaux",
+      "description": "Canaux configurés pour les opérations propres"
+    },
+    "conversations": {
+      "title": "Mes Conversations",
+      "description": "Conversations du locataire propre du SaaS"
+    },
+    "leads": {
+      "title": "Mes Prospects",
+      "description": "CRM des prospects générés par les agents propres",
+      "pipeline": {
+        "title": "Pipeline de Ventes",
+        "stages": {
+          "lead_captured": "Prospect Capturé",
+          "contacted": "Contacté",
+          "qualified": "Qualifié",
+          "demo": "Démo",
+          "proposal": "Proposition",
+          "negotiation": "Négociation",
+          "closed_won": "Fermé - Gagné",
+          "closed_lost": "Fermé - Perdu"
+        }
+      },
+      "create": {
+        "title": "Créer un Prospect",
+        "form": {
+          "name": "Nom",
+          "email": "Email",
+          "phone": "Téléphone",
+          "source": "Source",
+          "interest": "Intérêt",
+          "notes": "Notes"
+        }
+      },
+      "add_note": {
+        "title": "Ajouter une Note",
+        "placeholder": "Écrire une note..."
+      }
+    },
+    "n8n": {
+      "title": "Flux N8N",
+      "description": "Automatisation des processus internes",
+      "categories": {
+        "onboarding": "Intégration",
+        "notifications": "Notifications",
+        "leads": "Prospects",
+        "reports": "Rapports",
+        "operations": "Opérations"
+      },
+      "create": {
+        "title": "Créer un Flux",
+        "form": {
+          "name": "Nom",
+          "description": "Description",
+          "category": "Catégorie",
+          "workflow": "Workflow (JSON)"
+        }
+      },
+      "activate": "Activer",
+      "deactivate": "Désactiver",
+      "logs": "Voir les Journaux"
+    }
+  },
+  "errors": {
+    "unauthorized": "Vous n'avez pas la permission d'accéder à cette section",
+    "tenant_not_found": "Locataire non trouvé",
+    "slug_exists": "Le slug existe déjà",
+    "invalid_email": "Email invalide",
+    "invalid_country": "Pays invalide",
+    "cannot_suspend_self": "Vous ne pouvez pas suspendre votre propre locataire",
+    "cannot_delete_self": "Vous ne pouvez pas supprimer votre propre locataire",
+    "plan_in_use": "Impossible de supprimer un plan avec des locataires abonnés",
+    "migration_failed": "Échec de la migration des données",
+    "instance_not_found": "Instance non trouvée",
+    "instance_domain_exists": "Le domaine de l'instance existe déjà",
+    "instance_has_tenants": "Impossible de supprimer une instance avec des locataires assignés",
+    "ticket_not_found": "Ticket non trouvé",
+    "ticket_already_closed": "Le ticket est déjà fermé",
+    "lead_not_found": "Prospect non trouvé",
+    "flow_not_found": "Flux non trouvé",
+    "flow_already_active": "Le flux est déjà actif",
+    "flow_already_inactive": "Le flux est déjà inactif",
+    "flow_not_found_or_not_activated": "Flux non trouvé ou non activé",
+    "n8n_not_configured": "N8N n'est pas configuré",
+    "n8n_connection_error": "Erreur de connexion N8N",
+    "n8n_activation_failed": "Échec de l'activation du flux dans N8N",
+    "plan_not_found": "Plan non trouvé",
+    "plan_slug_exists": "Le slug du plan existe déjà",
+    "plan_has_subscriptions": "Impossible de supprimer un plan avec des abonnements actifs"
+  },
+  "success": {
+    "tenant_created": "Locataire créé avec succès",
+    "tenant_updated": "Locataire mis à jour avec succès",
+    "tenant_suspended": "Locataire suspendu avec succès",
+    "tenant_reactivated": "Locataire réactivé avec succès",
+    "tenant_deleted": "Locataire supprimé avec succès",
+    "plan_changed": "Plan changé avec succès",
+    "plan_created": "Plan créé avec succès",
+    "plan_updated": "Plan mis à jour avec succès",
+    "plan_deleted": "Plan supprimé avec succès",
+    "adjustment_applied": "Ajustement appliqué avec succès",
+    "ticket_created": "Ticket créé avec succès",
+    "ticket_updated": "Ticket mis à jour avec succès",
+    "ticket_closed": "Ticket fermé avec succès",
+    "message_sent": "Message envoyé avec succès",
+    "lead_created": "Prospect créé avec succès",
+    "lead_updated": "Prospect mis à jour avec succès",
+    "note_added": "Note ajoutée avec succès",
+    "flow_created": "Flux créé avec succès",
+    "flow_updated": "Flux mis à jour avec succès",
+    "flow_activated": "Flux activé avec succès",
+    "flow_deactivated": "Flux désactivé avec succès",
+    "flow_deleted": "Flux supprimé avec succès",
+    "instance_created": "Instance créée avec succès",
+    "instance_updated": "Instance mise à jour avec succès",
+    "instance_deleted": "Instance supprimée avec succès",
+    "tenant_assigned_to_instance": "Locataire assigné à l'instance avec succès"
+  }
+}

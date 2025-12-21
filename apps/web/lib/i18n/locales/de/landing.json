@@ -1,0 +1,171 @@
+{
+  "nav": {
+    "producto": "Produkt",
+    "comoFunciona": "Wie es funktioniert",
+    "beneficios": "Vorteile",
+    "roi": "ROI-Rechner",
+    "faq": "FAQ",
+    "calcularRoi": "ROI berechnen",
+    "login": "Anmelden",
+    "menu": "Menü",
+    "cerrarMenu": "Menü schließen",
+    "abrirMenu": "Menü öffnen"
+  },
+  "hero": {
+    "badge": "KI-Automatisierungsagentur",
+    "title": "Automatisieren Sie Ihr Unternehmen mit",
+    "titleHighlight": "Künstlicher Intelligenz",
+    "subtitle": "Wir entwickeln maßgeschneiderte KI-Agenten, die repetitive Aufgaben automatisieren, Kunden 24/7 betreuen und Betriebskosten um bis zu 70% reduzieren.",
+    "ctaPrimary": "Meinen ROI berechnen",
+    "ctaSecondary": "Mit einem Experten sprechen",
+    "trustCompanies": "Automatisierte Unternehmen",
+    "trustSavings": "Kostenreduzierung",
+    "trustSupport": "Automatischer Support"
+  },
+  "product": {
+    "title": "KI-Automatisierungs",
+    "titleHighlight": "Lösungen",
+    "subtitle": "Drei grundlegende Säulen zur Transformation Ihrer Unternehmensabläufe mit künstlicher Intelligenz.",
+    "whatsapp": {
+      "title": "WhatsApp-Automatisierung",
+      "description": "Konversationsagenten, die Anfragen bearbeiten, Termine vereinbaren und Bestellungen 24/7 auf WhatsApp Business verwalten."
+    },
+    "processes": {
+      "title": "Prozessautomatisierung",
+      "description": "Intelligente Workflows, die Ihre Tools verbinden und repetitive manuelle Aufgaben eliminieren."
+    },
+    "compliance": {
+      "title": "DSGVO-Konformität",
+      "description": "Alle unsere Lösungen entsprechen den europäischen Datenschutz- und Privatsphärebestimmungen."
+    }
+  },
+  "howItWorks": {
+    "title": "Wie es funktioniert",
+    "titleHighlight": "Unser Prozess",
+    "subtitle": "Ein strukturierter 6-Phasen-Prozess, um den Erfolg Ihres Automatisierungsprojekts zu gewährleisten.",
+    "step1": {
+      "title": "Prozessanalyse",
+      "description": "Wir identifizieren repetitive Aufgaben und Engpässe in Ihrem aktuellen Betrieb."
+    },
+    "step2": {
+      "title": "Lösungsdesign",
+      "description": "Wir erstellen eine maßgeschneiderte Automatisierungsarchitektur für Ihr Unternehmen."
+    },
+    "step3": {
+      "title": "Agentenentwicklung",
+      "description": "Wir entwickeln und trainieren Ihren KI-Agenten mit Ihrem Geschäftswissen."
+    },
+    "step4": {
+      "title": "Integration",
+      "description": "Wir verbinden den Agenten mit Ihren bestehenden Systemen: CRM, ERP, WhatsApp usw."
+    },
+    "step5": {
+      "title": "Tests und Optimierung",
+      "description": "Wir testen gründlich und passen die Leistung vor dem Start an."
+    },
+    "step6": {
+      "title": "Bereitstellung und Support",
+      "description": "Wir aktivieren die Lösung in der Produktion mit kontinuierlicher Überwachung und Support."
+    }
+  },
+  "benefits": {
+    "title": "Vorteile der",
+    "titleHighlight": "Automatisierung mit KI",
+    "subtitle": "Transformieren Sie Ihre Geschäftsabläufe und erzielen Sie echte, messbare Wettbewerbsvorteile.",
+    "benefit1": "70% Reduzierung bei repetitiven administrativen Aufgaben",
+    "benefit2": "Automatisierter Kundenservice 24 Stunden, 7 Tage",
+    "benefit3": "Sofortige Antworten ohne Wartezeit",
+    "benefit4": "Skalierbarkeit ohne Personalaufstockung",
+    "benefit5": "Integration mit bestehenden Systemen (CRM, ERP usw.)",
+    "benefit6": "Automatische Analyse und Berichterstattung von Metriken",
+    "benefit7": "Garantierte DSGVO-Regelkonformität",
+    "benefit8": "Positiver ROI in weniger als 6 Monaten",
+    "useCasesTitle": "Hauptanwendungsfälle",
+    "useCase1": "Kundenservice",
+    "useCase2": "Terminverwaltung",
+    "useCase3": "Bestellabwicklung",
+    "useCase4": "Technischer Support",
+    "useCase5": "Lead-Qualifizierung",
+    "useCase6": "Kunden-Onboarding"
+  },
+  "roi": {
+    "title": "Berechnen Sie Ihre",
+    "titleHighlight": "Kapitalrendite",
+    "subtitle": "Entdecken Sie, wie viel Sie durch die Automatisierung der repetitiven Aufgaben Ihres Teams sparen können.",
+    "calculatorTitle": "ROI-Rechner",
+    "numPeople": "Personen in repetitiven Aufgaben",
+    "hoursPerWeek": "Stunden/Woche in automatisierbaren Aufgaben",
+    "hourlyCost": "Mitarbeiterkosten/Stunde (mit SV)",
+    "automationRate": "Automatisierungsprozentsatz",
+    "currentYearlyCost": "Aktuelle jährliche Kosten",
+    "estimatedSavings": "Potenzielle jährliche Einsparungen",
+    "projectBudgetMin": "Minimale Anfangsinvestition",
+    "projectBudgetMax": "Maximale Anfangsinvestition",
+    "monthlyRetainer": "Monatliche Wartung",
+    "cta": "Personalisierte Offerte anfordern",
+    "note": "Schätzwert. Die Werte werden in der personalisierten Analyse-Sitzung angepasst.",
+    "calculate": "Berechnen",
+    "sector": "Sektor (optional)",
+    "sectorPlaceholder": "Wählen Sie Ihren Sektor",
+    "sectorRetail": "Einzelhandel / E-Commerce",
+    "sectorHealthcare": "Gesundheitswesen / Kliniken",
+    "sectorLegal": "Recht / Kanzleien",
+    "sectorRealEstate": "Immobilien",
+    "sectorOther": "Andere"
+  },
+  "faq": {
+    "title": "Häufig",
+    "titleHighlight": "gestellte Fragen",
+    "subtitle": "Antworten auf die häufigsten Fragen zur KI-Automatisierung.",
+    "q1": "Wie lange dauert die Implementierung eines KI-Agenten?",
+    "a1": "Die Implementierungszeit variiert je nach Projektkomplexität. Ein grundlegender WhatsApp-Agent kann in 2-4 Wochen betriebsbereit sein, während eine komplexere Automatisierungslösung 6-12 Wochen erfordern kann. Während der ersten Beratung erstellen wir einen detaillierten Zeitplan für Ihren spezifischen Fall.",
+    "q2": "Benötige ich technische Kenntnisse, um die Lösung zu nutzen?",
+    "a2": "Nein, unsere Lösungen sind für die Nutzung durch nicht-technisches Personal konzipiert. Wir bieten eine intuitive Benutzeroberfläche zur Verwaltung und Überwachung der Agenten sowie eine vollständige Schulung für Ihr Team. Der technische Support ist enthalten, um Fragen zu beantworten.",
+    "q3": "Wie integriert es sich mit meinen bestehenden Systemen?",
+    "a3": "Unsere KI-Agenten integrieren sich mit den meisten Geschäftssystemen: CRM (Salesforce, HubSpot, Pipedrive), ERP, E-Commerce-Plattformen, Ticket-Systeme und mehr. Wir verwenden Standard-APIs und entwickeln bei Bedarf maßgeschneiderte Konnektoren.",
+    "q4": "Welche Sicherheits- und Datenschutzgarantien bieten Sie?",
+    "a4": "Alle unsere Lösungen entsprechen der DSGVO und dem BDSG. Wir implementieren Ende-zu-Ende-Verschlüsselung, sichere Speicherung auf europäischen Servern und strenge Zugriffskontrollen. Wir unterzeichnen Vertraulichkeitsvereinbarungen und können uns an spezifische Sicherheitsanforderungen Ihres Sektors anpassen.",
+    "q5": "Was passiert, wenn der Agent etwas nicht beantworten kann?",
+    "a5": "Agenten sind so konzipiert, dass sie automatisch an einen Menschen weitergeleitet werden, wenn sie Anfragen außerhalb ihres Bereichs erkennen oder wenn der Benutzer dies anfordert. Darüber hinaus lernt das System kontinuierlich aus diesen Interaktionen, um zukünftige Antworten zu verbessern.",
+    "q6": "Wie hoch sind die Wartungskosten nach der Implementierung?",
+    "a6": "Wir bieten monatliche Wartungspläne, die Folgendes umfassen: 24/7-Überwachung, Sicherheitsupdates, Leistungsanpassungen und technischen Support. Die typischen Kosten liegen zwischen 10-15% des anfänglichen Projektwerts pro Jahr, variieren jedoch je nach Umfang der erforderlichen Dienstleistungen.",
+    "noAnswer": "Finden Sie nicht die Antwort, die Sie suchen?",
+    "contact": "Kontaktieren Sie uns direkt"
+  },
+  "footer": {
+    "description": "Agentur spezialisiert auf Unternehmensautomatisierung mit künstlicher Intelligenz. Wir transformieren die Abläufe Ihres Unternehmens.",
+    "services": "Dienstleistungen",
+    "company": "Unternehmen",
+    "legal": "Rechtliches",
+    "service1": "WhatsApp-Automatisierung",
+    "service2": "KI-Agenten",
+    "service3": "Integrationen",
+    "service4": "Beratung",
+    "company1": "Über uns",
+    "company2": "Erfolgsgeschichten",
+    "company3": "Blog",
+    "company4": "Karrieren",
+    "legal1": "Datenschutzrichtlinie",
+    "legal2": "Nutzungsbedingungen",
+    "legal3": "Cookie-Richtlinie",
+    "legal4": "Impressum",
+    "copyright": "Alle Rechte vorbehalten.",
+    "compliance": "Lösungen konform mit DSGVO, BDSG und europäischen Datenschutzbestimmungen. Server befinden sich in der Europäischen Union."
+  },
+  "common": {
+    "loading": "Laden...",
+    "error": "Fehler",
+    "success": "Erfolg",
+    "submit": "Senden",
+    "cancel": "Abbrechen",
+    "save": "Speichern",
+    "name": "Name",
+    "email": "E-Mail",
+    "phone": "Telefon",
+    "company": "Unternehmen",
+    "message": "Nachricht",
+    "required": "Erforderlich",
+    "invalidEmail": "Ungültige E-Mail"
+  }
+}
+

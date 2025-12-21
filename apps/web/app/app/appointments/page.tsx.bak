@@ -1,0 +1,717 @@
+'use client';
+
+import { useEffect, useState, useCallback } from 'react';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Textarea } from '@/components/ui/textarea';
+import { apiClient, Agent } from '@/lib/api/client';
+import { useToast } from '@/hooks/use-toast';
+import { useTranslation } from '@/lib/i18n/client';
+import { Skeleton } from '@/components/ui/skeleton';
+import { Calendar, Plus, Trash2, Edit, Clock, User, Phone, CheckCircle2, XCircle, AlertCircle, Send, List } from 'lucide-react';
+// TODO: Fix CalendarView import - temporary comment to allow build
+// import { CalendarView } from '@/components/appointments/calendar-view';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from '@/components/ui/dialog';
+
+interface Appointment {
+  id: string;
+  tenantId: string;
+  agentId: string;
+  conversationId: string;
+  calendarEventId?: string;
+  participantPhone: string;
+  participantName?: string;
+  startTime: string;
+  endTime: string;
+  status: 'PENDING' | 'CONFIRMED' | 'CANCELLED' | 'COMPLETED' | 'NO_SHOW';
+  notes?: string;
+  reminderSent: boolean;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export default function AppointmentsPage() {
+  const { toast } = useToast();
+  const { t } = useTranslation('common');
+  const [loading, setLoading] = useState(true);
+  const [appointments, setAppointments] = useState<Appointment[]>([]);
+  const [agents, setAgents] = useState<Agent[]>([]);
+  const [showCreateDialog, setShowCreateDialog] = useState(false);
+  const [editingAppointment, setEditingAppointment] = useState<Appointment | null>(null);
+  const [filters, setFilters] = useState<{
+    agentId: string;
+    status: string;
+    startDate: string;
+    endDate: string;
+  }>({
+    agentId: 'all',
+    status: 'all',
+    startDate: '',
+    endDate: '',
+  });
+  const [formData, setFormData] = useState({
+    agentId: '',
+    conversationId: '',
+    participantPhone: '',
+    participantName: '',
+    startTime: '',
+    endTime: '',
+    notes: '',
+  });
+  const [viewMode, setViewMode] = useState<'list' | 'calendar'>('list');
+
+  const loadData = useCallback(async () => {
+    try {
+      setLoading(true);
+      
+      // Verificar autenticación antes de hacer requests
+      const isAuthenticated = await apiClient.checkAuth();
+      if (!isAuthenticated) {
+        // El layout debería redirigir, pero por si acaso no lo hace
+        return;
+      }
+      
+      const [appointmentsResponse, agentsResponse] = await Promise.all([
+        apiClient.getAppointments({
+          agentId: filters.agentId && filters.agentId !== 'all' ? filters.agentId : undefined,
+          status: filters.status && filters.status !== 'all' ? (filters.status as 'PENDING' | 'CONFIRMED' | 'CANCELLED' | 'COMPLETED' | 'NO_SHOW') : undefined,
+          startDate: filters.startDate || undefined,
+          endDate: filters.endDate || undefined,
+        }),
+        apiClient.getAgents(),
+      ]);
+
+      // Solo actualizar estado si las respuestas fueron exitosas
+      if (appointmentsResponse.success && appointmentsResponse.data) {
+        setAppointments(appointmentsResponse.data.map((apt) => ({
+          ...apt,
+          status: apt.status as 'PENDING' | 'CONFIRMED' | 'CANCELLED' | 'COMPLETED' | 'NO_SHOW',
+        })));
+      } else if (appointmentsResponse.error_key === 'auth.unauthorized') {
+        // Si no está autorizado, no hacer nada (el layout manejará la redirección)
+        return;
+      }
+
+      if (agentsResponse.success && agentsResponse.data) {
+        setAgents(agentsResponse.data);
+      } else if (agentsResponse.error_key === 'auth.unauthorized') {
+        // Si no está autorizado, no hacer nada (el layout manejará la redirección)
+        return;
+      }
+    } catch (error) {
+      // Solo loguear errores que no sean de autenticación
+      if (error && typeof error === 'object' && 'error_key' in error && error.error_key !== 'auth.unauthorized') {
+        console.error('Error loading appointments:', error);
+        toast({
+          title: t('errors.generic'),
+          description: t('errors.load_failed'),
+          variant: 'destructive',
+        });
+      }
+    } finally {
+      setLoading(false);
+    }
+  }, [toast, t, filters]);
+
+  useEffect(() => {
+    loadData();
+  }, [loadData]);
+
+  const handleCreate = async () => {
+    if (!formData.agentId || !formData.participantPhone || !formData.startTime || !formData.endTime) {
+      toast({
+        title: t('errors.generic'),
+        description: t('appointments.required_fields'),
+        variant: 'destructive',
+      });
+      return;
+    }
+
+    try {
+      const response = await apiClient.createAppointment({
+        agentId: formData.agentId,
+        conversationId: formData.conversationId || '',
+        participantPhone: formData.participantPhone,
+        participantName: formData.participantName || undefined,
+        startTime: new Date(formData.startTime).toISOString(),
+        endTime: new Date(formData.endTime).toISOString(),
+        notes: formData.notes || undefined,
+      });
+
+      if (response.success) {
+        toast({
+          title: t('appointments.created'),
+          description: t('appointments.created_success'),
+        });
+        setShowCreateDialog(false);
+        setFormData({
+          agentId: '',
+          conversationId: '',
+          participantPhone: '',
+          participantName: '',
+          startTime: '',
+          endTime: '',
+          notes: '',
+        });
+        loadData();
+      }
+    } catch (error) {
+      console.error('Error creating appointment:', error);
+      toast({
+        title: t('errors.generic'),
+        description: t('errors.create_failed'),
+        variant: 'destructive',
+      });
+    }
+  };
+
+  const handleReschedule = async (id: string) => {
+    if (!formData.startTime || !formData.endTime) {
+      toast({
+        title: t('errors.generic'),
+        description: t('appointments.required_fields'),
+        variant: 'destructive',
+      });
+      return;
+    }
+
+    try {
+      const response = await apiClient.rescheduleAppointment(id, {
+        startTime: new Date(formData.startTime).toISOString(),
+        endTime: new Date(formData.endTime).toISOString(),
+      });
+
+      if (response.success) {
+        toast({
+          title: t('appointments.rescheduled'),
+          description: t('appointments.rescheduled_success'),
+        });
+        setEditingAppointment(null);
+        setFormData({
+          agentId: '',
+          conversationId: '',
+          participantPhone: '',
+          participantName: '',
+          startTime: '',
+          endTime: '',
+          notes: '',
+        });
+        loadData();
+      }
+    } catch (error) {
+      console.error('Error rescheduling appointment:', error);
+      toast({
+        title: t('errors.generic'),
+        description: t('errors.update_failed'),
+        variant: 'destructive',
+      });
+    }
+  };
+
+  const handleCancel = async (id: string) => {
+    if (!confirm(t('appointments.confirm_cancel'))) {
+      return;
+    }
+
+    try {
+      const response = await apiClient.cancelAppointment(id);
+      if (response.success) {
+        toast({
+          title: t('appointments.cancelled'),
+          description: t('appointments.cancelled_success'),
+        });
+        loadData();
+      }
+    } catch (error) {
+      console.error('Error canceling appointment:', error);
+      toast({
+        title: t('errors.generic'),
+        description: t('errors.cancel_failed'),
+        variant: 'destructive',
+      });
+    }
+  };
+
+  const handleSendReminder = async (id: string) => {
+    try {
+      const response = await apiClient.sendAppointmentReminder(id);
+      if (response.success) {
+        toast({
+          title: t('appointments.reminder_sent'),
+          description: t('appointments.reminder_sent_success'),
+        });
+        loadData();
+      }
+    } catch (error) {
+      console.error('Error sending reminder:', error);
+      toast({
+        title: t('errors.generic'),
+        description: t('errors.send_failed'),
+        variant: 'destructive',
+      });
+    }
+  };
+
+  const getStatusIcon = (status: string) => {
+    switch (status) {
+      case 'CONFIRMED':
+        return <CheckCircle2 className="h-4 w-4 text-green-500" />;
+      case 'CANCELLED':
+        return <XCircle className="h-4 w-4 text-red-500" />;
+      case 'COMPLETED':
+        return <CheckCircle2 className="h-4 w-4 text-blue-500" />;
+      case 'NO_SHOW':
+        return <AlertCircle className="h-4 w-4 text-orange-500" />;
+      default:
+        return <Clock className="h-4 w-4 text-gray-500" />;
+    }
+  };
+
+  const getStatusBadge = (status: string) => {
+    const labels: Record<string, string> = {
+      PENDING: t('appointments.statuses.PENDING'),
+      CONFIRMED: t('appointments.statuses.CONFIRMED'),
+      CANCELLED: t('appointments.statuses.CANCELLED'),
+      COMPLETED: t('appointments.statuses.COMPLETED'),
+      NO_SHOW: t('appointments.statuses.NO_SHOW'),
+    };
+    const variants: Record<string, 'default' | 'secondary' | 'destructive'> = {
+      PENDING: 'secondary',
+      CONFIRMED: 'default',
+      CANCELLED: 'destructive',
+      COMPLETED: 'default',
+      NO_SHOW: 'destructive',
+    };
+    return <Badge variant={variants[status] || 'secondary'}>{labels[status] || status}</Badge>;
+  };
+
+  const formatDateTime = (dateString: string) => {
+    const date = new Date(dateString);
+    return date.toLocaleString('es-ES', {
+      year: 'numeric',
+      month: 'short',
+      day: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit',
+    });
+  };
+
+  if (loading) {
+    return (
+      <div className="space-y-6">
+        <Skeleton className="h-10 w-64" />
+        <Skeleton className="h-64 w-full" />
+      </div>
+    );
+  }
+
+  return (
+    <div className="space-y-6">
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-3xl font-bold flex items-center gap-2">
+            <Calendar className="h-8 w-8" />
+            {t('appointments.title')}
+          </h1>
+          <p className="text-muted-foreground mt-1">
+            {t('appointments.description')}
+          </p>
+        </div>
+        <div className="flex items-center gap-2">
+          <Tabs value={viewMode} onValueChange={(v) => setViewMode(v as 'list' | 'calendar')}>
+            <TabsList>
+              <TabsTrigger value="list">
+                <List className="h-4 w-4 mr-2" />
+                {t('appointments.view_list')}
+              </TabsTrigger>
+              <TabsTrigger value="calendar">
+                <Calendar className="h-4 w-4 mr-2" />
+                {t('appointments.view_calendar')}
+              </TabsTrigger>
+            </TabsList>
+          </Tabs>
+          <Dialog open={showCreateDialog} onOpenChange={setShowCreateDialog}>
+            <DialogTrigger asChild>
+              <Button>
+                <Plus className="h-4 w-4 mr-2" />
+                {t('appointments.create')}
+              </Button>
+            </DialogTrigger>
+            <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+              <DialogHeader>
+                <DialogTitle>{t('appointments.create')}</DialogTitle>
+                <DialogDescription>
+                  {t('appointments.create_description')}
+                </DialogDescription>
+              </DialogHeader>
+              <div className="space-y-4">
+              <div className="space-y-2">
+                <Label htmlFor="agent">{t('appointments.agent')} *</Label>
+                <Select
+                  value={formData.agentId}
+                  onValueChange={(value) => setFormData({ ...formData, agentId: value })}
+                >
+                  <SelectTrigger id="agent">
+                    <SelectValue placeholder={t('appointments.select_agent')} />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {agents.map((agent) => (
+                      <SelectItem key={agent.id} value={agent.id}>
+                        {agent.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="participantPhone">{t('appointments.phone')} *</Label>
+                <Input
+                  id="participantPhone"
+                  value={formData.participantPhone}
+                  onChange={(e) => setFormData({ ...formData, participantPhone: e.target.value })}
+                  placeholder="+34612345678"
+                  required
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="participantName">{t('appointments.name')}</Label>
+                <Input
+                  id="participantName"
+                  value={formData.participantName}
+                  onChange={(e) => setFormData({ ...formData, participantName: e.target.value })}
+                  placeholder={t('appointments.name_placeholder')}
+                />
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="startTime">{t('appointments.start_time')} *</Label>
+                  <Input
+                    id="startTime"
+                    type="datetime-local"
+                    value={formData.startTime}
+                    onChange={(e) => setFormData({ ...formData, startTime: e.target.value })}
+                    required
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="endTime">{t('appointments.end_time')} *</Label>
+                  <Input
+                    id="endTime"
+                    type="datetime-local"
+                    value={formData.endTime}
+                    onChange={(e) => setFormData({ ...formData, endTime: e.target.value })}
+                    required
+                  />
+                </div>
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="notes">{t('appointments.notes')}</Label>
+                <Textarea
+                  id="notes"
+                  value={formData.notes}
+                  onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
+                  placeholder={t('appointments.notes_placeholder')}
+                  rows={3}
+                />
+              </div>
+
+              <div className="flex gap-2">
+                <Button onClick={handleCreate} className="flex-1">
+                  {t('common.create')}
+                </Button>
+                <Button
+                  variant="outline"
+                  onClick={() => {
+                    setShowCreateDialog(false);
+                    setFormData({
+                      agentId: '',
+                      conversationId: '',
+                      participantPhone: '',
+                      participantName: '',
+                      startTime: '',
+                      endTime: '',
+                      notes: '',
+                    });
+                  }}
+                  className="flex-1"
+                >
+                  {t('common.cancel')}
+                </Button>
+              </div>
+              </div>
+            </DialogContent>
+          </Dialog>
+        </div>
+      </div>
+
+      {/* Filtros */}
+      <Card>
+        <CardHeader>
+          <CardTitle>{t('appointments.filters')}</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="grid gap-4 md:grid-cols-4">
+            <div className="space-y-2">
+              <Label>{t('appointments.agent')}</Label>
+              <Select
+                value={filters.agentId || 'all'}
+                onValueChange={(value) => setFilters({ ...filters, agentId: value })}
+              >
+                <SelectTrigger>
+                    <SelectValue placeholder={t('appointments.all_agents')} />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">{t('appointments.all_agents')}</SelectItem>
+                  {agents.map((agent) => (
+                    <SelectItem key={agent.id} value={agent.id}>
+                      {agent.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div className="space-y-2">
+              <Label>{t('appointments.status')}</Label>
+              <Select
+                value={filters.status || 'all'}
+                onValueChange={(value) => setFilters({ ...filters, status: value })}
+              >
+                <SelectTrigger>
+                    <SelectValue placeholder={t('appointments.all_statuses')} />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">{t('appointments.all_statuses')}</SelectItem>
+                  <SelectItem value="PENDING">{t('appointments.statuses.PENDING')}</SelectItem>
+                  <SelectItem value="CONFIRMED">{t('appointments.statuses.CONFIRMED')}</SelectItem>
+                  <SelectItem value="CANCELLED">{t('appointments.statuses.CANCELLED')}</SelectItem>
+                  <SelectItem value="COMPLETED">{t('appointments.statuses.COMPLETED')}</SelectItem>
+                  <SelectItem value="NO_SHOW">{t('appointments.statuses.NO_SHOW')}</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div className="space-y-2">
+              <Label>{t('appointments.start_date')}</Label>
+              <Input
+                type="date"
+                value={filters.startDate}
+                onChange={(e) => setFilters({ ...filters, startDate: e.target.value })}
+              />
+            </div>
+
+            <div className="space-y-2">
+              <Label>{t('appointments.end_date')}</Label>
+              <Input
+                type="date"
+                value={filters.endDate}
+                onChange={(e) => setFilters({ ...filters, endDate: e.target.value })}
+              />
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Vista según modo seleccionado */}
+      {viewMode === 'calendar' ? (
+        <div className="p-4 text-center text-muted-foreground">
+          <p>Calendar view temporarily disabled - fixing build issue</p>
+        </div>
+      ) : (
+        <div className="grid gap-4">
+        {appointments.length > 0 ? (
+          appointments.map((appointment) => {
+            const agent = agents.find((a) => a.id === appointment.agentId);
+            return (
+              <Card key={appointment.id}>
+                <CardHeader>
+                  <div className="flex items-start justify-between">
+                    <div className="flex-1">
+                      <CardTitle className="flex items-center gap-2">
+                        {getStatusIcon(appointment.status)}
+                        {appointment.participantName || appointment.participantPhone}
+                      </CardTitle>
+                      <CardDescription className="mt-1">
+                        {agent?.name || appointment.agentId}
+                      </CardDescription>
+                    </div>
+                    {getStatusBadge(appointment.status)}
+                  </div>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <div className="grid gap-4 md:grid-cols-2">
+                    <div className="flex items-center gap-2">
+                      <Clock className="h-4 w-4 text-muted-foreground" />
+                      <div>
+                        <p className="text-sm font-medium">{t('appointments.start')}</p>
+                        <p className="text-sm text-muted-foreground">{formatDateTime(appointment.startTime)}</p>
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <Clock className="h-4 w-4 text-muted-foreground" />
+                      <div>
+                        <p className="text-sm font-medium">{t('appointments.end')}</p>
+                        <p className="text-sm text-muted-foreground">{formatDateTime(appointment.endTime)}</p>
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <Phone className="h-4 w-4 text-muted-foreground" />
+                      <div>
+                        <p className="text-sm font-medium">{t('appointments.phone')}</p>
+                        <p className="text-sm text-muted-foreground">{appointment.participantPhone}</p>
+                      </div>
+                    </div>
+                    {appointment.reminderSent && (
+                      <div className="flex items-center gap-2">
+                        <Send className="h-4 w-4 text-muted-foreground" />
+                        <div>
+                          <p className="text-sm font-medium">{t('appointments.reminder')}</p>
+                          <p className="text-sm text-muted-foreground">
+                            {t('appointments.reminder_sent')}
+                          </p>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+
+                  {appointment.notes && (
+                    <div>
+                      <p className="text-sm font-medium mb-1">{t('appointments.notes')}</p>
+                      <p className="text-sm text-muted-foreground">{appointment.notes}</p>
+                    </div>
+                  )}
+
+                  <div className="flex gap-2 pt-2 border-t">
+                    {appointment.status === 'PENDING' && (
+                      <>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => {
+                            setEditingAppointment(appointment);
+                            setFormData({
+                              agentId: appointment.agentId,
+                              conversationId: appointment.conversationId,
+                              participantPhone: appointment.participantPhone,
+                              participantName: appointment.participantName || '',
+                              startTime: new Date(appointment.startTime).toISOString().slice(0, 16),
+                              endTime: new Date(appointment.endTime).toISOString().slice(0, 16),
+                              notes: appointment.notes || '',
+                            });
+                          }}
+                        >
+                          <Edit className="h-3 w-3 mr-1" />
+                          {t('appointments.reschedule')}
+                        </Button>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => handleSendReminder(appointment.id)}
+                        >
+                          <Send className="h-3 w-3 mr-1" />
+                          {t('appointments.send_reminder')}
+                        </Button>
+                      </>
+                    )}
+                    {appointment.status !== 'CANCELLED' && appointment.status !== 'COMPLETED' && (
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        className="text-red-600 hover:text-red-700"
+                        onClick={() => handleCancel(appointment.id)}
+                      >
+                        <XCircle className="h-3 w-3 mr-1" />
+                        {t('appointments.cancel')}
+                      </Button>
+                    )}
+                  </div>
+                </CardContent>
+              </Card>
+            );
+          })
+        ) : (
+          <Card>
+            <CardContent className="flex flex-col items-center justify-center py-12">
+              <Calendar className="h-12 w-12 text-muted-foreground mb-4" />
+              <p className="text-muted-foreground mb-4">
+                {t('appointments.no_appointments')}
+              </p>
+              <Button onClick={() => setShowCreateDialog(true)}>
+                <Plus className="mr-2 h-4 w-4" />
+                {t('appointments.create_first')}
+              </Button>
+            </CardContent>
+          </Card>
+        )}
+        </div>
+      )}
+
+      {/* Dialog para Reagendar */}
+      {editingAppointment && (
+        <Dialog open={!!editingAppointment} onOpenChange={(open) => !open && setEditingAppointment(null)}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>{t('appointments.reschedule')}</DialogTitle>
+              <DialogDescription>
+                {t('appointments.reschedule_description')}
+              </DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4">
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="edit-startTime">{t('appointments.start_time')} *</Label>
+                  <Input
+                    id="edit-startTime"
+                    type="datetime-local"
+                    value={formData.startTime}
+                    onChange={(e) => setFormData({ ...formData, startTime: e.target.value })}
+                    required
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="edit-endTime">{t('appointments.end_time')} *</Label>
+                  <Input
+                    id="edit-endTime"
+                    type="datetime-local"
+                    value={formData.endTime}
+                    onChange={(e) => setFormData({ ...formData, endTime: e.target.value })}
+                    required
+                  />
+                </div>
+              </div>
+              <div className="flex gap-2">
+                <Button onClick={() => editingAppointment && handleReschedule(editingAppointment.id)} className="flex-1">
+                  {t('common.save')}
+                </Button>
+                <Button
+                  variant="outline"
+                  onClick={() => setEditingAppointment(null)}
+                  className="flex-1"
+                >
+                  {t('common.cancel')}
+                </Button>
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
+      )}
+    </div>
+  );
+}
+

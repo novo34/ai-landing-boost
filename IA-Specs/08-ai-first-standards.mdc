@@ -1,0 +1,542 @@
+# Estándares AI-First
+
+> **Versión:** 1.0  
+> **Fecha:** 2025-01-XX  
+> **Referencia:** `LEER/specs/prompts.md`
+
+---
+
+## Integración de IA en SaaS
+
+### Principio Fundamental
+
+✅ **Separación clara entre "lógica de negocio" y "prompts"**
+
+**Razón:** Los prompts deben poder versionarse, actualizarse y probarse independientemente de la lógica de negocio.
+
+**Contexto del SaaS:**
+Este SaaS está orientado a **agentes de IA de citas por WhatsApp y otros canales**. Los agentes deben:
+- Consultar la base de conocimiento del tenant
+- Mantener memoria conversacional por usuario y canal
+- Respetar idioma detectado + idioma preferido configurable del tenant
+- Integrarse con calendarios (cal.com, Google Calendar, sistema propio)
+
+---
+
+## Uso de Agentes, Prompts y Flujos de IA
+
+### Estructura de Prompts
+
+**Ubicación recomendada:**
+
+```
+backend/
+├── ai/
+│   ├── prompts/
+│   │   ├── whatsapp/
+│   │   │   ├── appointment-agent/
+│   │   │   │   ├── system.prompt.md
+│   │   │   │   ├── handle-message.prompt.md
+│   │   │   │   ├── schedule-appointment.prompt.md
+│   │   │   │   └── config.json
+│   │   │   └── ...
+│   │   ├── voice/        # Futuro: agentes de voz
+│   │   ├── sales/        # Futuro: agentes de venta
+│   │   └── common/
+│   │       └── system.prompt.md
+│   └── agents/
+│       ├── whatsapp-appointment-agent.service.ts
+│       └── ...
+```
+
+**Ejemplo:**
+
+```
+backend/ai/prompts/whatsapp/appointment-agent/
+├── system.prompt.md          # Instrucciones del sistema
+├── handle-message.prompt.md  # Manejo de mensajes entrantes
+├── schedule-appointment.prompt.md  # Programación de citas
+└── config.json               # Configuración (temperatura, modelo, etc.)
+```
+
+---
+
+### Versionado de Prompts
+
+**Reglas:**
+
+- ✅ Cada prompt debe tener versión (en nombre de archivo o metadata)
+- ✅ Mantener historial de cambios de prompts
+- ✅ Documentar cambios y razones
+
+**Formato de nombre:**
+
+```
+{accion}.v{version}.prompt.md
+```
+
+O usar metadata en el archivo:
+
+```markdown
+---
+version: 1.0
+last_updated: 2025-01-15
+author: system
+---
+```
+
+---
+
+### Separación de Lógica y Prompts
+
+**Estructura recomendada (NestJS):**
+
+```typescript
+// backend/src/modules/ai/agents/whatsapp-appointment-agent.service.ts
+import { Injectable } from '@nestjs/common';
+import { PromptLoader } from '../prompts/prompt-loader.service';
+import { AIService } from '../ai.service';
+import { KnowledgeBaseService } from '../knowledge-base/knowledge-base.service';
+import { ConversationMemoryService } from '../memory/conversation-memory.service';
+
+@Injectable()
+export class WhatsAppAppointmentAgentService {
+  constructor(
+    private readonly promptLoader: PromptLoader,
+    private readonly aiService: AIService,
+    private readonly knowledgeBase: KnowledgeBaseService,
+    private readonly memory: ConversationMemoryService,
+  ) {}
+
+  async handleMessage(
+    tenantId: number,
+    channelId: string,
+    userId: string,
+    message: string,
+  ) {
+    // 1. Cargar prompt versionado
+    const systemPrompt = await this.promptLoader.load(
+      'whatsapp/appointment-agent/system',
+      '1.0',
+    );
+    
+    // 2. Obtener base de conocimiento del tenant
+    const knowledge = await this.knowledgeBase.getTenantKnowledge(tenantId);
+    
+    // 3. Obtener memoria conversacional
+    const conversationHistory = await this.memory.getConversationHistory(
+      tenantId,
+      channelId,
+      userId,
+    );
+    
+    // 4. Preparar contexto
+    const context = {
+      message,
+      knowledge,
+      conversationHistory,
+      tenantConfig: await this.getTenantConfig(tenantId),
+    };
+    
+    // 5. Ejecutar con IA
+    const result = await this.aiService.execute(systemPrompt, context);
+    
+    // 6. Guardar en memoria conversacional
+    await this.memory.saveMessage(tenantId, channelId, userId, message, result);
+    
+    // 7. Validar y procesar resultado
+    return this.validateAndProcess(result);
+  }
+}
+```
+
+**Reglas:**
+
+- ✅ Lógica de negocio en Services NestJS (TypeScript)
+- ✅ Prompts en archivos Markdown separados
+- ✅ Configuración de prompts en JSON
+- ❌ NUNCA hardcodear prompts en código TypeScript
+
+---
+
+## Registro y Trazabilidad de Decisiones de IA
+
+### Logging Obligatorio
+
+**Registrar TODAS las decisiones de IA relevantes:**
+
+```php
+// Registrar decisión de IA
+AILogger::log($userId, $tenantId, 'ai.matching.find_workers', [
+    'prompt_version' => '1.0',
+    'input_criteria' => $criteria, // Sin datos sensibles
+    'output_result' => $result,
+    'confidence_score' => $confidence,
+    'model_used' => 'gpt-4',
+    'tokens_used' => $tokens,
+    'execution_time_ms' => $executionTime
+]);
+```
+
+**Campos mínimos:**
+
+- `user_id` - Usuario que inició la acción
+- `tenant_id` - Tenant del usuario
+- `action` - Acción de IA (ej: `ai.matching.find_workers`)
+- `prompt_version` - Versión del prompt usado
+- `input` - Entrada (sin datos sensibles)
+- `output` - Salida/resultado
+- `confidence_score` - Nivel de confianza (si aplica)
+- `model_used` - Modelo de IA usado
+- `timestamp` - Cuándo se ejecutó
+
+---
+
+### Trazabilidad
+
+**Requisitos:**
+
+- ✅ Todos los logs de IA deben ser consultables
+- ✅ Filtrar por usuario, tenant, acción, fecha
+- ✅ Retención configurable (mínimo 1 año)
+
+**Estructura de tabla:**
+
+```sql
+CREATE TABLE ai_logs (
+    id INT PRIMARY KEY AUTO_INCREMENT,
+    user_id INT,
+    tenant_id INT,
+    action VARCHAR(100),
+    prompt_version VARCHAR(20),
+    input JSON,
+    output JSON,
+    confidence_score DECIMAL(3,2),
+    model_used VARCHAR(50),
+    tokens_used INT,
+    execution_time_ms INT,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    INDEX idx_user_tenant (user_id, tenant_id),
+    INDEX idx_action (action),
+    INDEX idx_created_at (created_at)
+);
+```
+
+---
+
+## Protección de Datos Sensibles
+
+### Anonimización
+
+**Reglas:**
+
+- ❌ **NUNCA exponer datos sensibles al modelo de IA sin anonimizar**
+- ✅ Anonimizar PII antes de enviar a IA
+- ✅ Re-identificar resultados después de recibir respuesta
+
+**Ejemplo:**
+
+```php
+// Antes de enviar a IA
+$anonymizedData = Anonymizer::anonymize($userData, [
+    'name' => 'hash',      // Hash en lugar de nombre real
+    'email' => 'mask',     // Solo dominio visible
+    'phone' => 'mask'     // Solo últimos 4 dígitos
+]);
+
+// Enviar a IA
+$result = $aiService->execute($prompt, $anonymizedData);
+
+// Re-identificar después
+$identifiedResult = Anonymizer::reidentify($result, $userData);
+```
+
+---
+
+### Configuración por Tenant
+
+**Reglas:**
+
+- ✅ Configuración por tenant de qué datos enviar a IA
+- ✅ Consentimiento explícito para procesamiento de datos con IA
+- ✅ Opción de deshabilitar IA para tenant específico
+
+**Ejemplo de configuración:**
+
+```json
+{
+  "ai_enabled": true,
+  "ai_data_sharing": {
+    "pii_allowed": false,
+    "anonymization_level": "high",
+    "models_allowed": ["gpt-4", "claude-3"]
+  }
+}
+```
+
+---
+
+## Base de Conocimiento
+
+### Estructura
+
+**Organización recomendada:**
+
+```
+backend/
+├── src/
+│   └── modules/
+│       └── knowledge-base/
+│           ├── knowledge-base.service.ts
+│           ├── knowledge-base.module.ts
+│           └── entities/
+│               └── knowledge-document.entity.ts
+└── prisma/
+    └── schema.prisma  # Tabla knowledge_documents
+```
+
+**Base de datos (MySQL):**
+
+```prisma
+model KnowledgeDocument {
+  id          Int      @id @default(autoincrement())
+  tenantId    Int
+  title       String
+  content     Text     // Contenido del documento
+  category    String   // 'services', 'pricing', 'faq', 'calendar_rules', etc.
+  language    String   // 'es', 'de', 'en', etc.
+  vectorEmbed Json?    // Embedding vectorizado (opcional, para búsqueda semántica)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  
+  tenant      Tenant   @relation(fields: [tenantId], references: [id])
+  
+  @@index([tenantId, category])
+  @@index([tenantId, language])
+}
+```
+
+**Reglas:**
+
+- ✅ Cada tenant tiene su propia base de conocimiento
+- ✅ Documentos organizados por categoría (servicios, precios, FAQs, reglas de calendario)
+- ✅ Soporte multi-idioma por documento
+- ✅ Contenido vectorizado para búsqueda semántica (opcional, puede ser tabla específica o proveedor externo)
+- ✅ Metadatos en MySQL, contenido puede estar en MySQL o storage externo según tamaño
+
+---
+
+### Agentes de WhatsApp de Citas
+
+**Funcionalidades específicas:**
+
+1. **Consulta de base de conocimiento:**
+   - El agente consulta la base de conocimiento del tenant antes de responder
+   - Búsqueda semántica para encontrar información relevante
+   - Respeta idioma del mensaje y configuración del tenant
+
+2. **Memoria conversacional:**
+   - Mantiene historial de conversación por usuario y canal
+   - Recuerda contexto de conversaciones anteriores
+   - Retención configurable por tenant
+
+3. **Gestión de calendario y disponibilidad:**
+   - Integración con cal.com, Google Calendar o sistema propio
+   - Consulta disponibilidad antes de proponer citas
+   - Respeto de reglas de calendario del tenant (horarios, días libres, etc.)
+
+4. **Idiomas:**
+   - Detección automática del idioma del mensaje
+   - Respuesta en el idioma detectado o idioma preferido del tenant
+   - Soporte multi-idioma en base de conocimiento
+
+**Extensibilidad:**
+
+- Misma arquitectura para futuros agentes de voz y de venta
+- Prompts separados por tipo de agente
+- Base de conocimiento compartida entre agentes del mismo tenant
+
+### Limpieza y Mantenimiento
+
+**Reglas:**
+
+- ✅ Limpiar conocimiento obsoleto regularmente
+- ✅ Versionar cambios en base de conocimiento
+- ✅ Documentar origen de datos
+- ✅ Validar calidad de datos antes de añadir
+
+**Proceso de limpieza:**
+
+1. Revisar conocimiento obsoleto (más de X meses sin uso)
+2. Verificar relevancia y precisión
+3. Actualizar o eliminar según corresponda
+4. Documentar cambios
+
+---
+
+### Origen de Datos
+
+**Registrar origen de cada dato en base de conocimiento:**
+
+```typescript
+// En Prisma schema
+model KnowledgeDocument {
+  // ... campos anteriores
+  source        String   // 'tenant_config', 'manual', 'import', etc.
+  lastVerified  DateTime?
+  confidence    String?  // 'high', 'medium', 'low'
+  metadata      Json?    // Metadatos adicionales
+}
+```
+
+**Ejemplo de uso:**
+
+```typescript
+await prisma.knowledgeDocument.create({
+  data: {
+    tenantId: 123,
+    title: 'Servicios disponibles',
+    content: 'Ofrecemos servicios de...',
+    category: 'services',
+    language: 'es',
+    source: 'tenant_config',
+    confidence: 'high',
+  },
+});
+```
+
+---
+
+## Versionado y Documentación de Prompts
+
+### Documentación Obligatoria
+
+**Cada prompt DEBE incluir:**
+
+1. **Propósito:** Qué hace el prompt
+2. **Versión:** Versión actual
+3. **Input esperado:** Formato y campos requeridos
+4. **Output esperado:** Formato de respuesta
+5. **Ejemplos:** Ejemplos de uso
+6. **Cambios:** Historial de cambios
+
+**Formato:**
+
+```markdown
+# Prompt: Find Workers
+
+**Versión:** 1.0  
+**Última actualización:** 2025-01-15  
+**Autor:** System
+
+## Propósito
+Encontrar trabajadores que coincidan con criterios específicos.
+
+## Input Esperado
+```json
+{
+  "skills": ["construction", "plumbing"],
+  "availability": "2025-01-20",
+  "location": "Zurich"
+}
+```
+
+## Output Esperado
+```json
+{
+  "workers": [
+    {
+      "id": 123,
+      "name": "John Doe",
+      "match_score": 0.95
+    }
+  ]
+}
+```
+
+## Ejemplos
+[Ejemplos de uso...]
+
+## Cambios
+- v1.0 (2025-01-15): Versión inicial
+```
+
+---
+
+## Vinculación de Features con Prompts
+
+### Espacio en Código/Specs
+
+**Cada feature que usa IA DEBE documentar:**
+
+- Qué prompts usa
+- Dónde están ubicados los prompts
+- Versión de prompts
+- Cómo se integran con la lógica de negocio
+- Qué base de conocimiento consulta
+- Cómo maneja la memoria conversacional
+
+**Ejemplo en spec:**
+
+```markdown
+## Feature: Agente de WhatsApp de Citas
+
+### Integración de IA
+
+- **Prompts usados:**
+  - `whatsapp/appointment-agent/system.prompt.md` (v1.0)
+  - `whatsapp/appointment-agent/handle-message.prompt.md` (v1.0)
+  - `whatsapp/appointment-agent/schedule-appointment.prompt.md` (v1.0)
+- **Ubicación:** `backend/ai/prompts/whatsapp/appointment-agent/`
+- **Service:** `WhatsAppAppointmentAgentService::handleMessage()`
+- **Base de conocimiento:** Consulta `KnowledgeDocument` del tenant
+- **Memoria conversacional:** `ConversationMemoryService` por usuario y canal
+- **Logging:** `ai.whatsapp.appointment.handle_message`
+```
+
+---
+
+## Buenas Prácticas
+
+### No Exponer Datos Sensibles
+
+**Checklist:**
+
+- [ ] ¿Se anonimizan datos PII antes de enviar a IA?
+- [ ] ¿Se re-identifican resultados después de recibir respuesta?
+- [ ] ¿Los logs de IA no contienen datos sensibles?
+- [ ] ¿Hay consentimiento explícito para procesamiento con IA?
+- [ ] ¿La base de conocimiento del tenant no expone datos de otros tenants?
+- [ ] ¿La memoria conversacional está aislada por tenant?
+
+---
+
+### Prompts Versionados y Documentados
+
+**Checklist:**
+
+- [ ] ¿Cada prompt tiene versión?
+- [ ] ¿Está documentado el propósito del prompt?
+- [ ] ¿Hay ejemplos de uso?
+- [ ] ¿Se mantiene historial de cambios?
+
+---
+
+### Espacio para Vincular Features con Prompts
+
+**Checklist:**
+
+- [ ] ¿Cada feature que usa IA documenta qué prompts usa?
+- [ ] ¿Está claro dónde están ubicados los prompts?
+- [ ] ¿Se documenta cómo se integran con la lógica de negocio?
+- [ ] ¿Se documenta qué base de conocimiento consulta?
+- [ ] ¿Se documenta cómo maneja la memoria conversacional?
+- [ ] ¿Se documenta la integración con calendarios (si aplica)?
+
+---
+
+## Referencias
+
+- `IA-Specs/03-multitenancy-rbac-y-privacidad.mdc` - Privacidad y protección de datos
+- `IA-Specs/04-seguridad-y-compliance.mdc` - Seguridad
+- `LEER/specs/prompts.md` - Referencia histórica

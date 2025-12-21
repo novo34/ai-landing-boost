@@ -1,4 +1,60 @@
-# Welcome to your Lovable project
+# AutomAI SaaS - Monorepo
+
+SaaS multi-tenant para automatización de marketing con IA.
+
+## Configuración de Variables de Entorno
+
+### Backend (apps/api)
+
+1. Copiar el archivo de ejemplo:
+   ```bash
+   cp apps/api/.env.example apps/api/.env
+   ```
+
+2. Editar `apps/api/.env` y configurar las variables:
+   - `DATABASE_URL`: URL de conexión a MySQL
+   - `JWT_SECRET`: Secreto para JWT (generar con `openssl rand -base64 32`)
+   - `JWT_REFRESH_SECRET`: Secreto para refresh tokens
+   - `FRONTEND_URL`: URL del frontend para CORS
+   - **Stripe:** Ver [Configuración de Stripe](docs/CONFIGURACION-STRIPE.md) para variables completas
+
+### Frontend (apps/web)
+
+1. Copiar el archivo de ejemplo:
+   ```bash
+   cp apps/web/.env.example apps/web/.env
+   ```
+
+2. Editar `apps/web/.env` y configurar:
+   - `NEXT_PUBLIC_API_URL`: URL del backend API
+   - `NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY`: Publishable key de Stripe (ver [Configuración de Stripe](docs/CONFIGURACION-STRIPE.md))
+
+### Generar Secretos Seguros
+
+Para generar secretos seguros para JWT:
+
+```bash
+# JWT_SECRET
+openssl rand -base64 32
+
+# JWT_REFRESH_SECRET
+openssl rand -base64 32
+```
+
+## Configuración de Servicios Externos
+
+### Stripe (Billing)
+
+Para configurar Stripe completo (checkout, portal, webhooks), ver la guía detallada:
+
+📖 **[Configuración de Stripe - Guía Completa](docs/CONFIGURACION-STRIPE.md)**
+
+Esta guía incluye:
+- Configuración en Stripe Dashboard
+- Variables de entorno necesarias
+- Configuración de webhooks
+- Testing local con Stripe CLI
+- Troubleshooting común
 
 ## Project info
 

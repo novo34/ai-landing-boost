@@ -1,0 +1,171 @@
+{
+  "nav": {
+    "producto": "Produit",
+    "comoFunciona": "Comment ça marche",
+    "beneficios": "Avantages",
+    "roi": "Calculateur ROI",
+    "faq": "FAQ",
+    "calcularRoi": "Calculer le ROI",
+    "login": "Se connecter",
+    "menu": "Menu",
+    "cerrarMenu": "Fermer le menu",
+    "abrirMenu": "Ouvrir le menu"
+  },
+  "hero": {
+    "badge": "Agence d'Automatisation IA",
+    "title": "Automatisez votre entreprise avec",
+    "titleHighlight": "l'Intelligence Artificielle",
+    "subtitle": "Nous développons des agents IA personnalisés qui automatisent les tâches répétitives, servent les clients 24/7 et réduisent les coûts opérationnels jusqu'à 70%.",
+    "ctaPrimary": "Calculer mon ROI",
+    "ctaSecondary": "Parler à un expert",
+    "trustCompanies": "Entreprises automatisées",
+    "trustSavings": "Réduction des coûts",
+    "trustSupport": "Support automatique"
+  },
+  "product": {
+    "title": "Solutions d'",
+    "titleHighlight": "Automatisation IA",
+    "subtitle": "Trois piliers fondamentaux pour transformer les opérations de votre entreprise avec l'intelligence artificielle.",
+    "whatsapp": {
+      "title": "Automatisation WhatsApp",
+      "description": "Agents conversationnels qui gèrent les demandes, planifient les rendez-vous et gèrent les commandes 24/7 sur WhatsApp Business."
+    },
+    "processes": {
+      "title": "Automatisation des processus",
+      "description": "Flux de travail intelligents qui connectent vos outils et éliminent les tâches manuelles répétitives."
+    },
+    "compliance": {
+      "title": "Conformité RGPD",
+      "description": "Toutes nos solutions sont conformes à la réglementation européenne sur la protection des données et la vie privée."
+    }
+  },
+  "howItWorks": {
+    "title": "Comment ça marche",
+    "titleHighlight": "Notre processus",
+    "subtitle": "Un processus structuré en 6 phases pour garantir le succès de votre projet d'automatisation.",
+    "step1": {
+      "title": "Analyse des processus",
+      "description": "Nous identifions les tâches répétitives et les goulots d'étranglement dans vos opérations actuelles."
+    },
+    "step2": {
+      "title": "Conception de la solution",
+      "description": "Nous créons une architecture d'automatisation personnalisée pour votre entreprise."
+    },
+    "step3": {
+      "title": "Développement de l'agent",
+      "description": "Nous construisons et formons votre agent IA avec vos connaissances commerciales."
+    },
+    "step4": {
+      "title": "Intégration",
+      "description": "Nous connectons l'agent à vos systèmes existants : CRM, ERP, WhatsApp, etc."
+    },
+    "step5": {
+      "title": "Tests et optimisation",
+      "description": "Nous testons exhaustivement et ajustons les performances avant le lancement."
+    },
+    "step6": {
+      "title": "Déploiement et support",
+      "description": "Nous activons la solution en production avec surveillance et support continus."
+    }
+  },
+  "benefits": {
+    "title": "Avantages de",
+    "titleHighlight": "l'automatisation avec IA",
+    "subtitle": "Transformez vos opérations commerciales et obtenez des avantages concurrentiels réels et mesurables.",
+    "benefit1": "Réduction de 70% des tâches administratives répétitives",
+    "benefit2": "Service client automatisé 24 heures sur 24, 7 jours sur 7",
+    "benefit3": "Réponses instantanées sans temps d'attente",
+    "benefit4": "Évolutivité sans augmenter le personnel",
+    "benefit5": "Intégration avec les systèmes existants (CRM, ERP, etc.)",
+    "benefit6": "Analyse et reporting automatiques des métriques",
+    "benefit7": "Conformité réglementaire RGPD garantie",
+    "benefit8": "ROI positif en moins de 6 mois",
+    "useCasesTitle": "Cas d'utilisation principaux",
+    "useCase1": "Service client",
+    "useCase2": "Gestion des rendez-vous",
+    "useCase3": "Traitement des commandes",
+    "useCase4": "Support technique",
+    "useCase5": "Qualification des leads",
+    "useCase6": "Onboarding des clients"
+  },
+  "roi": {
+    "title": "Calculez votre",
+    "titleHighlight": "Retour sur investissement",
+    "subtitle": "Découvrez combien vous pouvez économiser en automatisant les tâches répétitives de votre équipe.",
+    "calculatorTitle": "Calculateur ROI",
+    "numPeople": "Personnes dans les tâches répétitives",
+    "hoursPerWeek": "Heures/semaine dans les tâches automatisables",
+    "hourlyCost": "Coût/heure employé (avec SS)",
+    "automationRate": "Pourcentage d'automatisation",
+    "currentYearlyCost": "Coût annuel actuel",
+    "estimatedSavings": "Économies annuelles potentielles",
+    "projectBudgetMin": "Investissement initial minimum",
+    "projectBudgetMax": "Investissement initial maximum",
+    "monthlyRetainer": "Maintenance mensuelle",
+    "cta": "Demander un devis personnalisé",
+    "note": "Estimation indicative. Les valeurs seront ajustées lors de la session d'analyse personnalisée.",
+    "calculate": "Calculer",
+    "sector": "Secteur (optionnel)",
+    "sectorPlaceholder": "Sélectionnez votre secteur",
+    "sectorRetail": "Commerce de détail / E-commerce",
+    "sectorHealthcare": "Santé / Cliniques",
+    "sectorLegal": "Juridique / Cabinets",
+    "sectorRealEstate": "Immobilier",
+    "sectorOther": "Autre"
+  },
+  "faq": {
+    "title": "Questions",
+    "titleHighlight": "Fréquentes",
+    "subtitle": "Réponses aux questions les plus courantes sur l'automatisation avec IA.",
+    "q1": "Combien de temps faut-il pour implémenter un agent IA ?",
+    "a1": "Le temps d'implémentation varie selon la complexité du projet. Un agent WhatsApp de base peut être opérationnel en 2-4 semaines, tandis qu'une solution d'automatisation plus complexe peut nécessiter 6-12 semaines. Lors de la consultation initiale, nous fournissons un calendrier détaillé pour votre cas spécifique.",
+    "q2": "Ai-je besoin de connaissances techniques pour utiliser la solution ?",
+    "a2": "Non, nos solutions sont conçues pour être utilisées par du personnel non technique. Nous fournissons une interface intuitive pour gérer et surveiller les agents, ainsi qu'une formation complète pour votre équipe. Le support technique est inclus pour résoudre toute question.",
+    "q3": "Comment s'intègre-t-elle à mes systèmes actuels ?",
+    "a3": "Nos agents IA s'intègrent à la plupart des systèmes d'entreprise : CRM (Salesforce, HubSpot, Pipedrive), ERP, plateformes e-commerce, systèmes de tickets, et plus encore. Nous utilisons des API standard et développons des connecteurs personnalisés lorsque nécessaire.",
+    "q4": "Quelles garanties de sécurité et de confidentialité offrez-vous ?",
+    "a4": "Toutes nos solutions sont conformes au RGPD et à la LOPDGDD. Nous mettons en œuvre un chiffrement de bout en bout, un stockage sécurisé sur des serveurs européens et des contrôles d'accès stricts. Nous signons des accords de confidentialité et pouvons nous adapter aux exigences de sécurité spécifiques de votre secteur.",
+    "q5": "Que se passe-t-il si l'agent ne sait pas répondre à quelque chose ?",
+    "a5": "Les agents sont conçus pour escalader automatiquement vers un humain lorsqu'ils détectent des demandes hors de leur portée ou lorsque l'utilisateur le demande. De plus, le système apprend continuellement de ces interactions pour améliorer ses réponses futures.",
+    "q6": "Quel est le coût de maintenance après l'implémentation ?",
+    "a6": "Nous proposons des plans de maintenance mensuels qui incluent : surveillance 24/7, mises à jour de sécurité, ajustements de performance et support technique. Le coût typique est entre 10-15% de la valeur initiale du projet par an, bien qu'il varie selon la portée du service requis.",
+    "noAnswer": "Vous ne trouvez pas la réponse que vous cherchez ?",
+    "contact": "Contactez-nous directement"
+  },
+  "footer": {
+    "description": "Agence spécialisée dans l'automatisation d'entreprise avec intelligence artificielle. Nous transformons les opérations de votre entreprise.",
+    "services": "Services",
+    "company": "Entreprise",
+    "legal": "Légal",
+    "service1": "Automatisation WhatsApp",
+    "service2": "Agents IA",
+    "service3": "Intégrations",
+    "service4": "Conseil",
+    "company1": "À propos de nous",
+    "company2": "Histoires de succès",
+    "company3": "Blog",
+    "company4": "Carrières",
+    "legal1": "Politique de confidentialité",
+    "legal2": "Conditions d'utilisation",
+    "legal3": "Politique des cookies",
+    "legal4": "Mentions légales",
+    "copyright": "Tous droits réservés.",
+    "compliance": "Solutions conformes au RGPD, LOPDGDD et à la réglementation européenne sur la protection des données. Serveurs situés dans l'Union européenne."
+  },
+  "common": {
+    "loading": "Chargement...",
+    "error": "Erreur",
+    "success": "Succès",
+    "submit": "Envoyer",
+    "cancel": "Annuler",
+    "save": "Enregistrer",
+    "name": "Nom",
+    "email": "E-mail",
+    "phone": "Téléphone",
+    "company": "Entreprise",
+    "message": "Message",
+    "required": "Requis",
+    "invalidEmail": "E-mail invalide"
+  }
+}
+

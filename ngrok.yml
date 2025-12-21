@@ -1,0 +1,17 @@
+version: "2"
+
+# Authtoken configurado globalmente (no debe estar aquí si ya está configurado)
+# Si necesitas configurarlo: ngrok config add-authtoken TU_TOKEN
+authtoken: 36qrNFAkKnxYaaBE2XtiaYoFfsO_4cpgrYdZcGhbj74Yq6Dot
+
+# Región para todos los túneles
+region: eu
+
+tunnels:
+  frontend:
+    proto: http
+    addr: 3000
+
+  backend:
+    proto: http
+    addr: 3001

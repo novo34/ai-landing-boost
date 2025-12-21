@@ -1,0 +1,628 @@
+{
+  "title": "Plattform-Administrationspanel",
+  "nav": {
+    "dashboard": "Dashboard",
+    "tenants": "Mandanten",
+    "billing": "Abrechnung",
+    "plans": "Pläne",
+    "tickets": "Support-Tickets",
+    "chat": "Chat mit Kunden",
+    "instances": "Instanzen",
+    "regions": "Datenregionen",
+    "audit": "Audit",
+    "operations": {
+      "title": "Eigene Operationen",
+      "agents": "Meine Agenten",
+      "channels": "Meine Kanäle",
+      "conversations": "Meine Konversationen",
+      "leads": "Meine Leads",
+      "n8n": "Meine N8N-Flows"
+    },
+    "settings": "Einstellungen"
+  },
+  "dashboard": {
+    "title": "Plattform-Dashboard",
+    "metrics": {
+      "tenants": {
+        "total": "Mandanten gesamt",
+        "active": "Aktive Mandanten",
+        "trial": "Im Test",
+        "suspended": "Gesperrt",
+        "new_last_30_days": "Neu (30 Tage)"
+      },
+      "users": {
+        "total": "Benutzer gesamt",
+        "active_last_30_days": "Aktiv (30 Tage)"
+      },
+      "revenue": {
+        "mrr": "MRR",
+        "arr": "ARR",
+        "current_month": "Aktueller Monat",
+        "previous_month": "Vormonat",
+        "growth": "Wachstum"
+      },
+      "usage": {
+        "agents": "Aktive Agenten",
+        "channels": "Konfigurierte Kanäle",
+        "conversations": "Konversationen",
+        "messages": "Verarbeitete Nachrichten"
+      },
+      "health": {
+        "payment_failed": "Fehlgeschlagene Zahlungen",
+        "near_limits": "Nahe an Grenzen",
+        "avg_response_time": "Durchschnittliche Antwortzeit"
+      }
+    }
+  },
+  "tenants": {
+    "title": "Mandantenverwaltung",
+    "list": {
+      "title": "Mandantenliste",
+      "search_placeholder": "Suche nach Name, E-Mail oder Slug...",
+      "filters": {
+        "status": "Status",
+        "plan": "Plan",
+        "country": "Land",
+        "date_range": "Datumsbereich",
+        "subscription_status": "Abonnementstatus"
+      },
+      "columns": {
+        "name": "Name",
+        "slug": "Slug",
+        "status": "Status",
+        "plan": "Plan",
+        "subscription_status": "Abonnementstatus",
+        "country": "Land",
+        "users": "Benutzer",
+        "agents": "Agenten",
+        "created_at": "Erstellt am",
+        "last_activity": "Letzte Aktivität",
+        "actions": "Aktionen"
+      },
+      "actions": {
+        "view": "Details anzeigen",
+        "edit": "Bearbeiten",
+        "suspend": "Sperren",
+        "reactivate": "Reaktivieren",
+        "delete": "Löschen",
+        "configure": "Konfigurieren"
+      }
+    },
+    "create": {
+      "title": "Neuen Mandanten erstellen",
+      "form": {
+        "name": "Mandantenname",
+        "name_placeholder": "Mein Unternehmen",
+        "slug": "Slug",
+        "slug_placeholder": "mein-unternehmen",
+        "country": "Land",
+        "data_region": "Datenregion",
+        "default_locale": "Standardsprache",
+        "time_zone": "Zeitzone",
+        "owner_email": "E-Mail des Eigentümers",
+        "owner_name": "Name des Eigentümers",
+        "initial_plan": "Anfangsplan",
+        "initial_status": "Anfangsstatus",
+        "trial_ends_at": "Testende"
+      },
+      "success": "Mandant erfolgreich erstellt",
+      "error": "Fehler beim Erstellen des Mandanten"
+    },
+    "edit": {
+      "title": "Mandant bearbeiten",
+      "success": "Mandant erfolgreich aktualisiert",
+      "error": "Fehler beim Aktualisieren des Mandanten"
+    },
+    "details": {
+      "title": "Mandantendetails",
+      "basic_info": "Grundinformationen",
+      "subscription": "Abonnement",
+      "metrics": "Metriken",
+      "users": "Benutzer",
+      "history": "Verlauf",
+      "logs": "Aktivitätsprotokolle"
+    },
+    "suspend": {
+      "title": "Mandant sperren",
+      "confirm": "Sind Sie sicher, dass Sie diesen Mandanten sperren möchten?",
+      "reason": "Sperrgrund",
+      "reason_placeholder": "Geben Sie den Sperrgrund ein...",
+      "success": "Mandant erfolgreich gesperrt",
+      "error": "Fehler beim Sperren des Mandanten"
+    },
+    "reactivate": {
+      "title": "Mandant reaktivieren",
+      "confirm": "Sind Sie sicher, dass Sie diesen Mandanten reaktivieren möchten?",
+      "success": "Mandant erfolgreich reaktiviert",
+      "error": "Fehler beim Reaktivieren des Mandanten"
+    },
+    "delete": {
+      "title": "Mandant löschen",
+      "confirm": "Sind Sie sicher, dass Sie diesen Mandanten löschen möchten? Diese Aktion kann nicht rückgängig gemacht werden.",
+      "warning": "Folgendes wird gelöscht:",
+      "warning_users": "{{count}} Benutzer",
+      "warning_conversations": "{{count}} Konversationen",
+      "warning_data": "Alle zugehörigen Daten",
+      "success": "Mandant erfolgreich gelöscht",
+      "error": "Fehler beim Löschen des Mandanten"
+    },
+    "status": {
+      "active": "Aktiv",
+      "trial": "Test",
+      "suspended": "Gesperrt",
+      "cancelled": "Storniert"
+    }
+  },
+  "billing": {
+    "title": "Abrechnungsverwaltung",
+    "subscription": {
+      "title": "Abonnement",
+      "plan": "Aktueller Plan",
+      "status": "Status",
+      "start_date": "Startdatum",
+      "next_billing": "Nächste Abrechnung",
+      "payment_method": "Zahlungsmethode",
+      "change_plan": "Plan ändern",
+      "apply_adjustment": "Anpassung anwenden"
+    },
+    "payment_failed": {
+      "title": "Fehlgeschlagene Zahlungen",
+      "days_since_payment": "Tage seit letzter Zahlung",
+      "failed_attempts": "Fehlgeschlagene Versuche",
+      "amount_due": "Fälliger Betrag",
+      "extend_grace": "Gnadenfrist verlängern",
+      "mark_paid": "Als bezahlt markieren",
+      "contact": "Kunde kontaktieren"
+    },
+    "adjustment": {
+      "title": "Anpassung anwenden",
+      "type": "Typ",
+      "amount": "Betrag",
+      "reason": "Grund",
+      "apply_date": "Anwendungsdatum",
+      "types": {
+        "discount": "Rabatt",
+        "credit": "Guthaben",
+        "adjustment": "Anpassung"
+      }
+    }
+  },
+  "plans": {
+    "title": "Planverwaltung",
+    "list": {
+      "title": "Abonnementpläne",
+      "columns": {
+        "name": "Name",
+        "price_monthly": "Monatspreis",
+        "price_yearly": "Jahrspreis",
+        "limits": "Grenzen",
+        "status": "Status",
+        "tenants": "Abonnierte Mandanten",
+        "revenue": "Einnahmen",
+        "actions": "Aktionen"
+      }
+    },
+    "create": {
+      "title": "Plan erstellen",
+      "form": {
+        "name": "Name",
+        "description": "Beschreibung",
+        "price_monthly": "Monatspreis (Cent)",
+        "price_yearly": "Jahrspreis (Cent)",
+        "currency": "Währung",
+        "max_agents": "Max. Agenten",
+        "max_channels": "Max. Kanäle",
+        "max_messages": "Max. Nachrichten",
+        "features": "Funktionen"
+      },
+      "success": "Plan erfolgreich erstellt"
+    },
+    "edit": {
+      "title": "Plan bearbeiten",
+      "success": "Plan erfolgreich aktualisiert"
+    },
+    "delete": {
+      "title": "Plan löschen",
+      "confirm": "Sind Sie sicher, dass Sie diesen Plan löschen möchten?",
+      "warning": "Kann nicht gelöscht werden, wenn Mandanten abonniert sind",
+      "success": "Plan erfolgreich gelöscht"
+    }
+  },
+  "tickets": {
+    "title": "Support-Tickets",
+    "list": {
+      "title": "Ticketliste",
+      "filters": {
+        "status": "Status",
+        "category": "Kategorie",
+        "priority": "Priorität",
+        "assigned_to": "Zugewiesen an",
+        "tenant": "Mandant"
+      },
+      "columns": {
+        "id": "ID",
+        "subject": "Betreff",
+        "tenant": "Mandant",
+        "category": "Kategorie",
+        "priority": "Priorität",
+        "status": "Status",
+        "assigned_to": "Zugewiesen an",
+        "created_at": "Erstellt",
+        "last_activity": "Letzte Aktivität",
+        "actions": "Aktionen"
+      }
+    },
+    "create": {
+      "title": "Ticket erstellen",
+      "form": {
+        "subject": "Betreff",
+        "description": "Beschreibung",
+        "category": "Kategorie",
+        "priority": "Priorität",
+        "tenant": "Mandant (optional)"
+      },
+      "success": "Ticket erfolgreich erstellt"
+    },
+    "details": {
+      "title": "Ticketdetails",
+      "messages": "Nachrichten",
+      "add_message": "Nachricht hinzufügen",
+      "internal_note": "Interne Notiz",
+      "assign": "Zuweisen",
+      "change_status": "Status ändern",
+      "close": "Schließen"
+    },
+    "status": {
+      "open": "Offen",
+      "in_progress": "In Bearbeitung",
+      "waiting_client": "Warten auf Kunde",
+      "resolved": "Gelöst",
+      "closed": "Geschlossen"
+    },
+    "priority": {
+      "low": "Niedrig",
+      "medium": "Mittel",
+      "high": "Hoch",
+      "critical": "Kritisch"
+    },
+    "category": {
+      "technical": "Technisch",
+      "billing": "Abrechnung",
+      "configuration": "Konfiguration",
+      "feature_request": "Funktionsanfrage",
+      "other": "Andere"
+    }
+  },
+  "leads": {
+    "title": "Leads CRM",
+    "list": {
+      "title": "Leads-Liste",
+      "filters": {
+        "status": "Status",
+        "stage": "Stufe",
+        "source": "Quelle",
+        "assigned_to": "Zugewiesen an"
+      },
+      "columns": {
+        "name": "Name",
+        "email": "E-Mail",
+        "phone": "Telefon",
+        "source": "Quelle",
+        "status": "Status",
+        "stage": "Stufe",
+        "assigned_to": "Zugewiesen an",
+        "created_at": "Erstellt",
+        "updated_at": "Aktualisiert",
+        "actions": "Aktionen"
+      }
+    },
+    "pipeline": {
+      "title": "Verkaufspipeline",
+      "metrics": {
+        "total": "Gesamt",
+        "conversion_rate": "Konversionsrate",
+        "by_stage": "Nach Stufe",
+        "by_source": "Nach Quelle"
+      }
+    },
+    "details": {
+      "title": "Lead-Details",
+      "info": "Informationen",
+      "notes": "Notizen",
+      "history": "Verlauf",
+      "add_note": "Notiz hinzufügen"
+    },
+    "status": {
+      "new": "Neu",
+      "contacted": "Kontaktiert",
+      "qualified": "Qualifiziert",
+      "opportunity": "Chance",
+      "customer": "Kunde",
+      "lost": "Verloren"
+    },
+    "stage": {
+      "lead_captured": "Lead erfasst",
+      "contacted": "Kontaktiert",
+      "qualified": "Qualifiziert",
+      "demo": "Demo",
+      "proposal": "Angebot",
+      "negotiation": "Verhandlung",
+      "closed_won": "Geschlossen - Gewonnen",
+      "closed_lost": "Geschlossen - Verloren"
+    },
+    "source": {
+      "whatsapp": "WhatsApp",
+      "webchat": "Webchat",
+      "landing": "Landing Page",
+      "manual": "Manuell",
+      "import": "Import"
+    }
+  },
+  "n8n_flows": {
+    "title": "Plattform N8N-Flows",
+    "list": {
+      "title": "Automatisierungs-Flows",
+      "filters": {
+        "category": "Kategorie",
+        "is_active": "Status"
+      },
+      "columns": {
+        "name": "Name",
+        "category": "Kategorie",
+        "status": "Status",
+        "created_at": "Erstellt",
+        "actions": "Aktionen"
+      }
+    },
+    "create": {
+      "title": "Flow erstellen",
+      "form": {
+        "name": "Name",
+        "description": "Beschreibung",
+        "category": "Kategorie",
+        "workflow": "Workflow (JSON)"
+      },
+      "success": "Flow erfolgreich erstellt"
+    },
+    "details": {
+      "title": "Flow-Details",
+      "workflow": "Workflow",
+      "executions": "Ausführungen",
+      "logs": "Protokolle"
+    },
+    "categories": {
+      "onboarding": "Onboarding",
+      "notifications": "Benachrichtigungen",
+      "leads": "Leads",
+      "reports": "Berichte",
+      "operations": "Operationen"
+    }
+  },
+  "chat": {
+    "title": "Chat mit Kunden",
+    "conversations": {
+      "title": "Aktive Konversationen",
+      "no_conversations": "Keine aktiven Konversationen",
+      "start_conversation": "Konversation starten",
+      "with_tenant": "mit {{tenant}}"
+    },
+    "messages": {
+      "type_message": "Nachricht eingeben...",
+      "send": "Senden",
+      "file": "Datei",
+      "image": "Bild",
+      "typing": "tippt...",
+      "online": "Online",
+      "offline": "Offline"
+    }
+  },
+  "instances": {
+    "title": "Instanzenverwaltung",
+    "list": {
+      "title": "SaaS-Instanzen",
+      "columns": {
+        "name": "Name",
+        "domain": "Domain",
+        "status": "Status",
+        "tenants": "Mandanten",
+        "created_at": "Erstellt",
+        "actions": "Aktionen"
+      }
+    },
+    "create": {
+      "title": "Instanz erstellen",
+      "form": {
+        "name": "Name",
+        "domain": "Domain",
+        "database_url": "Datenbank-URL",
+        "stripe_key": "Stripe-Schlüssel",
+        "n8n_url": "N8N-URL"
+      },
+      "success": "Instanz erfolgreich erstellt"
+    },
+    "switch": {
+      "title": "Instanz wechseln",
+      "current": "Aktuelle Instanz",
+      "select": "Instanz auswählen"
+    }
+  },
+  "regions": {
+    "title": "Datenregionen",
+    "list": {
+      "title": "Verteilung nach Region",
+      "columns": {
+        "region": "Region",
+        "tenants": "Mandanten",
+        "compliance": "Compliance",
+        "actions": "Aktionen"
+      }
+    },
+    "migrate": {
+      "title": "Mandant in andere Region migrieren",
+      "confirm": "Sind Sie sicher, dass Sie diesen Mandanten migrieren möchten?",
+      "warning": "Diese Operation kann mehrere Minuten dauern",
+      "success": "Migration erfolgreich gestartet"
+    },
+    "regions": {
+      "eu": "Europa (DSGVO)",
+      "ch": "Schweiz (nDSG)",
+      "us": "Vereinigte Staaten",
+      "apac": "Asien-Pazifik"
+    }
+  },
+  "audit": {
+    "title": "Audit-Protokolle",
+    "list": {
+      "title": "Aktionsverlauf",
+      "filters": {
+        "action": "Aktion",
+        "resource_type": "Ressourcentyp",
+        "resource_id": "Ressourcen-ID",
+        "user": "Benutzer",
+        "date_range": "Datumsbereich"
+      },
+      "columns": {
+        "timestamp": "Zeitstempel",
+        "user": "Benutzer",
+        "action": "Aktion",
+        "resource": "Ressource",
+        "details": "Details",
+        "ip": "IP"
+      },
+      "export": "Protokolle exportieren"
+    },
+    "actions": {
+      "create_tenant": "Mandant erstellen",
+      "update_tenant": "Mandant aktualisieren",
+      "suspend_tenant": "Mandant sperren",
+      "reactivate_tenant": "Mandant reaktivieren",
+      "delete_tenant": "Mandant löschen",
+      "change_plan": "Plan ändern",
+      "apply_adjustment": "Anpassung anwenden"
+    }
+  },
+  "operations": {
+    "agents": {
+      "title": "Meine Agenten",
+      "description": "Agenten zur Lead-Generierung und SaaS-Verkäufe"
+    },
+    "channels": {
+      "title": "Meine Kanäle",
+      "description": "Für eigene Operationen konfigurierte Kanäle"
+    },
+    "conversations": {
+      "title": "Meine Konversationen",
+      "description": "Konversationen vom eigenen SaaS-Mandanten"
+    },
+    "leads": {
+      "title": "Meine Leads",
+      "description": "CRM von Leads, die von eigenen Agenten generiert wurden",
+      "pipeline": {
+        "title": "Verkaufspipeline",
+        "stages": {
+          "lead_captured": "Lead erfasst",
+          "contacted": "Kontaktiert",
+          "qualified": "Qualifiziert",
+          "demo": "Demo",
+          "proposal": "Angebot",
+          "negotiation": "Verhandlung",
+          "closed_won": "Geschlossen - Gewonnen",
+          "closed_lost": "Geschlossen - Verloren"
+        }
+      },
+      "create": {
+        "title": "Lead erstellen",
+        "form": {
+          "name": "Name",
+          "email": "E-Mail",
+          "phone": "Telefon",
+          "source": "Quelle",
+          "interest": "Interesse",
+          "notes": "Notizen"
+        }
+      },
+      "add_note": {
+        "title": "Notiz hinzufügen",
+        "placeholder": "Notiz schreiben..."
+      }
+    },
+    "n8n": {
+      "title": "N8N-Flows",
+      "description": "Automatisierung interner Prozesse",
+      "categories": {
+        "onboarding": "Onboarding",
+        "notifications": "Benachrichtigungen",
+        "leads": "Leads",
+        "reports": "Berichte",
+        "operations": "Operationen"
+      },
+      "create": {
+        "title": "Flow erstellen",
+        "form": {
+          "name": "Name",
+          "description": "Beschreibung",
+          "category": "Kategorie",
+          "workflow": "Workflow (JSON)"
+        }
+      },
+      "activate": "Aktivieren",
+      "deactivate": "Deaktivieren",
+      "logs": "Protokolle anzeigen"
+    }
+  },
+  "errors": {
+    "unauthorized": "Sie haben keine Berechtigung, auf diesen Bereich zuzugreifen",
+    "tenant_not_found": "Mandant nicht gefunden",
+    "slug_exists": "Slug existiert bereits",
+    "invalid_email": "Ungültige E-Mail",
+    "invalid_country": "Ungültiges Land",
+    "cannot_suspend_self": "Sie können Ihren eigenen Mandanten nicht sperren",
+    "cannot_delete_self": "Sie können Ihren eigenen Mandanten nicht löschen",
+    "plan_in_use": "Kann nicht gelöscht werden, wenn Mandanten abonniert sind",
+    "migration_failed": "Datenmigration fehlgeschlagen",
+    "instance_not_found": "Instanz nicht gefunden",
+    "instance_domain_exists": "Instanz-Domain existiert bereits",
+    "instance_has_tenants": "Kann nicht gelöscht werden, wenn Mandanten zugewiesen sind",
+    "ticket_not_found": "Ticket nicht gefunden",
+    "ticket_already_closed": "Ticket ist bereits geschlossen",
+    "lead_not_found": "Lead nicht gefunden",
+    "flow_not_found": "Flow nicht gefunden",
+    "flow_already_active": "Flow ist bereits aktiv",
+    "flow_already_inactive": "Flow ist bereits inaktiv",
+    "flow_not_found_or_not_activated": "Flow nicht gefunden oder nicht aktiviert",
+    "n8n_not_configured": "N8N ist nicht konfiguriert",
+    "n8n_connection_error": "N8N-Verbindungsfehler",
+    "n8n_activation_failed": "Fehler beim Aktivieren des Flows in N8N",
+    "plan_not_found": "Plan nicht gefunden",
+    "plan_slug_exists": "Plan-Slug existiert bereits",
+    "plan_has_subscriptions": "Kann nicht gelöscht werden, wenn aktive Abonnements vorhanden sind"
+  },
+  "success": {
+    "tenant_created": "Mandant erfolgreich erstellt",
+    "tenant_updated": "Mandant erfolgreich aktualisiert",
+    "tenant_suspended": "Mandant erfolgreich gesperrt",
+    "tenant_reactivated": "Mandant erfolgreich reaktiviert",
+    "tenant_deleted": "Mandant erfolgreich gelöscht",
+    "plan_changed": "Plan erfolgreich geändert",
+    "plan_created": "Plan erfolgreich erstellt",
+    "plan_updated": "Plan erfolgreich aktualisiert",
+    "plan_deleted": "Plan erfolgreich gelöscht",
+    "adjustment_applied": "Anpassung erfolgreich angewendet",
+    "ticket_created": "Ticket erfolgreich erstellt",
+    "ticket_updated": "Ticket erfolgreich aktualisiert",
+    "ticket_closed": "Ticket erfolgreich geschlossen",
+    "message_sent": "Nachricht erfolgreich gesendet",
+    "lead_created": "Lead erfolgreich erstellt",
+    "lead_updated": "Lead erfolgreich aktualisiert",
+    "note_added": "Notiz erfolgreich hinzugefügt",
+    "flow_created": "Flow erfolgreich erstellt",
+    "flow_updated": "Flow erfolgreich aktualisiert",
+    "flow_activated": "Flow erfolgreich aktiviert",
+    "flow_deactivated": "Flow erfolgreich deaktiviert",
+    "flow_deleted": "Flow erfolgreich gelöscht",
+    "instance_created": "Instanz erfolgreich erstellt",
+    "instance_updated": "Instanz erfolgreich aktualisiert",
+    "instance_deleted": "Instanz erfolgreich gelöscht",
+    "tenant_assigned_to_instance": "Mandant erfolgreich der Instanz zugewiesen"
+  }
+}

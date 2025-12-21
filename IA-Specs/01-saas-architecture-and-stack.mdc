@@ -1,0 +1,339 @@
+# Arquitectura SaaS y Stack Tecnológico
+
+> **Versión:** 2.0  
+> **Fecha:** 2025-01-XX  
+> **Referencia:** `LEER/specs/03-repo-manifest.mdc`, `LEER/specs/06-backend-standards-php.mdc`
+
+---
+
+## Principios de Arquitectura SaaS
+
+### Multi-tenant por Diseño
+
+- ✅ **Single database, single schema** con `tenant_id` en todas las tablas de negocio
+- ✅ **Aislamiento de datos garantizado** mediante middleware obligatorio (NestJS Guards/Interceptors)
+- ✅ **Configuración por tenant** (branding, idioma, permisos, data residency, etc.)
+- ❌ **NUNCA** permitir acceso cross-tenant sin autorización explícita
+- ✅ **Data residency** configurable por tenant (UE vs CH) para cumplimiento GDPR/nLPD
+
+### Capas Claras
+
+**Separación de responsabilidades:**
+
+```
+Frontend (Next.js App Router)
+    ↓
+API Layer (NestJS Controllers)
+    ↓
+Business Logic / Domain Layer (NestJS Services)
+    ↓
+Data Access Layer (Prisma Client / Repositories)
+    ↓
+Database (MySQL)
+```
+
+**Reglas:**
+- Frontend nunca accede directamente a base de datos
+- API Layer (Controllers) valida entrada y delega a Services
+- Services contienen reglas de negocio
+- Data Access Layer (Prisma) abstrae queries SQL
+- Repositories opcionales para lógica de acceso a datos compleja
+
+### Separación de Configuración por Tenant
+
+- ✅ **Configuración almacenada en base de datos** (tabla `tenant_config` o equivalente)
+- ✅ **Cache de configuración** para performance (Redis opcional)
+- ✅ **Configuración por módulo** (branding, i18n, permisos, data residency, canales activos, etc.)
+- ❌ **NUNCA** hardcodear configuración específica de tenant
+
+---
+
+## Stack Tecnológico
+
+### Base de Datos
+
+- **Motor:** MySQL 8.0+ (requerido)
+- **ORM:** Prisma (acceso a datos type-safe)
+- **Multitenancy:** Single schema con `tenant_id` en todas las tablas de negocio
+- **Migraciones:** Prisma Migrate (convención automática)
+- **Regla crítica:** ❌ **NUNCA almacenar archivos grandes como BLOB en MySQL**
+  - MySQL solo guarda metadatos y rutas/URLs firmadas
+  - Archivos y adjuntos se guardan en storage externo (S3 compatible, Bunny, etc.) con data centers compatibles con UE/CH
+
+### Backend
+
+**Lenguaje y Framework:**
+- **Lenguaje:** TypeScript (requerido)
+- **Runtime:** Node.js LTS 20+ (requerido)
+- **Framework:** NestJS (arquitectura modular)
+- **ORM:** Prisma (acceso a datos)
+- **Arquitectura:** Módulos NestJS (modules), Controllers (API layer), Services (dominio/aplicación), Repositories/Prisma Client (acceso a datos)
+
+**Autenticación:**
+- JWT (JSON Web Tokens) con refresh tokens
+- **SSO con Google y Microsoft** usando OAuth2/OIDC (implementado)
+- Tokens emitidos por backend con `tenant_id` y `role` en el payload
+
+**API:**
+- RESTful API-first
+- Formato JSON estándar (ver `IA-Specs/06-backend-standards.mdc`)
+- Versionado de API (`/api/v1/`, `/api/v2/`, etc.)
+- Preparado para websockets/eventos en el futuro
+
+**DTOs y Validación:**
+- DTOs (Data Transfer Objects) con class-validator o Zod
+- Validación automática en Controllers mediante Pipes de NestJS
+
+### Frontend
+
+**Framework y Librerías:**
+- **Framework:** Next.js (App Router) sobre React
+- **Lenguaje:** TypeScript (requerido)
+- **UI:** Tailwind CSS + componente library (shadcn/ui recomendado)
+- **Diseño:** Mobile-first, responsive, dashboard profesional (no "plantilla cutre")
+
+**Componentes:**
+- Componentes reutilizables obligatorios (Table, Modal, Toast, Form, EmptyState, Loading, etc.)
+- Cliente API centralizado (único punto para fetch/Axios)
+- Design system consistente (botones, tablas, formularios)
+
+**i18n:**
+- Sistema centralizado de traducciones con namespaces (`core.auth.login`, etc.)
+- Detección automática del idioma del usuario
+- Idioma preferido configurable a nivel de tenant y usuario
+
+**Estructura de carpetas:**
+```
+frontend/
+├── app/              # Next.js App Router (rutas, layouts)
+├── components/       # Componentes reutilizables
+├── lib/              # Utilidades, cliente API
+├── hooks/            # React hooks personalizados
+└── public/           # Assets estáticos
+```
+
+### Integraciones Principales
+
+**WhatsApp:**
+- **Evolution API** (principal)
+- Posible integración futura con WhatsApp Cloud API u otros proveedores
+- Cada cliente final conecta su propio número/instancia (NADIE comparte número)
+- Configuración por tenant de credenciales de proveedor (Evolution, etc.)
+- Soporte para varios canales por tenant (WhatsApp, en el futuro otros)
+
+**Calendarios:**
+- **cal.com** (integración mediante API)
+- **Google Calendar** (integración mediante OAuth2)
+- Sistema propio (CRM o agenda propia del cliente)
+- Capa de abstracción "Calendar Provider" con adaptadores (cal.com, Google, custom)
+- Cada tenant puede elegir su proveedor y conectarlo mediante OAuth / API keys
+
+**Pagos:**
+- **Stripe** (EUR y CHF)
+- Suscripciones por plan + add-ons (número de agentes, canales, uso, etc.)
+- Gestión de período de prueba gratuito configurable por el **owner**
+- Corte automático por impago (bloqueo de agentes/tenant en modo read-only)
+- Reactivación automática al regularizar pago
+
+**n8n (Motor Interno):**
+- ⚠️ **IMPORTANTE:** n8n se usa **únicamente como motor interno de orquestación**
+- ❌ **NO se ofrece n8n como SaaS multi-tenant** (para respetar la licencia de n8n)
+- Una sola instancia de n8n controlada por nosotros
+- Nuestro SaaS gestiona:
+  - Qué workflow ejecutar
+  - Con qué contexto (tenant, canal, conocimiento)
+  - Sin exponer n8n directamente al cliente final
+
+### Base de Conocimiento y Agentes IA
+
+**Base de Conocimiento:**
+- Cada tenant tiene su propia **base de conocimiento**:
+  - Textos de negocio (servicios, precios, políticas)
+  - Preguntas frecuentes
+  - Reglas de agenda y calendario
+  - Idiomas en los que el agente puede hablar
+
+**Arquitectura:**
+- Documentos y configuración en MySQL (metadatos)
+- Contenido vectorizado en un vector store (puede ser tabla específica en MySQL o proveedor externo)
+- Motor de búsqueda semántica desacoplado
+
+**Agentes:**
+- Consultan la base de conocimiento del tenant
+- Mantienen **memoria conversacional** por usuario y canal
+- Respetan idioma detectado + idioma preferido configurable del tenant
+- Agentes de WhatsApp de citas (primera fase)
+- Extensibilidad para agentes de voz y de venta siguiendo los mismos estándares
+
+---
+
+## Data Residency y Cumplimiento Legal
+
+### Regulaciones
+
+- **GDPR/UE** (España)
+- **nLPD / FADP Suiza**
+
+### Data Residency
+
+**Configuración por tenant:**
+- Campo `data_region` en tabla `tenants`: `'EU' | 'CH'`
+- Reglas para asegurar que los datos personales no salen de la región configurada salvo base legal
+- Storage de archivos debe respetar data residency (S3/Bunny con data centers en región correspondiente)
+
+**Historial de conversaciones:**
+- Necesario para memoria y auditoría
+- Retención configurable por tenant
+- Anonimización / borrado bajo petición del usuario final
+
+---
+
+## Reglas para Extensibilidad
+
+### Añadir Nuevos Módulos
+
+**Proceso estándar:**
+
+1. **Crear especificación:** `spec-new-module-{nombre}`
+2. **Crear plan:** `plan-new-module-{nombre}`
+3. **Estructura mínima:**
+   - Backend: Módulo NestJS en `src/modules/{modulo}/`
+     - `{modulo}.module.ts`
+     - `{modulo}.controller.ts`
+     - `{modulo}.service.ts`
+     - `dto/` (DTOs de validación)
+     - `entities/` (si aplica)
+   - Frontend: Página/vista en `app/{modulo}/` (Next.js App Router)
+   - Traducciones: Archivos i18n en `lib/i18n/locales/{locale}/{modulo}.json`
+   - Tests: `tests/{modulo}.spec.ts` (backend) y `__tests__/{modulo}.test.tsx` (frontend)
+
+**Reglas obligatorias:**
+- ✅ Guards de TenantGuard + RBACGuard en todos los endpoints
+- ✅ Filtro por `tenant_id` en todas las queries Prisma
+- ✅ Traducciones i18n para todos los textos visibles
+- ✅ Tests de aislamiento multitenancy
+- ✅ Diseño mobile-first
+- ✅ DTOs con validación (class-validator o Zod)
+
+### Añadir Nuevos Endpoints
+
+**Estructura estándar (NestJS):**
+
+```typescript
+// src/modules/{recurso}/{recurso}.controller.ts
+@Controller('api/v1/{recurso}')
+@UseGuards(TenantGuard, RBACGuard)
+export class RecursoController {
+  constructor(private readonly recursoService: RecursoService) {}
+
+  @Get(':id')
+  @RequirePermission('{recurso}.view')
+  async findOne(
+    @Param('id', ParseIntPipe) id: number,
+    @CurrentTenant() tenant: Tenant,
+  ) {
+    return this.recursoService.findOne(id, tenant.id);
+  }
+}
+```
+
+**Reglas:**
+- ✅ Siempre usar TenantGuard + RBACGuard
+- ✅ Validar entrada con DTOs y Pipes
+- ✅ Usar Prisma Client (NO queries SQL directas)
+- ✅ Retornar formato JSON estándar
+- ✅ Usar claves de traducción para errores
+
+### Añadir Nuevas Vistas (Next.js App Router)
+
+**Estructura estándar:**
+
+```
+app/{modulo}/
+├── page.tsx          # Página principal
+├── [id]/
+│   └── page.tsx      # Página de detalle
+└── components/       # Componentes específicos del módulo
+```
+
+**Reglas:**
+- ✅ Usar componentes reutilizables (Modal, Toast, DataTable, etc.)
+- ✅ Cliente API centralizado para llamadas API
+- ✅ Traducciones i18n (nunca texto hardcodeado)
+- ✅ Diseño mobile-first
+- ✅ Estados de carga, error y vacío
+- ✅ Server Components cuando sea posible, Client Components solo cuando necesario
+
+---
+
+## Convenciones de Nomenclatura
+
+### Backend (NestJS/TypeScript)
+
+- **Archivos:** `kebab-case.ts` (ej: `whatsapp-instance.service.ts`)
+- **Clases:** `PascalCase` (ej: `WhatsAppInstanceService`)
+- **Métodos:** `camelCase` (ej: `getTenantId()`)
+- **Tablas DB:** `snake_case` (ej: `whatsapp_instances`)
+- **DTOs:** `{Nombre}Dto` (ej: `CreateWhatsAppInstanceDto`)
+
+### Frontend (Next.js/React/TypeScript)
+
+- **Archivos:** `kebab-case.tsx` o `kebab-case.ts` (ej: `whatsapp-instance-list.tsx`)
+- **Componentes:** `PascalCase` (ej: `WhatsAppInstanceList`)
+- **Hooks:** `use{Nombre}` (ej: `useWhatsAppInstances`)
+- **Funciones:** `camelCase` (ej: `loadData()`)
+- **Archivos CSS:** No necesario (Tailwind CSS)
+
+---
+
+## Estructura de Carpetas Recomendada
+
+### Backend (NestJS)
+
+```
+backend/
+├── src/
+│   ├── modules/          # Módulos NestJS (EDITABLE con plan)
+│   │   ├── tenants/
+│   │   ├── whatsapp/
+│   │   ├── agents/
+│   │   └── ...
+│   ├── common/           # Guards, Interceptors, Decorators (PROTEGIDO)
+│   │   ├── guards/
+│   │   ├── interceptors/
+│   │   └── decorators/
+│   ├── config/           # Configuración (EDITABLE con plan)
+│   └── main.ts           # Bootstrap de NestJS
+├── prisma/
+│   ├── schema.prisma     # Schema de Prisma (PROTEGIDO)
+│   └── migrations/       # Migraciones (PROTEGIDO)
+└── tests/                # Tests (EDITABLE)
+```
+
+### Frontend (Next.js)
+
+```
+frontend/
+├── app/                  # Next.js App Router (EDITABLE con plan)
+│   ├── (auth)/           # Rutas de autenticación
+│   ├── (dashboard)/     # Rutas del dashboard
+│   └── api/              # API routes (si aplica)
+├── components/           # Componentes reutilizables (PROTEGIDO)
+│   ├── ui/               # Componentes UI base (shadcn/ui)
+│   └── ...
+├── lib/                  # Utilidades, cliente API (PROTEGIDO)
+│   ├── api/
+│   ├── i18n/
+│   └── utils/
+└── public/               # Assets estáticos
+```
+
+---
+
+## Referencias
+
+- `IA-Specs/03-multitenancy-rbac-y-privacidad.mdc` - Multitenancy detallado
+- `IA-Specs/05-frontend-standards.mdc` - Estándares frontend
+- `IA-Specs/06-backend-standards.mdc` - Estándares backend
+- `IA-Specs/08-ai-first-standards.mdc` - Estándares AI-first
+- `LEER/specs/03-repo-manifest.mdc` - Estructura histórica

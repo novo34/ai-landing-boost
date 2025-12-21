@@ -1,0 +1,628 @@
+{
+  "title": "Painel de Administração da Plataforma",
+  "nav": {
+    "dashboard": "Dashboard",
+    "tenants": "Inquilinos",
+    "billing": "Faturação",
+    "plans": "Planos",
+    "tickets": "Tickets de Suporte",
+    "chat": "Chat com Clientes",
+    "instances": "Instâncias",
+    "regions": "Regiões de Dados",
+    "audit": "Auditoria",
+    "operations": {
+      "title": "Operações Próprias",
+      "agents": "Meus Agentes",
+      "channels": "Meus Canais",
+      "conversations": "Minhas Conversas",
+      "leads": "Meus Leads",
+      "n8n": "Meus Fluxos N8N"
+    },
+    "settings": "Configurações"
+  },
+  "dashboard": {
+    "title": "Dashboard da Plataforma",
+    "metrics": {
+      "tenants": {
+        "total": "Total de Inquilinos",
+        "active": "Inquilinos Ativos",
+        "trial": "Em Teste",
+        "suspended": "Suspensos",
+        "new_last_30_days": "Novos (30 dias)"
+      },
+      "users": {
+        "total": "Total de Usuários",
+        "active_last_30_days": "Ativos (30 dias)"
+      },
+      "revenue": {
+        "mrr": "MRR",
+        "arr": "ARR",
+        "current_month": "Mês Atual",
+        "previous_month": "Mês Anterior",
+        "growth": "Crescimento"
+      },
+      "usage": {
+        "agents": "Agentes Ativos",
+        "channels": "Canais Configurados",
+        "conversations": "Conversas",
+        "messages": "Mensagens Processadas"
+      },
+      "health": {
+        "payment_failed": "Pagamentos Falhados",
+        "near_limits": "Próximo dos Limites",
+        "avg_response_time": "Tempo Médio de Resposta"
+      }
+    }
+  },
+  "tenants": {
+    "title": "Gestão de Inquilinos",
+    "list": {
+      "title": "Lista de Inquilinos",
+      "search_placeholder": "Pesquisar por nome, email ou slug...",
+      "filters": {
+        "status": "Status",
+        "plan": "Plano",
+        "country": "País",
+        "date_range": "Intervalo de Datas",
+        "subscription_status": "Status da Assinatura"
+      },
+      "columns": {
+        "name": "Nome",
+        "slug": "Slug",
+        "status": "Status",
+        "plan": "Plano",
+        "subscription_status": "Status da Assinatura",
+        "country": "País",
+        "users": "Usuários",
+        "agents": "Agentes",
+        "created_at": "Criado em",
+        "last_activity": "Última Atividade",
+        "actions": "Ações"
+      },
+      "actions": {
+        "view": "Ver Detalhes",
+        "edit": "Editar",
+        "suspend": "Suspender",
+        "reactivate": "Reativar",
+        "delete": "Excluir",
+        "configure": "Configurar"
+      }
+    },
+    "create": {
+      "title": "Criar Novo Inquilino",
+      "form": {
+        "name": "Nome do Inquilino",
+        "name_placeholder": "Minha Empresa",
+        "slug": "Slug",
+        "slug_placeholder": "minha-empresa",
+        "country": "País",
+        "data_region": "Região de Dados",
+        "default_locale": "Idioma Padrão",
+        "time_zone": "Fuso Horário",
+        "owner_email": "Email do Proprietário",
+        "owner_name": "Nome do Proprietário",
+        "initial_plan": "Plano Inicial",
+        "initial_status": "Status Inicial",
+        "trial_ends_at": "Fim do Teste"
+      },
+      "success": "Inquilino criado com sucesso",
+      "error": "Erro ao criar inquilino"
+    },
+    "edit": {
+      "title": "Editar Inquilino",
+      "success": "Inquilino atualizado com sucesso",
+      "error": "Erro ao atualizar inquilino"
+    },
+    "details": {
+      "title": "Detalhes do Inquilino",
+      "basic_info": "Informações Básicas",
+      "subscription": "Assinatura",
+      "metrics": "Métricas",
+      "users": "Usuários",
+      "history": "Histórico",
+      "logs": "Logs de Atividade"
+    },
+    "suspend": {
+      "title": "Suspender Inquilino",
+      "confirm": "Tem certeza de que deseja suspender este inquilino?",
+      "reason": "Motivo da suspensão",
+      "reason_placeholder": "Digite o motivo da suspensão...",
+      "success": "Inquilino suspenso com sucesso",
+      "error": "Erro ao suspender inquilino"
+    },
+    "reactivate": {
+      "title": "Reativar Inquilino",
+      "confirm": "Tem certeza de que deseja reativar este inquilino?",
+      "success": "Inquilino reativado com sucesso",
+      "error": "Erro ao reativar inquilino"
+    },
+    "delete": {
+      "title": "Excluir Inquilino",
+      "confirm": "Tem certeza de que deseja excluir este inquilino? Esta ação não pode ser desfeita.",
+      "warning": "Serão excluídos:",
+      "warning_users": "{{count}} usuários",
+      "warning_conversations": "{{count}} conversas",
+      "warning_data": "Todos os dados associados",
+      "success": "Inquilino excluído com sucesso",
+      "error": "Erro ao excluir inquilino"
+    },
+    "status": {
+      "active": "Ativo",
+      "trial": "Teste",
+      "suspended": "Suspenso",
+      "cancelled": "Cancelado"
+    }
+  },
+  "billing": {
+    "title": "Gestão de Faturação",
+    "subscription": {
+      "title": "Assinatura",
+      "plan": "Plano Atual",
+      "status": "Status",
+      "start_date": "Data de Início",
+      "next_billing": "Próxima Faturação",
+      "payment_method": "Método de Pagamento",
+      "change_plan": "Alterar Plano",
+      "apply_adjustment": "Aplicar Ajuste"
+    },
+    "payment_failed": {
+      "title": "Pagamentos Falhados",
+      "days_since_payment": "Dias desde o último pagamento",
+      "failed_attempts": "Tentativas falhadas",
+      "amount_due": "Valor devido",
+      "extend_grace": "Estender Período de Graça",
+      "mark_paid": "Marcar como Pago",
+      "contact": "Contatar Cliente"
+    },
+    "adjustment": {
+      "title": "Aplicar Ajuste",
+      "type": "Tipo",
+      "amount": "Valor",
+      "reason": "Motivo",
+      "apply_date": "Data de Aplicação",
+      "types": {
+        "discount": "Desconto",
+        "credit": "Crédito",
+        "adjustment": "Ajuste"
+      }
+    }
+  },
+  "plans": {
+    "title": "Gestão de Planos",
+    "list": {
+      "title": "Planos de Assinatura",
+      "columns": {
+        "name": "Nome",
+        "price_monthly": "Preço Mensal",
+        "price_yearly": "Preço Anual",
+        "limits": "Limites",
+        "status": "Status",
+        "tenants": "Inquilinos Assinantes",
+        "revenue": "Receita",
+        "actions": "Ações"
+      }
+    },
+    "create": {
+      "title": "Criar Plano",
+      "form": {
+        "name": "Nome",
+        "description": "Descrição",
+        "price_monthly": "Preço Mensal (centavos)",
+        "price_yearly": "Preço Anual (centavos)",
+        "currency": "Moeda",
+        "max_agents": "Agentes Máx",
+        "max_channels": "Canais Máx",
+        "max_messages": "Mensagens Máx",
+        "features": "Funcionalidades"
+      },
+      "success": "Plano criado com sucesso"
+    },
+    "edit": {
+      "title": "Editar Plano",
+      "success": "Plano atualizado com sucesso"
+    },
+    "delete": {
+      "title": "Excluir Plano",
+      "confirm": "Tem certeza de que deseja excluir este plano?",
+      "warning": "Não pode ser excluído se houver inquilinos assinantes",
+      "success": "Plano excluído com sucesso"
+    }
+  },
+  "tickets": {
+    "title": "Tickets de Suporte",
+    "list": {
+      "title": "Lista de Tickets",
+      "filters": {
+        "status": "Status",
+        "category": "Categoria",
+        "priority": "Prioridade",
+        "assigned_to": "Atribuído a",
+        "tenant": "Inquilino"
+      },
+      "columns": {
+        "id": "ID",
+        "subject": "Assunto",
+        "tenant": "Inquilino",
+        "category": "Categoria",
+        "priority": "Prioridade",
+        "status": "Status",
+        "assigned_to": "Atribuído a",
+        "created_at": "Criado",
+        "last_activity": "Última Atividade",
+        "actions": "Ações"
+      }
+    },
+    "create": {
+      "title": "Criar Ticket",
+      "form": {
+        "subject": "Assunto",
+        "description": "Descrição",
+        "category": "Categoria",
+        "priority": "Prioridade",
+        "tenant": "Inquilino (opcional)"
+      },
+      "success": "Ticket criado com sucesso"
+    },
+    "details": {
+      "title": "Detalhes do Ticket",
+      "messages": "Mensagens",
+      "add_message": "Adicionar Mensagem",
+      "internal_note": "Nota Interna",
+      "assign": "Atribuir",
+      "change_status": "Alterar Status",
+      "close": "Fechar"
+    },
+    "status": {
+      "open": "Aberto",
+      "in_progress": "Em Progresso",
+      "waiting_client": "Aguardando Cliente",
+      "resolved": "Resolvido",
+      "closed": "Fechado"
+    },
+    "priority": {
+      "low": "Baixa",
+      "medium": "Média",
+      "high": "Alta",
+      "critical": "Crítica"
+    },
+    "category": {
+      "technical": "Técnico",
+      "billing": "Faturação",
+      "configuration": "Configuração",
+      "feature_request": "Solicitação de Funcionalidade",
+      "other": "Outro"
+    }
+  },
+  "leads": {
+    "title": "CRM de Leads",
+    "list": {
+      "title": "Lista de Leads",
+      "filters": {
+        "status": "Status",
+        "stage": "Estágio",
+        "source": "Fonte",
+        "assigned_to": "Atribuído a"
+      },
+      "columns": {
+        "name": "Nome",
+        "email": "Email",
+        "phone": "Telefone",
+        "source": "Fonte",
+        "status": "Status",
+        "stage": "Estágio",
+        "assigned_to": "Atribuído a",
+        "created_at": "Criado",
+        "updated_at": "Atualizado",
+        "actions": "Ações"
+      }
+    },
+    "pipeline": {
+      "title": "Pipeline de Vendas",
+      "metrics": {
+        "total": "Total",
+        "conversion_rate": "Taxa de Conversão",
+        "by_stage": "Por Estágio",
+        "by_source": "Por Fonte"
+      }
+    },
+    "details": {
+      "title": "Detalhes do Lead",
+      "info": "Informações",
+      "notes": "Notas",
+      "history": "Histórico",
+      "add_note": "Adicionar Nota"
+    },
+    "status": {
+      "new": "Novo",
+      "contacted": "Contatado",
+      "qualified": "Qualificado",
+      "opportunity": "Oportunidade",
+      "customer": "Cliente",
+      "lost": "Perdido"
+    },
+    "stage": {
+      "lead_captured": "Lead Capturado",
+      "contacted": "Contatado",
+      "qualified": "Qualificado",
+      "demo": "Demonstração",
+      "proposal": "Proposta",
+      "negotiation": "Negociação",
+      "closed_won": "Fechado - Ganho",
+      "closed_lost": "Fechado - Perdido"
+    },
+    "source": {
+      "whatsapp": "WhatsApp",
+      "webchat": "Webchat",
+      "landing": "Landing Page",
+      "manual": "Manual",
+      "import": "Importação"
+    }
+  },
+  "n8n_flows": {
+    "title": "Fluxos N8N da Plataforma",
+    "list": {
+      "title": "Fluxos de Automação",
+      "filters": {
+        "category": "Categoria",
+        "is_active": "Status"
+      },
+      "columns": {
+        "name": "Nome",
+        "category": "Categoria",
+        "status": "Status",
+        "created_at": "Criado",
+        "actions": "Ações"
+      }
+    },
+    "create": {
+      "title": "Criar Fluxo",
+      "form": {
+        "name": "Nome",
+        "description": "Descrição",
+        "category": "Categoria",
+        "workflow": "Workflow (JSON)"
+      },
+      "success": "Fluxo criado com sucesso"
+    },
+    "details": {
+      "title": "Detalhes do Fluxo",
+      "workflow": "Workflow",
+      "executions": "Execuções",
+      "logs": "Logs"
+    },
+    "categories": {
+      "onboarding": "Onboarding",
+      "notifications": "Notificações",
+      "leads": "Leads",
+      "reports": "Relatórios",
+      "operations": "Operações"
+    }
+  },
+  "chat": {
+    "title": "Chat com Clientes",
+    "conversations": {
+      "title": "Conversas Ativas",
+      "no_conversations": "Nenhuma conversa ativa",
+      "start_conversation": "Iniciar Conversa",
+      "with_tenant": "com {{tenant}}"
+    },
+    "messages": {
+      "type_message": "Digite uma mensagem...",
+      "send": "Enviar",
+      "file": "Arquivo",
+      "image": "Imagem",
+      "typing": "digitando...",
+      "online": "Online",
+      "offline": "Offline"
+    }
+  },
+  "instances": {
+    "title": "Gestão de Instâncias",
+    "list": {
+      "title": "Instâncias SaaS",
+      "columns": {
+        "name": "Nome",
+        "domain": "Domínio",
+        "status": "Status",
+        "tenants": "Inquilinos",
+        "created_at": "Criado",
+        "actions": "Ações"
+      }
+    },
+    "create": {
+      "title": "Criar Instância",
+      "form": {
+        "name": "Nome",
+        "domain": "Domínio",
+        "database_url": "URL do Banco de Dados",
+        "stripe_key": "Chave Stripe",
+        "n8n_url": "URL N8N"
+      },
+      "success": "Instância criada com sucesso"
+    },
+    "switch": {
+      "title": "Alterar Instância",
+      "current": "Instância Atual",
+      "select": "Selecionar Instância"
+    }
+  },
+  "regions": {
+    "title": "Regiões de Dados",
+    "list": {
+      "title": "Distribuição por Região",
+      "columns": {
+        "region": "Região",
+        "tenants": "Inquilinos",
+        "compliance": "Conformidade",
+        "actions": "Ações"
+      }
+    },
+    "migrate": {
+      "title": "Migrar Inquilino para Outra Região",
+      "confirm": "Tem certeza de que deseja migrar este inquilino?",
+      "warning": "Esta operação pode levar vários minutos",
+      "success": "Migração iniciada com sucesso"
+    },
+    "regions": {
+      "eu": "Europa (GDPR)",
+      "ch": "Suíça (nLPD)",
+      "us": "Estados Unidos",
+      "apac": "Ásia-Pacífico"
+    }
+  },
+  "audit": {
+    "title": "Logs de Auditoria",
+    "list": {
+      "title": "Histórico de Ações",
+      "filters": {
+        "action": "Ação",
+        "resource_type": "Tipo de Recurso",
+        "resource_id": "ID do Recurso",
+        "user": "Usuário",
+        "date_range": "Intervalo de Datas"
+      },
+      "columns": {
+        "timestamp": "Timestamp",
+        "user": "Usuário",
+        "action": "Ação",
+        "resource": "Recurso",
+        "details": "Detalhes",
+        "ip": "IP"
+      },
+      "export": "Exportar Logs"
+    },
+    "actions": {
+      "create_tenant": "Criar Inquilino",
+      "update_tenant": "Atualizar Inquilino",
+      "suspend_tenant": "Suspender Inquilino",
+      "reactivate_tenant": "Reativar Inquilino",
+      "delete_tenant": "Excluir Inquilino",
+      "change_plan": "Alterar Plano",
+      "apply_adjustment": "Aplicar Ajuste"
+    }
+  },
+  "operations": {
+    "agents": {
+      "title": "Meus Agentes",
+      "description": "Agentes para geração de leads e vendas SaaS"
+    },
+    "channels": {
+      "title": "Meus Canais",
+      "description": "Canais configurados para operações próprias"
+    },
+    "conversations": {
+      "title": "Minhas Conversas",
+      "description": "Conversas do inquilino próprio do SaaS"
+    },
+    "leads": {
+      "title": "Meus Leads",
+      "description": "CRM de leads gerados pelos agentes próprios",
+      "pipeline": {
+        "title": "Pipeline de Vendas",
+        "stages": {
+          "lead_captured": "Lead Capturado",
+          "contacted": "Contatado",
+          "qualified": "Qualificado",
+          "demo": "Demonstração",
+          "proposal": "Proposta",
+          "negotiation": "Negociação",
+          "closed_won": "Fechado - Ganho",
+          "closed_lost": "Fechado - Perdido"
+        }
+      },
+      "create": {
+        "title": "Criar Lead",
+        "form": {
+          "name": "Nome",
+          "email": "Email",
+          "phone": "Telefone",
+          "source": "Fonte",
+          "interest": "Interesse",
+          "notes": "Notas"
+        }
+      },
+      "add_note": {
+        "title": "Adicionar Nota",
+        "placeholder": "Escreva uma nota..."
+      }
+    },
+    "n8n": {
+      "title": "Fluxos N8N",
+      "description": "Automação de processos internos",
+      "categories": {
+        "onboarding": "Onboarding",
+        "notifications": "Notificações",
+        "leads": "Leads",
+        "reports": "Relatórios",
+        "operations": "Operações"
+      },
+      "create": {
+        "title": "Criar Fluxo",
+        "form": {
+          "name": "Nome",
+          "description": "Descrição",
+          "category": "Categoria",
+          "workflow": "Workflow (JSON)"
+        }
+      },
+      "activate": "Ativar",
+      "deactivate": "Desativar",
+      "logs": "Ver Logs"
+    }
+  },
+  "errors": {
+    "unauthorized": "Você não tem permissão para acessar esta seção",
+    "tenant_not_found": "Inquilino não encontrado",
+    "slug_exists": "O slug já existe",
+    "invalid_email": "Email inválido",
+    "invalid_country": "País inválido",
+    "cannot_suspend_self": "Você não pode suspender seu próprio inquilino",
+    "cannot_delete_self": "Você não pode excluir seu próprio inquilino",
+    "plan_in_use": "Não pode ser excluído se houver inquilinos assinantes",
+    "migration_failed": "Migração de dados falhou",
+    "instance_not_found": "Instância não encontrada",
+    "instance_domain_exists": "O domínio da instância já existe",
+    "instance_has_tenants": "Não pode ser excluída se houver inquilinos atribuídos",
+    "ticket_not_found": "Ticket não encontrado",
+    "ticket_already_closed": "O ticket já está fechado",
+    "lead_not_found": "Lead não encontrado",
+    "flow_not_found": "Fluxo não encontrado",
+    "flow_already_active": "O fluxo já está ativo",
+    "flow_already_inactive": "O fluxo já está inativo",
+    "flow_not_found_or_not_activated": "Fluxo não encontrado ou não ativado",
+    "n8n_not_configured": "N8N não está configurado",
+    "n8n_connection_error": "Erro de conexão N8N",
+    "n8n_activation_failed": "Falha ao ativar fluxo no N8N",
+    "plan_not_found": "Plano não encontrado",
+    "plan_slug_exists": "O slug do plano já existe",
+    "plan_has_subscriptions": "Não pode ser excluído se houver assinaturas ativas"
+  },
+  "success": {
+    "tenant_created": "Inquilino criado com sucesso",
+    "tenant_updated": "Inquilino atualizado com sucesso",
+    "tenant_suspended": "Inquilino suspenso com sucesso",
+    "tenant_reactivated": "Inquilino reativado com sucesso",
+    "tenant_deleted": "Inquilino excluído com sucesso",
+    "plan_changed": "Plano alterado com sucesso",
+    "plan_created": "Plano criado com sucesso",
+    "plan_updated": "Plano atualizado com sucesso",
+    "plan_deleted": "Plano excluído com sucesso",
+    "adjustment_applied": "Ajuste aplicado com sucesso",
+    "ticket_created": "Ticket criado com sucesso",
+    "ticket_updated": "Ticket atualizado com sucesso",
+    "ticket_closed": "Ticket fechado com sucesso",
+    "message_sent": "Mensagem enviada com sucesso",
+    "lead_created": "Lead criado com sucesso",
+    "lead_updated": "Lead atualizado com sucesso",
+    "note_added": "Nota adicionada com sucesso",
+    "flow_created": "Fluxo criado com sucesso",
+    "flow_updated": "Fluxo atualizado com sucesso",
+    "flow_activated": "Fluxo ativado com sucesso",
+    "flow_deactivated": "Fluxo desativado com sucesso",
+    "flow_deleted": "Fluxo excluído com sucesso",
+    "instance_created": "Instância criada com sucesso",
+    "instance_updated": "Instância atualizada com sucesso",
+    "instance_deleted": "Instância excluída com sucesso",
+    "tenant_assigned_to_instance": "Inquilino atribuído à instância com sucesso"
+  }
+}

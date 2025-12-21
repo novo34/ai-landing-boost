@@ -1,0 +1,171 @@
+{
+  "nav": {
+    "producto": "Produto",
+    "comoFunciona": "Como funciona",
+    "beneficios": "Benefícios",
+    "roi": "Calculadora ROI",
+    "faq": "FAQ",
+    "calcularRoi": "Calcular ROI",
+    "login": "Entrar",
+    "menu": "Menu",
+    "cerrarMenu": "Fechar menu",
+    "abrirMenu": "Abrir menu"
+  },
+  "hero": {
+    "badge": "Agência de Automação com IA",
+    "title": "Automatize seu negócio com",
+    "titleHighlight": "Inteligência Artificial",
+    "subtitle": "Desenvolvemos agentes IA personalizados que automatizam tarefas repetitivas, atendem clientes 24/7 e reduzem custos operacionais em até 70%.",
+    "ctaPrimary": "Calcular meu ROI",
+    "ctaSecondary": "Falar com um especialista",
+    "trustCompanies": "Empresas automatizadas",
+    "trustSavings": "Redução de custos",
+    "trustSupport": "Suporte automático"
+  },
+  "product": {
+    "title": "Soluções de",
+    "titleHighlight": "Automação IA",
+    "subtitle": "Três pilares fundamentais para transformar a operação da sua empresa com inteligência artificial.",
+    "whatsapp": {
+      "title": "Automação WhatsApp",
+      "description": "Agentes conversacionais que atendem consultas, agendam compromissos e gerenciam pedidos 24/7 no WhatsApp Business."
+    },
+    "processes": {
+      "title": "Automação de processos",
+      "description": "Fluxos de trabalho inteligentes que conectam suas ferramentas e eliminam tarefas manuais repetitivas."
+    },
+    "compliance": {
+      "title": "Conformidade GDPR",
+      "description": "Todas as nossas soluções estão em conformidade com a regulamentação europeia de proteção de dados e privacidade."
+    }
+  },
+  "howItWorks": {
+    "title": "Como funciona",
+    "titleHighlight": "Nosso processo",
+    "subtitle": "Um processo estruturado em 6 fases para garantir o sucesso do seu projeto de automação.",
+    "step1": {
+      "title": "Análise de processos",
+      "description": "Identificamos tarefas repetitivas e gargalos na sua operação atual."
+    },
+    "step2": {
+      "title": "Design da solução",
+      "description": "Criamos uma arquitetura de automação personalizada para o seu negócio."
+    },
+    "step3": {
+      "title": "Desenvolvimento do agente",
+      "description": "Construímos e treinamos seu agente IA com seu conhecimento empresarial."
+    },
+    "step4": {
+      "title": "Integração",
+      "description": "Conectamos o agente aos seus sistemas existentes: CRM, ERP, WhatsApp, etc."
+    },
+    "step5": {
+      "title": "Testes e otimização",
+      "description": "Testamos exaustivamente e ajustamos o desempenho antes do lançamento."
+    },
+    "step6": {
+      "title": "Implantação e suporte",
+      "description": "Ativamos a solução em produção com monitoramento e suporte contínuos."
+    }
+  },
+  "benefits": {
+    "title": "Benefícios de",
+    "titleHighlight": "automatizar com IA",
+    "subtitle": "Transforme sua operação empresarial e obtenha vantagens competitivas reais e mensuráveis.",
+    "benefit1": "Redução de 70% em tarefas administrativas repetitivas",
+    "benefit2": "Atendimento ao cliente automatizado 24 horas, 7 dias",
+    "benefit3": "Respostas instantâneas sem tempo de espera",
+    "benefit4": "Escalabilidade sem aumentar equipe",
+    "benefit5": "Integração com sistemas existentes (CRM, ERP, etc.)",
+    "benefit6": "Análise e relatórios automáticos de métricas",
+    "benefit7": "Conformidade regulatória GDPR garantida",
+    "benefit8": "ROI positivo em menos de 6 meses",
+    "useCasesTitle": "Principais casos de uso",
+    "useCase1": "Atendimento ao cliente",
+    "useCase2": "Gestão de compromissos",
+    "useCase3": "Processamento de pedidos",
+    "useCase4": "Suporte técnico",
+    "useCase5": "Qualificação de leads",
+    "useCase6": "Onboarding de clientes"
+  },
+  "roi": {
+    "title": "Calcule seu",
+    "titleHighlight": "Retorno sobre investimento",
+    "subtitle": "Descubra quanto você pode economizar automatizando as tarefas repetitivas da sua equipe.",
+    "calculatorTitle": "Calculadora ROI",
+    "numPeople": "Pessoas em tarefas repetitivas",
+    "hoursPerWeek": "Horas/semana em tarefas automatizáveis",
+    "hourlyCost": "Custo/hora funcionário (com SS)",
+    "automationRate": "Percentual de automação",
+    "currentYearlyCost": "Custo anual atual",
+    "estimatedSavings": "Economia anual potencial",
+    "projectBudgetMin": "Investimento inicial mínimo",
+    "projectBudgetMax": "Investimento inicial máximo",
+    "monthlyRetainer": "Manutenção mensal",
+    "cta": "Solicitar orçamento personalizado",
+    "note": "Estimativa indicativa. Os valores serão ajustados na sessão de análise personalizada.",
+    "calculate": "Calcular",
+    "sector": "Setor (opcional)",
+    "sectorPlaceholder": "Selecione seu setor",
+    "sectorRetail": "Varejo / E-commerce",
+    "sectorHealthcare": "Saúde / Clínicas",
+    "sectorLegal": "Jurídico / Escritórios",
+    "sectorRealEstate": "Imobiliário",
+    "sectorOther": "Outro"
+  },
+  "faq": {
+    "title": "Perguntas",
+    "titleHighlight": "Frequentes",
+    "subtitle": "Respostas às dúvidas mais comuns sobre automação com IA.",
+    "q1": "Quanto tempo leva para implementar um agente IA?",
+    "a1": "O tempo de implementação varia de acordo com a complexidade do projeto. Um agente básico de WhatsApp pode estar operacional em 2-4 semanas, enquanto uma solução de automação mais complexa pode exigir 6-12 semanas. Durante a consulta inicial, fornecemos um cronograma detalhado para o seu caso específico.",
+    "q2": "Preciso de conhecimentos técnicos para usar a solução?",
+    "a2": "Não, nossas soluções são projetadas para serem usadas por pessoal não técnico. Fornecemos uma interface intuitiva para gerenciar e monitorar os agentes, além de treinamento completo para sua equipe. O suporte técnico está incluído para resolver qualquer dúvida.",
+    "q3": "Como se integra com meus sistemas atuais?",
+    "a3": "Nossos agentes IA se integram com a maioria dos sistemas empresariais: CRM (Salesforce, HubSpot, Pipedrive), ERP, plataformas de e-commerce, sistemas de tickets e muito mais. Usamos APIs padrão e desenvolvemos conectores personalizados quando necessário.",
+    "q4": "Quais garantias de segurança e privacidade vocês oferecem?",
+    "a4": "Todas as nossas soluções estão em conformidade com o GDPR e a LOPDGDD. Implementamos criptografia de ponta a ponta, armazenamento seguro em servidores europeus e controles de acesso rigorosos. Assinamos acordos de confidencialidade e podemos nos adaptar a requisitos de segurança específicos do seu setor.",
+    "q5": "O que acontece se o agente não souber responder algo?",
+    "a5": "Os agentes são projetados para escalar automaticamente para um humano quando detectam consultas fora de seu escopo ou quando o usuário solicita. Além disso, o sistema aprende continuamente com essas interações para melhorar suas respostas futuras.",
+    "q6": "Qual é o custo de manutenção após a implementação?",
+    "a6": "Oferecemos planos de manutenção mensais que incluem: monitoramento 24/7, atualizações de segurança, ajustes de desempenho e suporte técnico. O custo típico é entre 10-15% do valor inicial do projeto por ano, embora varie de acordo com o escopo do serviço necessário.",
+    "noAnswer": "Não encontra a resposta que procura?",
+    "contact": "Entre em contato conosco diretamente"
+  },
+  "footer": {
+    "description": "Agência especializada em automação empresarial com inteligência artificial. Transformamos a operação do seu negócio.",
+    "services": "Serviços",
+    "company": "Empresa",
+    "legal": "Legal",
+    "service1": "Automação WhatsApp",
+    "service2": "Agentes IA",
+    "service3": "Integrações",
+    "service4": "Consultoria",
+    "company1": "Sobre nós",
+    "company2": "Histórias de sucesso",
+    "company3": "Blog",
+    "company4": "Carreiras",
+    "legal1": "Política de privacidade",
+    "legal2": "Termos de serviço",
+    "legal3": "Política de cookies",
+    "legal4": "Aviso legal",
+    "copyright": "Todos os direitos reservados.",
+    "compliance": "Soluções em conformidade com GDPR, LOPDGDD e regulamentação europeia de proteção de dados. Servidores localizados na União Europeia."
+  },
+  "common": {
+    "loading": "Carregando...",
+    "error": "Erro",
+    "success": "Sucesso",
+    "submit": "Enviar",
+    "cancel": "Cancelar",
+    "save": "Salvar",
+    "name": "Nome",
+    "email": "E-mail",
+    "phone": "Telefone",
+    "company": "Empresa",
+    "message": "Mensagem",
+    "required": "Obrigatório",
+    "invalidEmail": "E-mail inválido"
+  }
+}
+

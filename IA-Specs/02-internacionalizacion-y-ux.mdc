@@ -1,0 +1,319 @@
+# Internacionalización y UX
+
+> **Versión:** 1.0  
+> **Fecha:** 2025-01-XX  
+> **Referencia:** `LEER/specs/standards/i18n-styleguide.mdc`, `LEER/specs/standards/responsive-mobile.mdc`
+
+---
+
+## Reglas de Internacionalización (i18n)
+
+### Principio Fundamental
+
+❌ **NUNCA hardcodear texto visible al usuario**
+
+✅ **SIEMPRE usar sistema de traducciones con claves tipo `namespace.modulo.clave`**
+
+---
+
+### Estructura de Claves
+
+**Formato:** `namespace.modulo.clave` o `namespace.subclave`
+
+**Ejemplos:**
+- `common.save`
+- `common.delete_confirm`
+- `errors.not_found`
+- `validation.required`
+- `clients.created_success`
+- `projects.not_found`
+
+**Reglas:**
+- Usar nombres descriptivos y consistentes
+- Agrupar por namespace lógico (common, errors, validation, {modulo})
+- Reutilizar claves comunes cuando sea posible
+
+---
+
+### Idiomas Soportados
+
+**Idiomas mínimos requeridos:**
+- `es` (Español) - Idioma por defecto
+- `de` (Alemán)
+- `en` (Inglés)
+- `fr` (Francés) - Opcional pero recomendado
+- `it` (Italiano) - Opcional pero recomendado
+
+**Extensibilidad:**
+- El sistema debe permitir añadir nuevos idiomas sin modificar código
+- Traducciones almacenadas en archivos o base de datos según arquitectura
+
+---
+
+### Detección Automática de Idioma
+
+**Prioridad de detección:**
+
+1. **Preferencia del usuario** (localStorage/sesión/configuración de perfil)
+2. **Configuración del tenant** (base de datos)
+3. **Header Accept-Language** (HTTP)
+4. **Fallback:** Español (`es`)
+
+**Implementación:**
+- Backend: Middleware que detecta idioma y lo establece en contexto
+- Frontend: Cargar traducciones según idioma detectado al iniciar sesión
+
+---
+
+### Uso en Backend (NestJS)
+
+**Función de traducción:**
+
+```typescript
+// Ejemplo de uso
+i18n.t('common.save')                    // Clave simple
+i18n.t('clients.created_success')        // Clave con namespace
+i18n.t('users.welcome', { name: name })  // Con variables
+```
+
+**En respuestas JSON:**
+
+```typescript
+// ✅ CORRECTO
+return {
+  success: false,
+  error_key: 'validation.required',
+  error_params: { field: 'email' }
+};
+
+// ❌ INCORRECTO
+return {
+  success: false,
+  error: 'El campo email es requerido' // Hardcodeado
+};
+```
+
+---
+
+### Uso en Frontend (Next.js/React)
+
+**Función de traducción (hook):**
+
+```typescript
+// Ejemplo de uso con hook
+const { t } = useTranslation();
+
+// En componentes
+<button>{t('common.save')}</button>
+<p>{t('clients.created_success')}</p>
+<p>{t('users.welcome', { name: userName })}</p>
+```
+
+**En Server Components (Next.js App Router):**
+
+```typescript
+// Usar función de traducción directamente
+import { getTranslations } from '@/lib/i18n';
+
+export default async function Page({ params: { locale } }) {
+  const t = await getTranslations(locale);
+  return <h1>{t('clients.title')}</h1>;
+}
+```
+
+**Reglas:**
+- ✅ Usar hook `useTranslation()` en Client Components
+- ✅ Usar `getTranslations()` en Server Components
+- ✅ Nunca texto hardcodeado en JSX
+
+---
+
+### Variables en Traducciones
+
+**Formato (JSON):**
+
+```json
+{
+  "welcome": "Bienvenido, {name}",
+  "shift_from_to": "Turno de {start} a {end}"
+}
+```
+
+**Uso:**
+
+```typescript
+// Backend (NestJS)
+i18n.t('users.welcome', { name: 'Juan' });
+
+// Frontend (React)
+t('users.welcome', { name: 'Juan' });
+```
+
+---
+
+### Pluralización
+
+**Formato (i18next):**
+
+```json
+{
+  "items_count_one": "{{count}} elemento",
+  "items_count_other": "{{count}} elementos"
+}
+```
+
+**Uso automático:**
+- Sistema detecta singular/plural según valor de `count`
+- `t('common.items_count', { count: 1 })` → "1 elemento"
+- `t('common.items_count', { count: 5 })` → "5 elementos"
+
+---
+
+## Reglas de UX y UI
+
+### Mobile-First Obligatorio
+
+✅ **Diseñar y probar primero en móviles, luego tablet y desktop**
+
+**Breakpoints con Tailwind CSS:**
+
+```typescript
+// Tailwind breakpoints (por defecto)
+sm: '640px'   // Small devices
+md: '768px'   // Medium devices (tablets)
+lg: '1024px'  // Large devices (desktop)
+xl: '1280px'  // Extra large devices
+2xl: '1536px' // 2X Extra large devices
+```
+
+**Uso en componentes:**
+
+```tsx
+// Mobile-first: diseño base sin breakpoint, luego mejoras progresivas
+<div className="flex flex-col md:flex-row lg:grid lg:grid-cols-3">
+  {/* Contenido */}
+</div>
+```
+
+**Reglas:**
+- Diseño base para móvil (sin breakpoints)
+- Mejoras progresivas con `md:`, `lg:`, etc.
+- Probar en dispositivos reales (iOS y Android)
+- Usar Tailwind responsive utilities en lugar de media queries custom
+
+---
+
+### Accesibilidad
+
+**Contraste:**
+- ✅ Mínimo WCAG AA (4.5:1 para texto normal, 3:1 para texto grande)
+- ✅ Verificar contraste de todos los colores
+
+**Tamaños mínimos:**
+- ✅ Botones y elementos interactivos: mínimo 44x44px
+- ✅ Texto: mínimo 16px (evitar zoom automático en iOS)
+
+**Navegación:**
+- ✅ Navegación por teclado funcional (Tab, Enter, Esc)
+- ✅ Foco visible y claro
+- ✅ Skip links para saltar navegación
+
+**Lectores de pantalla:**
+- ✅ ARIA labels donde sea necesario
+- ✅ Atributos `aria-hidden` para elementos decorativos
+- ✅ Estructura semántica HTML correcta
+
+---
+
+### Componentes Reutilizables Obligatorios
+
+**Componentes mínimos requeridos:**
+
+- **Table/DataTable:** Tablas con paginación, ordenamiento, filtros
+- **Modal:** Modales reutilizables con diferentes tamaños
+- **Toast:** Notificaciones toast (success, error, warning, info)
+- **Form:** Formularios con validación integrada
+- **EmptyState:** Estados vacíos con mensaje y acción opcional
+- **Loading:** Indicadores de carga (spinner, skeleton, etc.)
+
+**Reglas:**
+- ✅ Buscar componente existente antes de crear nuevo
+- ✅ Reutilizar o extender componentes existentes
+- ✅ Documentar props/parámetros del componente
+- ❌ NUNCA duplicar funcionalidad de componentes existentes
+
+---
+
+### Estados de UI Obligatorios
+
+**Todas las vistas DEBEN manejar:**
+
+1. **Estado de carga:**
+   - Mostrar indicador de carga mientras se obtienen datos
+   - Skeleton screens para mejor UX
+
+2. **Estado de error:**
+   - Mostrar mensaje de error claro y accionable
+   - Opción de reintentar
+
+3. **Estado vacío:**
+   - Mostrar mensaje explicativo
+   - Sugerir acción (ej: "Crear primer proyecto")
+
+4. **Estado de éxito:**
+   - Feedback visual claro (toast, mensaje, etc.)
+
+---
+
+### Responsive Design
+
+**Reglas:**
+
+- ✅ Grids adaptativos (1 columna móvil, 2-3 columnas desktop)
+- ✅ Navegación hamburguesa en móvil
+- ✅ Modales fullscreen o bottom sheet en móvil
+- ✅ Tablas con scroll horizontal o vista de tarjetas en móvil
+- ✅ Formularios optimizados para teclado móvil
+
+**Componentes móviles recomendados:**
+
+- BottomSheet para modales en móvil
+- Pull to refresh para listas
+- Swipe gestures para acciones rápidas
+- Virtual scroll para listas largas
+
+---
+
+### Performance UX
+
+**Reglas:**
+
+- ✅ Lazy loading de imágenes y componentes pesados
+- ✅ Debounce en búsquedas y filtros
+- ✅ Cache de datos cuando sea apropiado
+- ✅ Optimización de imágenes (WebP con fallback)
+- ✅ Minimizar re-renders innecesarios
+
+---
+
+## Checklist de i18n y UX
+
+**Antes de considerar una tarea completada:**
+
+- [ ] ¿Todos los textos visibles usan claves de traducción?
+- [ ] ¿Se crearon traducciones en TODOS los idiomas mínimos (es, de, en)?
+- [ ] ¿Se reutilizaron claves existentes cuando es posible?
+- [ ] ¿Las variables en traducciones están correctamente formateadas?
+- [ ] ¿Los mensajes de error usan claves (no texto hardcodeado)?
+- [ ] ¿El diseño es mobile-first (probado en móvil)?
+- [ ] ¿Los componentes reutilizables se usan correctamente?
+- [ ] ¿Se manejan estados de carga, error y vacío?
+- [ ] ¿La accesibilidad básica está verificada (contraste, navegación por teclado)?
+
+---
+
+## Referencias
+
+- `IA-Specs/05-frontend-standards.mdc` - Estándares frontend detallados
+- `LEER/specs/standards/i18n-styleguide.mdc` - Guía detallada de i18n
+- `LEER/specs/standards/responsive-mobile.mdc` - Guía detallada de responsive

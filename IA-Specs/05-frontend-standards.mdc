@@ -1,0 +1,472 @@
+# Estándares Frontend
+
+> **Versión:** 2.0  
+> **Fecha:** 2025-01-XX  
+> **Referencia:** `LEER/specs/05-frontend-standards.mdc`, `LEER/specs/standards/css-styleguide.mdc`
+
+---
+
+## Stack Tecnológico Frontend
+
+### Framework y Librerías
+
+- **Framework:** Next.js (App Router) sobre React
+- **Lenguaje:** TypeScript (requerido)
+- **UI:** Tailwind CSS + componente library (shadcn/ui recomendado)
+- **Diseño:** Mobile-first, responsive, dashboard profesional (no "plantilla cutre")
+- **i18n:** Sistema centralizado de traducciones con namespaces
+
+---
+
+## Mobile-First y Responsive
+
+### Regla Obligatoria
+
+✅ **Mobile-first obligatorio:** Diseñar y probar primero en móviles, luego tablet y desktop
+
+---
+
+### Breakpoints con Tailwind CSS
+
+**Definición estándar (Tailwind por defecto):**
+
+```typescript
+// tailwind.config.ts
+export default {
+  theme: {
+    screens: {
+      sm: '640px',   // Small devices
+      md: '768px',   // Medium devices (tablets)
+      lg: '1024px',  // Large devices (desktop)
+      xl: '1280px',  // Extra large devices
+      '2xl': '1536px' // 2X Extra large devices
+    }
+  }
+}
+```
+
+**Uso en componentes:**
+
+```tsx
+// Mobile-first: diseño base sin breakpoint, luego mejoras progresivas
+<div className="flex flex-col md:flex-row lg:grid lg:grid-cols-3">
+  {/* Contenido */}
+</div>
+```
+
+**Comportamiento esperado:**
+
+- **Mobile (< 768px):** Una columna, navegación hamburguesa, modales fullscreen
+- **Tablet (768px - 1023px):** Dos columnas, navegación adaptativa
+- **Desktop (≥ 1024px):** Múltiples columnas, sidebar visible, modales centrados
+
+---
+
+### Tap Targets y Espaciado
+
+**Tamaños mínimos:**
+
+- ✅ Botones y elementos interactivos: **mínimo 44x44px**
+- ✅ Espaciado entre elementos interactivos: **mínimo 8px**
+- ✅ Texto: **mínimo 16px** (evitar zoom automático en iOS)
+
+**Implementación con Tailwind:**
+
+```tsx
+<button className="min-w-[44px] min-h-[44px] px-4 py-2">
+  {/* Contenido */}
+</button>
+
+<div className="flex gap-2"> {/* Mínimo 8px (gap-2 = 0.5rem = 8px) */}
+  {/* Elementos */}
+</div>
+```
+
+---
+
+## Estándares de Estructura
+
+### Organización de Carpetas (Next.js App Router)
+
+**Estructura recomendada:**
+
+```
+frontend/
+├── app/                  # Next.js App Router (rutas, layouts)
+│   ├── (auth)/           # Grupo de rutas de autenticación
+│   │   ├── login/
+│   │   │   └── page.tsx
+│   │   └── layout.tsx
+│   ├── (dashboard)/      # Grupo de rutas del dashboard
+│   │   ├── whatsapp/
+│   │   │   ├── page.tsx
+│   │   │   └── components/  # Componentes específicos del módulo
+│   │   └── layout.tsx
+│   ├── api/              # API routes (si aplica)
+│   ├── layout.tsx        # Layout raíz
+│   └── globals.css       # Estilos globales
+├── components/           # Componentes reutilizables
+│   ├── ui/               # Componentes UI base (shadcn/ui)
+│   │   ├── button.tsx
+│   │   ├── table.tsx
+│   │   ├── modal.tsx
+│   │   └── toast.tsx
+│   └── ...               # Componentes de negocio
+├── lib/                  # Utilidades, cliente API
+│   ├── api/              # Cliente API centralizado
+│   ├── i18n/             # Sistema de traducciones
+│   └── utils/            # Utilidades (cn(), formatters, etc.)
+├── hooks/                # React hooks personalizados
+└── public/               # Assets estáticos
+```
+
+**Reglas:**
+
+- ✅ Usar App Router de Next.js (no Pages Router)
+- ✅ Server Components por defecto, Client Components solo cuando necesario
+- ✅ Agrupar rutas relacionadas con `(grupo)` para layouts compartidos
+- ✅ Componentes específicos del módulo en `app/{modulo}/components/`
+- ✅ Componentes reutilizables en `components/`
+
+---
+
+### Organización de Estilos (Tailwind CSS)
+
+**Arquitectura con Tailwind CSS:**
+
+```
+frontend/
+├── app/
+│   └── globals.css        # Estilos globales, variables CSS, imports de Tailwind
+├── components/
+│   └── ui/                # Componentes UI (shadcn/ui)
+└── lib/
+    └── utils.ts           # Utilidades (cn() para merge de clases)
+```
+
+**Configuración Tailwind (`tailwind.config.ts`):**
+
+```typescript
+import type { Config } from 'tailwindcss';
+
+export default {
+  content: [
+    './app/**/*.{js,ts,jsx,tsx,mdx}',
+    './components/**/*.{js,ts,jsx,tsx,mdx}',
+  ],
+  theme: {
+    extend: {
+      colors: {
+        // Design tokens personalizados
+        primary: {
+          DEFAULT: '#...',
+          dark: '#...',
+        },
+      },
+      spacing: {
+        // Espaciados personalizados si es necesario
+      },
+    },
+  },
+  plugins: [],
+} satisfies Config;
+```
+
+**Reglas:**
+
+- ✅ Usar Tailwind utility classes en lugar de CSS custom
+- ✅ Design tokens en `tailwind.config.ts` (colores, espaciados, etc.)
+- ✅ Componentes UI reutilizables (shadcn/ui o equivalente)
+- ✅ Clases utilitarias de Tailwind (no CSS custom salvo casos excepcionales)
+- ❌ NUNCA hardcodear valores en CSS inline o archivos CSS custom
+
+---
+
+### Componentes UI (shadcn/ui)
+
+**Componentes mínimos requeridos:**
+
+1. **Table/DataTable:**
+   - Paginación serverside para tablas grandes (>100 registros)
+   - Ordenamiento, filtros, búsqueda
+   - Responsive (scroll horizontal o vista de tarjetas en móvil)
+
+2. **Modal/Dialog:**
+   - Diferentes tamaños (sm, md, lg, xl)
+   - Fullscreen en móvil
+   - Swipe to dismiss en móvil (opcional)
+
+3. **Toast:**
+   - Tipos: success, error, warning, info
+   - Auto-dismiss configurable
+   - Stack de múltiples toasts
+
+4. **Form:**
+   - Validación integrada (react-hook-form + zod)
+   - Estados de error por campo
+   - Submit con loading state
+
+5. **EmptyState:**
+   - Mensaje explicativo
+   - Acción opcional (botón)
+   - Icono opcional
+
+6. **Loading:**
+   - Spinner
+   - Skeleton screens
+   - Progress bar
+
+**Regla de Reutilización:**
+
+**Antes de crear componente específico:**
+
+1. Buscar componente existente en `components/ui/`
+2. Si existe, reutilizar o extender
+3. Si no existe, crear componente reutilizable
+4. Documentar props/parámetros con TypeScript interfaces
+
+**Prohibiciones:**
+
+- ❌ NUNCA duplicar funcionalidad de componentes existentes
+- ❌ NUNCA crear componentes específicos por página sin intentar reutilizar
+
+---
+
+## Consumo de API
+
+### Cliente API Centralizado
+
+✅ **OBLIGATORIO usar un cliente API centralizado** (único punto para fetch/Axios/etc.)
+
+**Ubicación:** `lib/api/client.ts` (o equivalente)
+
+**Características obligatorias:**
+
+- Autenticación automática (añadir tokens JWT a headers)
+- Manejo de errores global (traducir claves de error automáticamente)
+- Interceptores para refresh tokens
+- Manejo de estados de carga
+- TypeScript types para requests/responses
+
+**Ejemplo de uso:**
+
+```typescript
+// ✅ CORRECTO
+import { apiClient } from '@/lib/api/client';
+
+const response = await apiClient.get('/api/v1/whatsapp/instances', {
+  params: { page: 1 },
+});
+
+if (response.success) {
+  // Usar response.data
+}
+
+// ❌ PROHIBIDO
+const response = await fetch('/api/v1/whatsapp/instances');
+```
+
+---
+
+### Manejo Estandarizado de Errores
+
+**Formato de respuesta estándar:**
+
+```typescript
+interface ApiResponse<T> {
+  success: boolean;
+  error_key?: string;
+  error_params?: Record<string, any>;
+  data?: T;
+}
+```
+
+**Manejo en frontend:**
+
+```typescript
+try {
+  const response = await apiClient.post('/api/v1/clients', data);
+  if (response.success) {
+    toast.success(t('clients.created_success'));
+  } else {
+    // Error ya traducido por API client
+    toast.error(response.error || t('errors.generic'));
+  }
+} catch (error) {
+  toast.error(t('errors.network_error'));
+}
+```
+
+---
+
+### Estados de Carga
+
+**Manejo obligatorio:**
+
+1. **Mostrar indicador de carga** mientras se obtienen datos
+2. **Ocultar indicador** cuando se reciben datos o error
+3. **Manejar timeout** (mostrar error si la petición tarda demasiado)
+
+**Ejemplo con React:**
+
+```tsx
+const [loading, setLoading] = useState(false);
+const [data, setData] = useState(null);
+
+useEffect(() => {
+  setLoading(true);
+  apiClient.get('/api/v1/endpoint')
+    .then((response) => {
+      if (response.success) {
+        setData(response.data);
+      }
+    })
+    .catch((error) => {
+      toast.error(t('errors.load_failed'));
+    })
+    .finally(() => {
+      setLoading(false);
+    });
+}, []);
+
+if (loading) return <LoadingSpinner />;
+if (!data) return <EmptyState />;
+return <DataDisplay data={data} />;
+```
+
+---
+
+## i18n en Frontend
+
+### Uso Obligatorio de Hooks/Helpers
+
+✅ **SIEMPRE usar función `t()` para texto visible al usuario**
+
+**Ejemplo con hook:**
+
+```tsx
+'use client'; // Client Component
+
+import { useTranslation } from '@/lib/i18n';
+
+export function MyComponent() {
+  const { t } = useTranslation();
+  
+  return (
+    <button>{t('common.save')}</button>
+  );
+}
+```
+
+**En Server Components (Next.js App Router):**
+
+```tsx
+// Server Component
+import { getTranslations } from '@/lib/i18n';
+
+export default async function Page({ params: { locale } }) {
+  const t = await getTranslations(locale);
+  
+  return <h1>{t('clients.title')}</h1>;
+}
+```
+
+**Reglas:**
+
+- ✅ Usar hook `useTranslation()` en Client Components
+- ✅ Usar `getTranslations()` en Server Components
+- ✅ Nunca texto hardcodeado en JSX
+- ✅ Namespaces organizados (`core.auth.login`, `whatsapp.instances.title`, etc.)
+
+---
+
+## Accesibilidad
+
+### Requisitos Mínimos
+
+**Contraste:**
+
+- ✅ Mínimo WCAG AA (4.5:1 para texto normal, 3:1 para texto grande)
+- ✅ Verificar contraste de todos los colores
+
+**Navegación por teclado:**
+
+- ✅ Tab, Enter, Esc funcionan correctamente
+- ✅ Foco visible y claro
+- ✅ Skip links para saltar navegación
+
+**Lectores de pantalla:**
+
+- ✅ ARIA labels donde sea necesario
+- ✅ Atributos `aria-hidden` para elementos decorativos
+- ✅ Estructura semántica HTML correcta
+
+**Ejemplo:**
+
+```tsx
+<button 
+  aria-label="Cerrar modal"
+  aria-describedby="modal-description">
+  <span aria-hidden="true">×</span>
+</button>
+```
+
+---
+
+## Server Components vs Client Components
+
+### Regla General
+
+✅ **Usar Server Components por defecto, Client Components solo cuando necesario**
+
+**Cuándo usar Server Components:**
+
+- Renderizado estático
+- Acceso directo a recursos del backend
+- Reducir JavaScript del bundle
+- Mejor SEO
+
+**Cuándo usar Client Components:**
+
+- Interactividad (onClick, onChange, etc.)
+- Hooks de React (useState, useEffect, etc.)
+- Eventos del navegador
+- APIs del navegador (localStorage, etc.)
+
+**Marcado:**
+
+```tsx
+'use client'; // Solo si es necesario
+
+export function InteractiveComponent() {
+  const [state, setState] = useState();
+  // ...
+}
+```
+
+---
+
+## Checklist de Frontend
+
+**Antes de considerar una tarea completada:**
+
+- [ ] ¿El diseño es mobile-first (probado en móvil)?
+- [ ] ¿Los tap targets son mínimo 44x44px?
+- [ ] ¿Se usa Tailwind CSS (no CSS custom salvo excepciones)?
+- [ ] ¿Se usa el cliente API centralizado (no fetch directo)?
+- [ ] ¿Se manejan estados de carga, error y vacío?
+- [ ] ¿Todos los textos usan función `t()` (no hardcodeados)?
+- [ ] ¿Se usan componentes reutilizables (no duplicados)?
+- [ ] ¿La accesibilidad básica está verificada (contraste, navegación por teclado)?
+- [ ] ¿Los breakpoints responsive funcionan correctamente?
+- [ ] ¿Se usan Server Components cuando es posible?
+- [ ] ¿Los componentes están tipados con TypeScript?
+
+---
+
+## Referencias
+
+- `IA-Specs/02-internacionalizacion-y-ux.mdc` - i18n y UX detallados
+- `IA-Specs/01-saas-architecture-and-stack.mdc` - Arquitectura
+- `LEER/specs/05-frontend-standards.mdc` - Referencia histórica
+- `LEER/specs/standards/css-styleguide.mdc` - Referencia histórica

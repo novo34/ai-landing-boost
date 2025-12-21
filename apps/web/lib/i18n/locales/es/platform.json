@@ -1,0 +1,647 @@
+{
+  "title": "Panel de Administración de Plataforma",
+  "nav": {
+    "dashboard": "Dashboard",
+    "tenants": "Tenants",
+    "billing": "Facturación",
+    "plans": "Planes",
+    "tickets": "Tickets de Soporte",
+    "chat": "Chat con Clientes",
+    "instances": "Instancias",
+    "regions": "Regiones de Datos",
+    "audit": "Auditoría",
+    "operations": {
+      "title": "Operaciones Propias",
+      "agents": "Mis Agentes",
+      "channels": "Mis Canales",
+      "conversations": "Mis Conversaciones",
+      "leads": "Mis Leads",
+      "n8n": "Mis Flujos N8N"
+    },
+    "settings": "Configuración"
+  },
+  "dashboard": {
+    "title": "Dashboard de Plataforma",
+    "metrics": {
+      "tenants": {
+        "total": "Total de Tenants",
+        "active": "Tenants Activos",
+        "trial": "En Trial",
+        "suspended": "Suspendidos",
+        "new_last_30_days": "Nuevos (30 días)"
+      },
+      "users": {
+        "total": "Total de Usuarios",
+        "active_last_30_days": "Activos (30 días)"
+      },
+      "revenue": {
+        "mrr": "MRR",
+        "arr": "ARR",
+        "current_month": "Mes Actual",
+        "previous_month": "Mes Anterior",
+        "growth": "Crecimiento"
+      },
+      "usage": {
+        "agents": "Agentes Activos",
+        "channels": "Canales Configurados",
+        "conversations": "Conversaciones",
+        "messages": "Mensajes Procesados"
+      },
+      "health": {
+        "payment_failed": "Pagos Fallidos",
+        "near_limits": "Cerca de Límites",
+        "avg_response_time": "Tiempo Promedio de Respuesta"
+      }
+    }
+  },
+  "tenants": {
+    "title": "Gestión de Tenants",
+    "list": {
+      "title": "Lista de Tenants",
+      "search_placeholder": "Buscar por nombre, email o slug...",
+      "filters": {
+        "status": "Estado",
+        "plan": "Plan",
+        "country": "País",
+        "date_range": "Rango de Fechas",
+        "subscription_status": "Estado de Suscripción"
+      },
+      "columns": {
+        "name": "Nombre",
+        "slug": "Slug",
+        "status": "Estado",
+        "plan": "Plan",
+        "subscription_status": "Estado Suscripción",
+        "country": "País",
+        "users": "Usuarios",
+        "agents": "Agentes",
+        "created_at": "Fecha de Creación",
+        "last_activity": "Última Actividad",
+        "actions": "Acciones"
+      },
+      "actions": {
+        "view": "Ver Detalles",
+        "edit": "Editar",
+        "suspend": "Suspender",
+        "reactivate": "Reactivar",
+        "delete": "Eliminar",
+        "configure": "Configurar"
+      }
+    },
+    "create": {
+      "title": "Crear Nuevo Tenant",
+      "form": {
+        "name": "Nombre del Tenant",
+        "name_placeholder": "Mi Empresa",
+        "slug": "Slug",
+        "slug_placeholder": "mi-empresa",
+        "country": "País",
+        "country_placeholder": "ES",
+        "data_region": "Región de Datos",
+        "default_locale": "Idioma por Defecto",
+        "time_zone": "Zona Horaria",
+        "time_zone_placeholder": "Europe/Madrid",
+        "owner_email": "Email del Owner",
+        "owner_email_placeholder": "owner@example.com",
+        "owner_name": "Nombre del Owner",
+        "owner_name_placeholder": "John Doe",
+        "initial_plan": "Plan Inicial",
+        "initial_status": "Estado Inicial",
+        "trial_ends_at": "Fin del Trial"
+      },
+      "success": "Tenant creado exitosamente",
+      "error": "Error al crear tenant"
+    },
+    "edit": {
+      "title": "Editar Tenant",
+      "success": "Tenant actualizado exitosamente",
+      "error": "Error al actualizar tenant"
+    },
+    "details": {
+      "title": "Detalles del Tenant",
+      "basic_info": "Información Básica",
+      "subscription": "Suscripción",
+      "metrics": "Métricas",
+      "users": "Usuarios",
+      "history": "Historial",
+      "logs": "Logs de Actividad"
+    },
+    "suspend": {
+      "title": "Suspender Tenant",
+      "confirm": "¿Estás seguro de que deseas suspender este tenant?",
+      "reason": "Razón de suspensión",
+      "reason_placeholder": "Ingresa la razón de la suspensión...",
+      "success": "Tenant suspendido exitosamente",
+      "error": "Error al suspender tenant"
+    },
+    "reactivate": {
+      "title": "Reactivar Tenant",
+      "confirm": "¿Estás seguro de que deseas reactivar este tenant?",
+      "success": "Tenant reactivado exitosamente",
+      "error": "Error al reactivar tenant"
+    },
+    "delete": {
+      "title": "Eliminar Tenant",
+      "confirm": "¿Estás seguro de que deseas eliminar este tenant? Esta acción no se puede deshacer.",
+      "warning": "Se eliminarán:",
+      "warning_users": "{{count}} usuarios",
+      "warning_conversations": "{{count}} conversaciones",
+      "warning_data": "Todos los datos asociados",
+      "success": "Tenant eliminado exitosamente",
+      "error": "Error al eliminar tenant"
+    },
+    "status": {
+      "active": "Activo",
+      "trial": "Trial",
+      "suspended": "Suspendido",
+      "cancelled": "Cancelado"
+    }
+  },
+  "billing": {
+    "title": "Gestión de Facturación",
+    "subscription": {
+      "title": "Suscripción",
+      "plan": "Plan Actual",
+      "status": "Estado",
+      "start_date": "Fecha de Inicio",
+      "next_billing": "Próxima Facturación",
+      "payment_method": "Método de Pago",
+      "change_plan": "Cambiar Plan",
+      "apply_adjustment": "Aplicar Ajuste"
+    },
+    "payment_failed": {
+      "title": "Pagos Fallidos",
+      "days_since_payment": "Días desde último pago",
+      "failed_attempts": "Intentos fallidos",
+      "amount_due": "Monto pendiente",
+      "extend_grace": "Extender Grace Period",
+      "mark_paid": "Marcar como Pagado",
+      "contact": "Contactar Cliente"
+    },
+    "adjustment": {
+      "title": "Aplicar Ajuste",
+      "type": "Tipo",
+      "amount": "Monto",
+      "reason": "Razón",
+      "apply_date": "Fecha de Aplicación",
+      "types": {
+        "discount": "Descuento",
+        "credit": "Crédito",
+        "adjustment": "Ajuste"
+      }
+    }
+  },
+  "plans": {
+    "title": "Gestión de Planes",
+    "list": {
+      "title": "Planes de Suscripción",
+      "columns": {
+        "name": "Nombre",
+        "price_monthly": "Precio Mensual",
+        "price_yearly": "Precio Anual",
+        "limits": "Límites",
+        "status": "Estado",
+        "tenants": "Tenants Suscritos",
+        "revenue": "Ingresos",
+        "actions": "Acciones"
+      }
+    },
+    "create": {
+      "title": "Crear Plan",
+      "form": {
+        "name": "Nombre",
+        "description": "Descripción",
+        "price_monthly": "Precio Mensual (centavos)",
+        "price_yearly": "Precio Anual (centavos)",
+        "currency": "Moneda",
+        "max_agents": "Máximo de Agentes",
+        "max_channels": "Máximo de Canales",
+        "max_messages": "Máximo de Mensajes",
+        "features": "Características"
+      },
+      "success": "Plan creado exitosamente"
+    },
+    "edit": {
+      "title": "Editar Plan",
+      "success": "Plan actualizado exitosamente"
+    },
+    "delete": {
+      "title": "Eliminar Plan",
+      "confirm": "¿Estás seguro de que deseas eliminar este plan?",
+      "warning": "No se puede eliminar si hay tenants suscritos",
+      "success": "Plan eliminado exitosamente"
+    }
+  },
+  "tickets": {
+    "title": "Tickets de Soporte",
+    "list": {
+      "title": "Lista de Tickets",
+      "filters": {
+        "status": "Estado",
+        "category": "Categoría",
+        "priority": "Prioridad",
+        "assigned_to": "Asignado a",
+        "tenant": "Tenant"
+      },
+      "columns": {
+        "id": "ID",
+        "subject": "Asunto",
+        "tenant": "Tenant",
+        "category": "Categoría",
+        "priority": "Prioridad",
+        "status": "Estado",
+        "assigned_to": "Asignado a",
+        "created_at": "Creado",
+        "last_activity": "Última Actividad",
+        "actions": "Acciones"
+      }
+    },
+    "create": {
+      "title": "Crear Ticket",
+      "form": {
+        "subject": "Asunto",
+        "description": "Descripción",
+        "category": "Categoría",
+        "priority": "Prioridad",
+        "tenant": "Tenant (opcional)"
+      },
+      "success": "Ticket creado exitosamente"
+    },
+    "details": {
+      "title": "Detalles del Ticket",
+      "messages": "Mensajes",
+      "add_message": "Agregar Mensaje",
+      "internal_note": "Nota Interna",
+      "assign": "Asignar",
+      "change_status": "Cambiar Estado",
+      "close": "Cerrar"
+    },
+    "status": {
+      "open": "Abierto",
+      "in_progress": "En Progreso",
+      "waiting_client": "Esperando Cliente",
+      "resolved": "Resuelto",
+      "closed": "Cerrado"
+    },
+    "priority": {
+      "low": "Baja",
+      "medium": "Media",
+      "high": "Alta",
+      "critical": "Crítica"
+    },
+    "category": {
+      "technical": "Técnico",
+      "billing": "Facturación",
+      "configuration": "Configuración",
+      "feature_request": "Solicitud de Funcionalidad",
+      "other": "Otro"
+    }
+  },
+  "chat": {
+    "title": "Chat con Clientes",
+    "conversations": {
+      "title": "Conversaciones Activas",
+      "no_conversations": "No hay conversaciones activas",
+      "start_conversation": "Iniciar Conversación",
+      "with_tenant": "con {{tenant}}"
+    },
+    "messages": {
+      "type_message": "Escribe un mensaje...",
+      "send": "Enviar",
+      "file": "Archivo",
+      "image": "Imagen",
+      "typing": "escribiendo...",
+      "online": "En línea",
+      "offline": "Desconectado"
+    }
+  },
+  "instances": {
+    "title": "Gestión de Instancias",
+    "list": {
+      "title": "Instancias del SaaS",
+      "columns": {
+        "name": "Nombre",
+        "domain": "Dominio",
+        "status": "Estado",
+        "tenants": "Tenants",
+        "created_at": "Creada",
+        "actions": "Acciones"
+      }
+    },
+    "create": {
+      "title": "Crear Instancia",
+      "form": {
+        "name": "Nombre",
+        "domain": "Dominio",
+        "database_url": "URL de Base de Datos",
+        "stripe_key": "Clave de Stripe",
+        "n8n_url": "URL de N8N"
+      },
+      "success": "Instancia creada exitosamente"
+    },
+    "switch": {
+      "title": "Cambiar Instancia",
+      "current": "Instancia Actual",
+      "select": "Seleccionar Instancia"
+    }
+  },
+  "regions": {
+    "title": "Regiones de Datos",
+    "list": {
+      "title": "Distribución por Región",
+      "columns": {
+        "region": "Región",
+        "tenants": "Tenants",
+        "compliance": "Cumplimiento",
+        "actions": "Acciones"
+      }
+    },
+    "migrate": {
+      "title": "Migrar Tenant a Otra Región",
+      "confirm": "¿Estás seguro de que deseas migrar este tenant?",
+      "warning": "Esta operación puede tardar varios minutos",
+      "success": "Migración iniciada exitosamente"
+    },
+    "regions": {
+      "eu": "Europa (GDPR)",
+      "ch": "Suiza (nLPD)",
+      "us": "Estados Unidos",
+      "apac": "Asia-Pacífico"
+    }
+  },
+  "audit": {
+    "title": "Logs de Auditoría",
+    "list": {
+      "title": "Historial de Acciones",
+      "filters": {
+        "action": "Acción",
+        "resource_type": "Tipo de Recurso",
+        "resource_id": "ID de Recurso",
+        "user": "Usuario",
+        "date_range": "Rango de Fechas"
+      },
+      "columns": {
+        "timestamp": "Fecha/Hora",
+        "user": "Usuario",
+        "action": "Acción",
+        "resource": "Recurso",
+        "details": "Detalles",
+        "ip": "IP"
+      },
+      "export": "Exportar Logs"
+    },
+    "actions": {
+      "create_tenant": "Crear Tenant",
+      "update_tenant": "Actualizar Tenant",
+      "suspend_tenant": "Suspender Tenant",
+      "reactivate_tenant": "Reactivar Tenant",
+      "delete_tenant": "Eliminar Tenant",
+      "change_plan": "Cambiar Plan",
+      "apply_adjustment": "Aplicar Ajuste"
+    }
+  },
+  "operations": {
+    "agents": {
+      "title": "Mis Agentes",
+      "description": "Agentes para captación de leads y ventas del SaaS"
+    },
+    "channels": {
+      "title": "Mis Canales",
+      "description": "Canales configurados para operaciones propias"
+    },
+    "conversations": {
+      "title": "Mis Conversaciones",
+      "description": "Conversaciones del tenant propio del SaaS"
+    },
+    "leads": {
+      "title": "Mis Leads",
+      "description": "CRM de leads generados por los agentes propios",
+      "pipeline": {
+        "title": "Pipeline de Ventas",
+        "stages": {
+          "lead_captured": "Lead Capturado",
+          "contacted": "Contactado",
+          "qualified": "Calificado",
+          "demo": "Demostración",
+          "proposal": "Propuesta",
+          "negotiation": "Negociación",
+          "closed_won": "Cerrado - Ganado",
+          "closed_lost": "Cerrado - Perdido"
+        }
+      },
+      "create": {
+        "title": "Crear Lead",
+        "form": {
+          "name": "Nombre",
+          "email": "Email",
+          "phone": "Teléfono",
+          "source": "Fuente",
+          "interest": "Interés",
+          "notes": "Notas"
+        }
+      },
+      "add_note": {
+        "title": "Agregar Nota",
+        "placeholder": "Escribe una nota..."
+      }
+    },
+    "n8n": {
+      "title": "Mis Flujos N8N",
+      "description": "Automatización de procesos internos",
+      "categories": {
+        "onboarding": "Onboarding",
+        "notifications": "Notificaciones",
+        "leads": "Leads",
+        "reports": "Reportes",
+        "operations": "Operaciones"
+      },
+      "create": {
+        "title": "Crear Flujo",
+        "form": {
+          "name": "Nombre",
+          "description": "Descripción",
+          "category": "Categoría",
+          "workflow": "Workflow (JSON)"
+        }
+      },
+      "activate": "Activar",
+      "deactivate": "Desactivar",
+      "logs": "Ver Logs"
+    },
+    "settings": {
+      "title": "Configuración",
+      "description": "Configura las opciones de tus operaciones propias",
+      "general": "Configuración General",
+      "general_description": "Ajusta la configuración básica de tus operaciones",
+      "company_placeholder": "Nombre de la empresa",
+      "email_placeholder": "email@ejemplo.com",
+      "phone_placeholder": "+34 600 000 000",
+      "address_placeholder": "Dirección completa",
+      "timezone": "Zona Horaria",
+      "currency": "Moneda",
+      "address": "Dirección"
+    }
+  },
+  "leads": {
+    "title": "CRM de Leads",
+    "list": {
+      "title": "Lista de Leads",
+      "filters": {
+        "status": "Estado",
+        "stage": "Etapa",
+        "source": "Fuente",
+        "assigned_to": "Asignado a"
+      },
+      "columns": {
+        "name": "Nombre",
+        "email": "Email",
+        "phone": "Teléfono",
+        "source": "Fuente",
+        "status": "Estado",
+        "stage": "Etapa",
+        "assigned_to": "Asignado a",
+        "created_at": "Creado",
+        "updated_at": "Actualizado",
+        "actions": "Acciones"
+      }
+    },
+    "pipeline": {
+      "title": "Pipeline de Ventas",
+      "metrics": {
+        "total": "Total",
+        "conversion_rate": "Tasa de Conversión",
+        "by_stage": "Por Etapa",
+        "by_source": "Por Fuente"
+      }
+    },
+    "details": {
+      "title": "Detalles del Lead",
+      "info": "Información",
+      "notes": "Notas",
+      "history": "Historial",
+      "add_note": "Agregar Nota"
+    },
+    "status": {
+      "new": "Nuevo",
+      "contacted": "Contactado",
+      "qualified": "Calificado",
+      "opportunity": "Oportunidad",
+      "customer": "Cliente",
+      "lost": "Perdido"
+    },
+    "stage": {
+      "lead_captured": "Lead Capturado",
+      "contacted": "Contactado",
+      "qualified": "Calificado",
+      "demo": "Demostración",
+      "proposal": "Propuesta",
+      "negotiation": "Negociación",
+      "closed_won": "Cerrado - Ganado",
+      "closed_lost": "Cerrado - Perdido"
+    },
+    "source": {
+      "whatsapp": "WhatsApp",
+      "webchat": "Webchat",
+      "landing": "Landing Page",
+      "manual": "Manual",
+      "import": "Importación"
+    }
+  },
+  "n8n_flows": {
+    "title": "Flujos N8N de Plataforma",
+    "list": {
+      "title": "Flujos de Automatización",
+      "filters": {
+        "category": "Categoría",
+        "is_active": "Estado"
+      },
+      "columns": {
+        "name": "Nombre",
+        "category": "Categoría",
+        "status": "Estado",
+        "created_at": "Creado",
+        "actions": "Acciones"
+      }
+    },
+    "create": {
+      "title": "Crear Flujo",
+      "form": {
+        "name": "Nombre",
+        "description": "Descripción",
+        "category": "Categoría",
+        "workflow": "Workflow (JSON)"
+      },
+      "success": "Flujo creado exitosamente"
+    },
+    "details": {
+      "title": "Detalles del Flujo",
+      "workflow": "Workflow",
+      "executions": "Ejecuciones",
+      "logs": "Logs"
+    },
+    "categories": {
+      "onboarding": "Onboarding",
+      "notifications": "Notificaciones",
+      "leads": "Leads",
+      "reports": "Reportes",
+      "operations": "Operaciones"
+    }
+  },
+  "errors": {
+    "unauthorized": "No tienes permisos para acceder a esta sección",
+    "tenant_not_found": "Tenant no encontrado",
+    "slug_exists": "El slug ya existe",
+    "invalid_email": "Email inválido",
+    "invalid_country": "País inválido",
+    "cannot_suspend_self": "No puedes suspender tu propio tenant",
+    "cannot_delete_self": "No puedes eliminar tu propio tenant",
+    "plan_in_use": "No se puede eliminar un plan con tenants suscritos",
+    "migration_failed": "Error en la migración de datos",
+    "instance_not_found": "Instancia no encontrada",
+    "instance_domain_exists": "El dominio de la instancia ya existe",
+    "instance_has_tenants": "No se puede eliminar una instancia con tenants asignados",
+    "ticket_not_found": "Ticket no encontrado",
+    "ticket_already_closed": "El ticket ya está cerrado",
+    "lead_not_found": "Lead no encontrado",
+    "flow_not_found": "Flujo no encontrado",
+    "flow_already_active": "El flujo ya está activo",
+    "flow_already_inactive": "El flujo ya está inactivo",
+    "flow_not_found_or_not_activated": "Flujo no encontrado o no activado",
+    "n8n_not_configured": "N8N no está configurado",
+    "n8n_connection_error": "Error de conexión con N8N",
+    "n8n_activation_failed": "Error al activar flujo en N8N",
+    "plan_not_found": "Plan no encontrado",
+    "plan_slug_exists": "El slug del plan ya existe",
+    "plan_has_subscriptions": "No se puede eliminar un plan con suscripciones activas"
+  },
+  "success": {
+    "tenant_created": "Tenant creado exitosamente",
+    "tenant_updated": "Tenant actualizado exitosamente",
+    "tenant_suspended": "Tenant suspendido exitosamente",
+    "tenant_reactivated": "Tenant reactivado exitosamente",
+    "tenant_deleted": "Tenant eliminado exitosamente",
+    "plan_changed": "Plan cambiado exitosamente",
+    "plan_created": "Plan creado exitosamente",
+    "plan_updated": "Plan actualizado exitosamente",
+    "plan_deleted": "Plan eliminado exitosamente",
+    "adjustment_applied": "Ajuste aplicado exitosamente",
+    "ticket_created": "Ticket creado exitosamente",
+    "ticket_updated": "Ticket actualizado exitosamente",
+    "ticket_closed": "Ticket cerrado exitosamente",
+    "message_sent": "Mensaje enviado exitosamente",
+    "lead_created": "Lead creado exitosamente",
+    "lead_updated": "Lead actualizado exitosamente",
+    "note_added": "Nota agregada exitosamente",
+    "flow_created": "Flujo creado exitosamente",
+    "flow_updated": "Flujo actualizado exitosamente",
+    "flow_activated": "Flujo activado exitosamente",
+    "flow_deactivated": "Flujo desactivado exitosamente",
+    "flow_deleted": "Flujo eliminado exitosamente",
+    "instance_created": "Instancia creada exitosamente",
+    "instance_updated": "Instancia actualizada exitosamente",
+    "instance_deleted": "Instancia eliminada exitosamente",
+    "tenant_assigned_to_instance": "Tenant asignado a instancia exitosamente",
+    "settings_saved": "Configuración guardada exitosamente",
+    "settings_save_failed": "Error al guardar la configuración"
+  }
+}

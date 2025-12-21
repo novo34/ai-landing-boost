@@ -1,0 +1,1007 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model agent {
+  id                     String                 @id
+  tenantId               String
+  name                   String
+  whatsappAccountId      String
+  status                 agent_status           @default(ACTIVE)
+  languageStrategy       agent_languageStrategy @default(AUTO_DETECT)
+  defaultLanguage        String?
+  personalitySettings    String?                @db.LongText
+  knowledgeCollectionIds String                 @db.LongText
+  calendarIntegrationId  String?
+  n8nWorkflowId          String?
+  createdAt              DateTime               @default(now())
+  updatedAt              DateTime
+  tenant                 tenant                 @relation(fields: [tenantId], references: [id], onDelete: Cascade, map: "Agent_tenantId_fkey")
+  tenantwhatsappaccount  tenantwhatsappaccount  @relation(fields: [whatsappAccountId], references: [id], map: "Agent_whatsappAccountId_fkey")
+  agentcalendarrule      agentcalendarrule[]
+  appointment            appointment[]
+  channelagent           channelagent[]
+  conversation           conversation[]
+  n8nflow                n8nflow[]
+
+  @@index([tenantId], map: "Agent_tenantId_idx")
+  @@index([whatsappAccountId], map: "Agent_whatsappAccountId_idx")
+  @@index([name], map: "Agent_name_idx")
+  @@index([tenantId, status], map: "Agent_tenantId_status_idx")
+}
+
+model agentcalendarrule {
+  id                    String              @id
+  agentId               String
+  calendarIntegrationId String
+  duration              Int
+  availableHours        String              @db.LongText
+  availableDays         String              @db.LongText
+  bufferMinutes         Int                 @default(15)
+  cancellationPolicy    String?             @db.LongText
+  createdAt             DateTime            @default(now())
+  updatedAt             DateTime
+  agent                 agent               @relation(fields: [agentId], references: [id], onDelete: Cascade, map: "AgentCalendarRule_agentId_fkey")
+  calendarintegration   calendarintegration @relation(fields: [calendarIntegrationId], references: [id], onDelete: Cascade, map: "AgentCalendarRule_calendarIntegrationId_fkey")
+
+  @@index([agentId], map: "AgentCalendarRule_agentId_idx")
+  @@index([calendarIntegrationId], map: "AgentCalendarRule_calendarIntegrationId_idx")
+}
+
+model appointment {
+  id               String             @id
+  tenantId         String
+  agentId          String
+  conversationId   String
+  calendarEventId  String?
+  participantPhone String
+  participantName  String?
+  startTime        DateTime
+  endTime          DateTime
+  status           appointment_status @default(PENDING)
+  notes            String?
+  reminderSent     Boolean            @default(false)
+  createdAt        DateTime           @default(now())
+  updatedAt        DateTime
+  agent            agent              @relation(fields: [agentId], references: [id], onDelete: Cascade, map: "Appointment_agentId_fkey")
+  conversation     conversation       @relation(fields: [conversationId], references: [id], onDelete: Cascade, map: "Appointment_conversationId_fkey")
+  tenant           tenant             @relation(fields: [tenantId], references: [id], onDelete: Cascade, map: "Appointment_tenantId_fkey")
+
+  @@index([agentId], map: "Appointment_agentId_idx")
+  @@index([conversationId], map: "Appointment_conversationId_idx")
+  @@index([participantPhone], map: "Appointment_participantPhone_idx")
+  @@index([participantName], map: "Appointment_participantName_idx")
+  @@index([startTime], map: "Appointment_startTime_idx")
+  @@index([status], map: "Appointment_status_idx")
+  @@index([tenantId], map: "Appointment_tenantId_idx")
+}
+
+model calendarintegration {
+  id                String                       @id
+  tenantId          String
+  provider          calendarintegration_provider
+  credentials       String
+  status            String                       @default("ACTIVE")
+  createdAt         DateTime                     @default(now())
+  updatedAt         DateTime
+  agentcalendarrule agentcalendarrule[]
+  tenant            tenant                       @relation(fields: [tenantId], references: [id], onDelete: Cascade, map: "CalendarIntegration_tenantId_fkey")
+
+  @@index([provider], map: "CalendarIntegration_provider_idx")
+  @@index([tenantId], map: "CalendarIntegration_tenantId_idx")
+}
+
+model channel {
+  id           String         @id
+  tenantId     String
+  type         channel_type
+  name         String
+  status       channel_status @default(ACTIVE)
+  config       String?        @db.LongText
+  createdAt    DateTime       @default(now())
+  updatedAt    DateTime
+  tenant       tenant         @relation(fields: [tenantId], references: [id], onDelete: Cascade, map: "Channel_tenantId_fkey")
+  channelagent channelagent[]
+
+  @@index([tenantId], map: "Channel_tenantId_idx")
+  @@index([type, status], map: "Channel_type_status_idx")
+  @@index([tenantId, status], map: "Channel_tenantId_status_idx")
+}
+
+model channelagent {
+  id        String   @id
+  channelId String
+  agentId   String
+  createdAt DateTime @default(now())
+  agent     agent    @relation(fields: [agentId], references: [id], onDelete: Cascade, map: "ChannelAgent_agentId_fkey")
+  channel   channel  @relation(fields: [channelId], references: [id], onDelete: Cascade, map: "ChannelAgent_channelId_fkey")
+
+  @@unique([channelId, agentId], map: "ChannelAgent_channelId_agentId_key")
+  @@index([agentId], map: "ChannelAgent_agentId_idx")
+  @@index([channelId], map: "ChannelAgent_channelId_idx")
+}
+
+model consentlog {
+  id          String   @id
+  tenantId    String
+  userId      String?
+  consentType String
+  granted     Boolean
+  ipAddress   String?
+  userAgent   String?
+  createdAt   DateTime @default(now())
+  tenant      tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade, map: "ConsentLog_tenantId_fkey")
+  user        user?    @relation(fields: [userId], references: [id], onDelete: Cascade, map: "ConsentLog_userId_fkey")
+
+  @@index([consentType], map: "ConsentLog_consentType_idx")
+  @@index([createdAt], map: "ConsentLog_createdAt_idx")
+  @@index([tenantId], map: "ConsentLog_tenantId_idx")
+  @@index([userId], map: "ConsentLog_userId_idx")
+}
+
+model conversation {
+  id                    String                @id
+  tenantId              String
+  whatsappAccountId     String
+  agentId               String?
+  participantPhone      String
+  participantName       String?
+  status                conversation_status   @default(ACTIVE)
+  lastMessageAt         DateTime?
+  unreadCount           Int                   @default(0)
+  metadata              String?               @db.LongText
+  createdAt             DateTime              @default(now())
+  updatedAt             DateTime
+  summary               String?               @db.Text
+  detectedLanguage      String?
+  appointment           appointment[]
+  agent                 agent?                @relation(fields: [agentId], references: [id], map: "Conversation_agentId_fkey")
+  tenant                tenant                @relation(fields: [tenantId], references: [id], onDelete: Cascade, map: "Conversation_tenantId_fkey")
+  tenantwhatsappaccount tenantwhatsappaccount @relation(fields: [whatsappAccountId], references: [id], map: "Conversation_whatsappAccountId_fkey")
+  message               message[]
+
+  @@unique([tenantId, whatsappAccountId, participantPhone], map: "Conversation_tenantId_whatsappAccountId_participantPhone_key")
+  @@index([agentId], map: "Conversation_agentId_fkey")
+  @@index([lastMessageAt], map: "Conversation_lastMessageAt_idx")
+  @@index([participantPhone], map: "Conversation_participantPhone_idx")
+  @@index([participantName], map: "Conversation_participantName_idx")
+  @@index([tenantId], map: "Conversation_tenantId_idx")
+  @@index([whatsappAccountId], map: "Conversation_whatsappAccountId_idx")
+  @@index([tenantId, status], map: "Conversation_tenantId_status_idx")
+  @@index([tenantId, agentId], map: "Conversation_tenantId_agentId_idx")
+  @@index([createdAt], map: "Conversation_createdAt_idx")
+}
+
+model dataretentionpolicy {
+  id            String   @id
+  tenantId      String
+  dataType      String
+  retentionDays Int
+  autoDelete    Boolean  @default(false)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime
+  tenant        tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade, map: "DataRetentionPolicy_tenantId_fkey")
+
+  @@unique([tenantId, dataType], map: "DataRetentionPolicy_tenantId_dataType_key")
+  @@index([dataType], map: "DataRetentionPolicy_dataType_idx")
+  @@index([tenantId], map: "DataRetentionPolicy_tenantId_idx")
+}
+
+model emailverification {
+  id        String   @id
+  userId    String   @unique(map: "EmailVerification_userId_key")
+  token     String   @unique(map: "EmailVerification_token_key")
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+  user      user     @relation(fields: [userId], references: [id], onDelete: Cascade, map: "EmailVerification_userId_fkey")
+
+  @@index([token], map: "EmailVerification_token_idx")
+  @@index([userId], map: "EmailVerification_userId_idx")
+}
+
+model knowledgechunk {
+  id              String          @id
+  sourceId        String
+  tenantId        String
+  content         String          @db.Text
+  chunkIndex      Int
+  embedding       String?         @db.LongText
+  metadata        String?         @db.LongText
+  createdAt       DateTime        @default(now())
+  updatedAt       DateTime
+  knowledgesource knowledgesource @relation(fields: [sourceId], references: [id], onDelete: Cascade, map: "KnowledgeChunk_sourceId_fkey")
+
+  @@index([sourceId], map: "KnowledgeChunk_sourceId_idx")
+  @@index([tenantId], map: "KnowledgeChunk_tenantId_idx")
+  @@index([tenantId, sourceId], map: "KnowledgeChunk_tenantId_sourceId_idx")
+}
+
+model knowledgecollection {
+  id              String            @id
+  tenantId        String
+  name            String
+  description     String?
+  language        String
+  createdAt       DateTime          @default(now())
+  updatedAt       DateTime
+  tenant          tenant            @relation(fields: [tenantId], references: [id], onDelete: Cascade, map: "KnowledgeCollection_tenantId_fkey")
+  knowledgesource knowledgesource[]
+
+  @@index([tenantId], map: "KnowledgeCollection_tenantId_idx")
+  @@index([tenantId, language], map: "KnowledgeCollection_tenantId_language_idx")
+  @@index([name], map: "KnowledgeCollection_name_idx")
+}
+
+model knowledgesource {
+  id                  String               @id
+  tenantId            String
+  collectionId        String?
+  type                knowledgesource_type
+  title               String
+  language            String
+  content             String?              @db.Text
+  url                 String?
+  metadata            String?              @db.LongText
+  createdAt           DateTime             @default(now())
+  updatedAt           DateTime
+  knowledgechunk      knowledgechunk[]
+  knowledgecollection knowledgecollection? @relation(fields: [collectionId], references: [id], map: "KnowledgeSource_collectionId_fkey")
+  tenant              tenant               @relation(fields: [tenantId], references: [id], onDelete: Cascade, map: "KnowledgeSource_tenantId_fkey")
+
+  @@index([collectionId], map: "KnowledgeSource_collectionId_fkey")
+  @@index([tenantId], map: "KnowledgeSource_tenantId_idx")
+  @@index([tenantId, language], map: "KnowledgeSource_tenantId_language_idx")
+  @@index([tenantId, type], map: "KnowledgeSource_tenantId_type_idx")
+  @@index([title], map: "KnowledgeSource_title_idx")
+}
+
+model marketinglead {
+  id          String       @id
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime
+  name        String?
+  email       String
+  phone       String?
+  company     String?
+  message     String?
+  locale      String       @default("es")
+  source      String?
+  utmSource   String?
+  utmMedium   String?
+  utmCampaign String?
+  roiestimate roiestimate?
+
+  @@index([createdAt], map: "MarketingLead_createdAt_idx")
+  @@index([email], map: "MarketingLead_email_idx")
+  @@index([source], map: "MarketingLead_source_idx")
+}
+
+model message {
+  id                String            @id
+  conversationId    String
+  tenantId          String
+  type              message_type
+  direction         message_direction
+  content           String            @db.Text
+  status            message_status    @default(SENT)
+  providerMessageId String?
+  metadata          String?           @db.LongText
+  sentAt            DateTime?
+  deliveredAt       DateTime?
+  readAt            DateTime?
+  createdAt         DateTime          @default(now())
+  updatedAt         DateTime
+  language          String?
+  conversation      conversation      @relation(fields: [conversationId], references: [id], onDelete: Cascade, map: "Message_conversationId_fkey")
+
+  @@index([conversationId], map: "Message_conversationId_idx")
+  @@index([createdAt], map: "Message_createdAt_idx")
+  @@index([providerMessageId], map: "Message_providerMessageId_idx")
+  @@index([tenantId], map: "Message_tenantId_idx")
+}
+
+model n8nflow {
+  id          String       @id
+  tenantId    String
+  agentId     String?
+  workflowId  String
+  type        n8nflow_type
+  name        String
+  description String?
+  isActive    Boolean      @default(true)
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime
+  agent       agent?       @relation(fields: [agentId], references: [id], map: "N8nFlow_agentId_fkey")
+  tenant      tenant       @relation(fields: [tenantId], references: [id], onDelete: Cascade, map: "N8nFlow_tenantId_fkey")
+
+  @@index([agentId], map: "N8nFlow_agentId_idx")
+  @@index([isActive], map: "N8nFlow_isActive_idx")
+  @@index([tenantId], map: "N8nFlow_tenantId_idx")
+  @@index([type], map: "N8nFlow_type_idx")
+  @@index([workflowId], map: "N8nFlow_workflowId_idx")
+}
+
+model roiestimate {
+  id                String        @id
+  createdAt         DateTime      @default(now())
+  numPeople         Int
+  hoursPerWeek      Float
+  hourlyCost        Float
+  automationRate    Float
+  yearlyHours       Float
+  currentYearlyCost Float
+  estimatedSavings  Float
+  projectBudgetMin  Float
+  projectBudgetMax  Float
+  monthlyRetainer   Float
+  leadId            String        @unique(map: "RoiEstimate_leadId_key")
+  marketinglead     marketinglead @relation(fields: [leadId], references: [id], onDelete: Cascade, map: "RoiEstimate_leadId_fkey")
+
+  @@index([leadId], map: "RoiEstimate_leadId_idx")
+}
+
+model subscriptionplan {
+  id                 String                    @id
+  name               String
+  slug               String                    @unique(map: "SubscriptionPlan_slug_key")
+  description        String?
+  currency           String
+  priceCents         Int
+  interval           subscriptionplan_interval
+  maxAgents          Int?
+  maxChannels        Int?
+  createdAt          DateTime                  @default(now())
+  updatedAt          DateTime
+  tenantsubscription tenantsubscription[]
+}
+
+model teaminvitation {
+  id        String                @id
+  tenantId  String
+  email     String
+  role      teaminvitation_role
+  token     String                @unique(map: "TeamInvitation_token_key")
+  invitedBy String
+  status    teaminvitation_status @default(PENDING)
+  expiresAt DateTime
+  createdAt DateTime              @default(now())
+  updatedAt DateTime
+  user      user                  @relation(fields: [invitedBy], references: [id], map: "TeamInvitation_invitedBy_fkey")
+  tenant    tenant                @relation(fields: [tenantId], references: [id], onDelete: Cascade, map: "TeamInvitation_tenantId_fkey")
+
+  @@unique([tenantId, email, status], map: "TeamInvitation_tenantId_email_status_key")
+  @@index([email], map: "TeamInvitation_email_idx")
+  @@index([invitedBy], map: "TeamInvitation_invitedBy_fkey")
+  @@index([tenantId], map: "TeamInvitation_tenantId_idx")
+  @@index([token], map: "TeamInvitation_token_idx")
+}
+
+model tenant {
+  id                    String                  @id
+  name                  String
+  slug                  String                  @unique(map: "Tenant_slug_key")
+  country               String?
+  defaultLocale         String?
+  dataRegion            String?
+  trialEndsAt           DateTime?
+  status                tenant_status           @default(ACTIVE)
+  instanceId            String?
+  createdAt             DateTime                @default(now())
+  updatedAt             DateTime
+  agent                 agent[]
+  appointment           appointment[]
+  calendarintegration   calendarintegration[]
+  channel               channel[]
+  consentlog            consentlog[]
+  conversation          conversation[]
+  dataretentionpolicy   dataretentionpolicy[]
+  knowledgecollection   knowledgecollection[]
+  knowledgesource       knowledgesource[]
+  n8nflow               n8nflow[]
+  teaminvitation        teaminvitation[]
+  tenantmembership      tenantmembership[]
+  tenantsettings        tenantsettings?
+  tenantsubscription    tenantsubscription?
+  tenantwhatsappaccount tenantwhatsappaccount[]
+  notification          notification[]
+  supporttickets        supportticket[]
+  platformchatmessages  platformchatmessage[]
+  platforminstance      platforminstance?       @relation(fields: [instanceId], references: [id], onDelete: SetNull)
+  tenantsmtpsettings    tenantsmtpsettings?
+  emailoutbox           emailoutbox[]
+  
+  @@index([instanceId], map: "Tenant_instanceId_idx")
+}
+
+model notification {
+  id          String            @id
+  tenantId    String
+  userId      String
+  type        notification_type
+  title       String
+  description String?           @db.Text
+  read        Boolean           @default(false)
+  readAt      DateTime?
+  actionUrl   String?
+  metadata    Json?
+  createdAt   DateTime          @default(now())
+  updatedAt   DateTime
+  tenant      tenant            @relation(fields: [tenantId], references: [id], onDelete: Cascade, map: "Notification_tenantId_fkey")
+  user        user              @relation(fields: [userId], references: [id], onDelete: Cascade, map: "Notification_userId_fkey")
+
+  @@index([tenantId, userId], map: "Notification_tenantId_userId_idx")
+  @@index([userId, read], map: "Notification_userId_read_idx")
+  @@index([createdAt], map: "Notification_createdAt_idx")
+}
+
+model tenantmembership {
+  id        String                @id
+  userId    String
+  tenantId  String
+  role      tenantmembership_role @default(AGENT)
+  createdAt DateTime              @default(now())
+  updatedAt DateTime
+  tenant    tenant                @relation(fields: [tenantId], references: [id], onDelete: Cascade, map: "TenantMembership_tenantId_fkey")
+  user      user                  @relation(fields: [userId], references: [id], onDelete: Cascade, map: "TenantMembership_userId_fkey")
+
+  @@unique([userId, tenantId], map: "TenantMembership_userId_tenantId_key")
+  @@index([tenantId], map: "TenantMembership_tenantId_idx")
+  @@index([userId], map: "TenantMembership_userId_idx")
+  @@index([tenantId, role], map: "TenantMembership_tenantId_role_idx")
+}
+
+model tenantsettings {
+  id               String   @id
+  tenantId         String   @unique(map: "TenantSettings_tenantId_key")
+  defaultLocale    String   @default("es")
+  timeZone         String   @default("Europe/Madrid")
+  country          String
+  dataRegion       String
+  whatsappProvider String   @default("NONE")
+  calendarProvider String   @default("NONE")
+  businessType     String?
+  industryNotes    String?
+  logoUrl          String?
+  primaryColor     String?
+  secondaryColor   String?
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime
+  tenant           tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade, map: "TenantSettings_tenantId_fkey")
+}
+
+model tenantsubscription {
+  id                   String                    @id
+  tenantId             String                    @unique(map: "TenantSubscription_tenantId_key")
+  planId               String
+  status               tenantsubscription_status @default(TRIAL)
+  trialEndsAt          DateTime?
+  currentPeriodEnd     DateTime?
+  cancelAtPeriodEnd    Boolean                   @default(false)
+  country              String
+  stripeCustomerId     String?
+  stripeSubscriptionId String?
+  createdAt            DateTime                  @default(now())
+  updatedAt            DateTime
+  blockedAt            DateTime?
+  gracePeriodEndsAt    DateTime?
+  lastPaymentAt        DateTime?
+  nextBillingDate      DateTime?
+  subscriptionplan     subscriptionplan          @relation(fields: [planId], references: [id], map: "TenantSubscription_planId_fkey")
+  tenant               tenant                    @relation(fields: [tenantId], references: [id], onDelete: Cascade, map: "TenantSubscription_tenantId_fkey")
+
+  @@index([planId], map: "TenantSubscription_planId_fkey")
+}
+
+model tenantwhatsappaccount {
+  id            String                         @id
+  tenantId      String
+  provider      tenantwhatsappaccount_provider
+  phoneNumber   String
+  status        tenantwhatsappaccount_status   @default(PENDING)
+  credentials   String
+  instanceName  String?
+  displayName   String?
+  qrCodeUrl     String?
+  connectedAt   DateTime?
+  lastCheckedAt DateTime?
+  createdAt     DateTime                       @default(now())
+  updatedAt     DateTime
+  agent         agent[]
+  conversation  conversation[]
+  tenant        tenant                         @relation(fields: [tenantId], references: [id], onDelete: Cascade, map: "TenantWhatsAppAccount_tenantId_fkey")
+
+  @@unique([tenantId, phoneNumber], map: "TenantWhatsAppAccount_tenantId_phoneNumber_key")
+  @@index([provider, status], map: "TenantWhatsAppAccount_provider_status_idx")
+  @@index([tenantId], map: "TenantWhatsAppAccount_tenantId_idx")
+}
+
+model user {
+  id                    String                 @id
+  email                 String                 @unique(map: "User_email_key")
+  passwordHash          String?
+  name                  String?
+  locale                String?
+  timeZone              String?
+  platformRole          platform_role?
+  createdAt             DateTime               @default(now())
+  updatedAt             DateTime
+  emailVerified         Boolean                @default(false)
+  consentlog             consentlog[]
+  emailverification     emailverification?
+  teaminvitation        teaminvitation[]
+  tenantmembership      tenantmembership[]
+  useridentity          useridentity[]
+  notification          notification[]
+  platformauditlog      platformauditlog[]
+  supportTicketsCreated supportticket[]         @relation("TicketCreatedBy")
+  supportTicketsAssigned supportticket[]        @relation("TicketAssignedTo")
+  ticketmessages        ticketmessage[]
+  platformchatmessages  platformchatmessage[]
+  leadsAssigned         lead[]
+  leadnotes             leadnote[]
+  emailsettingsauditlog emailsettingsauditlog[]
+}
+
+model useridentity {
+  id           String    @id
+  userId       String
+  provider     String
+  providerId   String
+  email        String
+  name         String?
+  picture      String?
+  accessToken  String?
+  refreshToken String?
+  expiresAt    DateTime?
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime
+  user         user      @relation(fields: [userId], references: [id], onDelete: Cascade, map: "UserIdentity_userId_fkey")
+
+  @@unique([provider, providerId], map: "UserIdentity_provider_providerId_key")
+  @@unique([userId, provider], map: "UserIdentity_userId_provider_key")
+  @@index([provider, providerId], map: "UserIdentity_provider_providerId_idx")
+  @@index([userId], map: "UserIdentity_userId_idx")
+}
+
+enum calendarintegration_provider {
+  CAL_COM
+  GOOGLE
+  CUSTOM
+}
+
+enum channel_type {
+  WHATSAPP
+  VOICE
+  WEBCHAT
+  TELEGRAM
+}
+
+enum tenantwhatsappaccount_provider {
+  EVOLUTION_API
+  WHATSAPP_CLOUD
+}
+
+enum knowledgesource_type {
+  FAQ
+  DOC
+  URL_SCRAPE
+  MANUAL_ENTRY
+  CALENDAR
+  CRM
+}
+
+enum message_type {
+  TEXT
+  IMAGE
+  DOCUMENT
+  AUDIO
+  VIDEO
+  LOCATION
+  CONTACT
+}
+
+enum teaminvitation_role {
+  OWNER
+  ADMIN
+  AGENT
+  VIEWER
+}
+
+enum tenantmembership_role {
+  OWNER
+  ADMIN
+  AGENT
+  VIEWER
+}
+
+enum tenantsubscription_status {
+  TRIAL
+  TRIAL_EXPIRED
+  ACTIVE
+  PAST_DUE
+  CANCELLED
+  BLOCKED
+}
+
+enum agent_status {
+  ACTIVE
+  PAUSED
+  DISABLED
+}
+
+enum channel_status {
+  ACTIVE
+  INACTIVE
+  ERROR
+}
+
+enum message_direction {
+  INBOUND
+  OUTBOUND
+}
+
+enum n8nflow_type {
+  LEAD_INTAKE
+  BOOKING_FLOW
+  FOLLOWUP
+  PAYMENT_FAILED
+  CUSTOM
+}
+
+enum tenantwhatsappaccount_status {
+  PENDING
+  CONNECTED
+  DISCONNECTED
+  ERROR
+}
+
+enum agent_languageStrategy {
+  AUTO_DETECT
+  FIXED
+  MULTI_LANGUAGE
+}
+
+enum conversation_status {
+  ACTIVE
+  ARCHIVED
+  BLOCKED
+}
+
+enum message_status {
+  SENT
+  DELIVERED
+  READ
+  FAILED
+}
+
+enum subscriptionplan_interval {
+  MONTHLY
+  YEARLY
+}
+
+enum teaminvitation_status {
+  PENDING
+  ACCEPTED
+  REJECTED
+  EXPIRED
+}
+
+enum tenant_status {
+  ACTIVE
+  TRIAL
+  SUSPENDED
+  CANCELLED
+}
+
+enum platform_role {
+  PLATFORM_OWNER
+  PLATFORM_ADMIN
+  PLATFORM_SUPPORT
+}
+
+model platformauditlog {
+  id          String        @id @default(cuid())
+  userId      String
+  action      String
+  resourceType String
+  resourceId  String?
+  metadata    Json?
+  ipAddress   String?
+  userAgent   String?
+  createdAt   DateTime      @default(now())
+  user        user           @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId], map: "PlatformAuditLog_userId_idx")
+  @@index([action], map: "PlatformAuditLog_action_idx")
+  @@index([resourceType, resourceId], map: "PlatformAuditLog_resourceType_resourceId_idx")
+  @@index([createdAt], map: "PlatformAuditLog_createdAt_idx")
+  @@map("PlatformAuditLog")
+}
+
+enum appointment_status {
+  PENDING
+  CONFIRMED
+  CANCELLED
+  COMPLETED
+  NO_SHOW
+}
+
+enum notification_type {
+  MESSAGE_RECEIVED
+  MESSAGE_FAILED
+  CONVERSATION_NEW
+  APPOINTMENT_CREATED
+  APPOINTMENT_CONFIRMED
+  APPOINTMENT_CANCELLED
+  APPOINTMENT_RESCHEDULED
+  APPOINTMENT_REMINDER
+  TEAM_INVITATION_ACCEPTED
+  TEAM_INVITATION_REJECTED
+  TEAM_MEMBER_ADDED
+  TEAM_ROLE_CHANGED
+  TEAM_MEMBER_REMOVED
+  TEAM_OWNERSHIP_TRANSFERRED
+  PLAN_LIMIT_WARNING
+  PLAN_LIMIT_REACHED
+  BILLING_LIMIT_REACHED
+  TRIAL_EXPIRING
+  PAYMENT_FAILED
+  BILLING_PAYMENT_FAILED
+  BILLING_SUBSCRIPTION_CANCELLED
+}
+
+// ============================================
+// PLATFORM MANAGEMENT MODELS
+// ============================================
+
+// Support Tickets
+model supportticket {
+  id            String          @id @default(cuid())
+  tenantId      String?
+  createdById   String?
+  assignedToId  String?
+  subject       String
+  description   String          @db.Text
+  category      String          // TECHNICAL, BILLING, CONFIGURATION, FEATURE_REQUEST, OTHER
+  priority      String          // LOW, MEDIUM, HIGH, CRITICAL
+  status        String          @default("OPEN") // OPEN, IN_PROGRESS, WAITING_CLIENT, RESOLVED, CLOSED
+  createdAt     DateTime        @default(now())
+  updatedAt     DateTime        @updatedAt
+  lastActivityAt DateTime       @default(now())
+  
+  tenant        tenant?         @relation(fields: [tenantId], references: [id], onDelete: SetNull)
+  createdBy     user?           @relation("TicketCreatedBy", fields: [createdById], references: [id], onDelete: SetNull)
+  assignedTo    user?           @relation("TicketAssignedTo", fields: [assignedToId], references: [id], onDelete: SetNull)
+  messages      ticketmessage[]
+  
+  @@index([status], map: "SupportTicket_status_idx")
+  @@index([category], map: "SupportTicket_category_idx")
+  @@index([priority], map: "SupportTicket_priority_idx")
+  @@index([tenantId], map: "SupportTicket_tenantId_idx")
+  @@index([assignedToId], map: "SupportTicket_assignedToId_idx")
+  @@index([createdAt], map: "SupportTicket_createdAt_idx")
+  @@map("SupportTicket")
+}
+
+model ticketmessage {
+  id          String        @id @default(cuid())
+  ticketId    String
+  userId      String
+  message     String        @db.Text
+  isInternal  Boolean       @default(false)
+  createdAt   DateTime      @default(now())
+  
+  ticket      supportticket @relation(fields: [ticketId], references: [id], onDelete: Cascade)
+  user        user          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  @@index([ticketId], map: "TicketMessage_ticketId_idx")
+  @@index([createdAt], map: "TicketMessage_createdAt_idx")
+  @@map("TicketMessage")
+}
+
+// Platform Chat
+model platformchatmessage {
+  id        String   @id @default(cuid())
+  tenantId  String
+  userId    String
+  message   String   @db.Text
+  createdAt DateTime @default(now())
+  
+  tenant    tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  user      user     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  @@index([tenantId], map: "PlatformChatMessage_tenantId_idx")
+  @@index([createdAt], map: "PlatformChatMessage_createdAt_idx")
+  @@map("PlatformChatMessage")
+}
+
+// CRM Leads
+model lead {
+  id            String     @id @default(cuid())
+  name          String
+  email         String
+  phone         String?
+  source        String     // WHATSAPP, WEBCHAT, LANDING, MANUAL, IMPORT, etc.
+  interest      String?    // Plan de interés
+  status        String     @default("NEW") // NEW, CONTACTED, QUALIFIED, OPPORTUNITY, CUSTOMER, LOST
+  stage         String     @default("LEAD_CAPTURED") // LEAD_CAPTURED, CONTACTED, QUALIFIED, DEMO, PROPOSAL, NEGOTIATION, CLOSED_WON, CLOSED_LOST
+  assignedToId  String?
+  conversationId String?
+  notes         String?    @db.Text
+  createdAt     DateTime   @default(now())
+  updatedAt     DateTime   @updatedAt
+  
+  assignedTo    user?      @relation(fields: [assignedToId], references: [id], onDelete: SetNull)
+  leadnotes     leadnote[]
+  
+  @@index([status], map: "Lead_status_idx")
+  @@index([stage], map: "Lead_stage_idx")
+  @@index([assignedToId], map: "Lead_assignedToId_idx")
+  @@index([source], map: "Lead_source_idx")
+  @@index([createdAt], map: "Lead_createdAt_idx")
+  @@map("Lead")
+}
+
+model leadnote {
+  id        String   @id @default(cuid())
+  leadId    String
+  userId    String
+  note      String   @db.Text
+  createdAt DateTime @default(now())
+  
+  lead      lead     @relation(fields: [leadId], references: [id], onDelete: Cascade)
+  user      user     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  @@index([leadId], map: "LeadNote_leadId_idx")
+  @@map("LeadNote")
+}
+
+// Multi-Instance
+model platforminstance {
+  id          String   @id @default(cuid())
+  name        String
+  domain      String   @unique
+  databaseUrl String
+  stripeKey   String?  @db.Text
+  n8nUrl      String?
+  status      String   @default("ACTIVE") // ACTIVE, INACTIVE, MAINTENANCE
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  
+  tenants     tenant[]
+  
+  @@index([status], map: "PlatformInstance_status_idx")
+  @@map("PlatformInstance")
+}
+
+// Platform N8N Flows
+model platformn8nflow {
+  id            String   @id @default(cuid())
+  name          String
+  description   String?  @db.Text
+  workflow      Json     // Workflow completo de N8N
+  category      String   // ONBOARDING, NOTIFICATIONS, LEADS, REPORTS, OPERATIONS
+  isActive      Boolean  @default(false)
+  n8nWorkflowId String?
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+  
+  @@index([category], map: "PlatformN8NFlow_category_idx")
+  @@index([isActive], map: "PlatformN8NFlow_isActive_idx")
+  @@map("PlatformN8NFlow")
+}
+
+// ============================================
+// EMAIL DELIVERY MODELS
+// ============================================
+
+// Configuración SMTP por Tenant
+model tenantsmtpsettings {
+  id          String   @id @default(cuid())
+  tenantId    String   @unique
+  fromName    String
+  fromEmail   String
+  replyTo     String?
+  host        String
+  port        Int
+  secure      Boolean  @default(false)
+  username    String
+  password    String   @db.Text // Cifrado con AES-256-GCM
+  tls         Json?    // Configuración TLS opcional
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  updatedBy   String?  // userId que actualizó
+  
+  tenant      tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  
+  @@index([tenantId])
+  @@map("TenantSmtpSettings")
+}
+
+// Configuración SMTP Global del Platform
+model platformsmtpsettings {
+  id          String   @id @default(cuid())
+  fromName    String
+  fromEmail   String
+  replyTo     String?
+  host        String
+  port        Int
+  secure      Boolean  @default(false)
+  username    String
+  password    String   @db.Text // Cifrado con AES-256-GCM
+  tls         Json?    // Configuración TLS opcional
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  updatedBy   String?  // userId que actualizó
+  
+  @@map("PlatformSmtpSettings")
+}
+
+// Enum para estados del outbox
+enum emailoutboxstatus {
+  QUEUED
+  SENDING
+  SENT
+  FAILED
+  CANCELLED
+}
+
+// Cola de Envíos (Outbox Pattern)
+model emailoutbox {
+  id              String              @id @default(cuid())
+  tenantId        String?             // null para emails del platform
+  idempotencyKey  String               @unique
+  to              String
+  cc              Json?                // Array de strings
+  bcc             Json?                // Array de strings
+  subject         String
+  body            String               @db.Text
+  bodyType        String               @default("html") // "html" | "text"
+  status          emailoutboxstatus    @default(QUEUED)
+  attempts        Int                  @default(0)
+  maxAttempts     Int                  @default(5)
+  nextRetryAt     DateTime?
+  lastError       String?              @db.Text
+  sentAt          DateTime?
+  provider        String               @default("TENANT") // "TENANT" | "PLATFORM"
+  metadata        Json?                // Datos adicionales
+  createdAt       DateTime             @default(now())
+  updatedAt       DateTime             @updatedAt
+  
+  tenant          tenant?               @relation(fields: [tenantId], references: [id], onDelete: SetNull)
+  
+  @@index([tenantId, status])
+  @@index([status, nextRetryAt])
+  @@index([idempotencyKey])
+  @@index([createdAt])
+  @@map("EmailOutbox")
+}
+
+// Logs de Auditoría de Configuración SMTP
+model emailsettingsauditlog {
+  id          String   @id @default(cuid())
+  userId      String
+  tenantId    String?  // null si es cambio global
+  action      String   // "CREATE" | "UPDATE" | "DELETE"
+  field       String?  // Campo modificado (opcional)
+  oldValue    String?  @db.Text // Hash para password
+  newValue    String?  @db.Text // Hash para password
+  ipAddress   String?
+  userAgent   String?
+  createdAt   DateTime @default(now())
+  
+  user        user     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  @@index([userId])
+  @@index([tenantId])
+  @@index([action])
+  @@index([createdAt])
+  @@map("EmailSettingsAuditLog")
+}

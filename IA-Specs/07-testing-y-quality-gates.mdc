@@ -1,0 +1,490 @@
+# Testing y Quality Gates
+
+> **Versión:** 1.0  
+> **Fecha:** 2025-01-XX  
+> **Referencia:** `LEER/specs/08-testing-and-acceptance.mdc`, `LEER/specs/standards/testing.mdc`
+
+---
+
+## Tipos de Pruebas Exigidas
+
+### Tests Unitarios
+
+**Objetivo:** Probar funciones/métodos individuales de forma aislada
+
+**Backend (Jest/Vitest):**
+- Funciones de validación
+- Helpers y utilidades
+- Servicios de dominio (con mocks de Prisma)
+
+**Frontend (Jest/Vitest + React Testing Library):**
+- Funciones puras
+- Helpers y utilidades
+- Componentes React (con React Testing Library)
+
+**Ejemplo Backend (Jest):**
+
+```typescript
+// tests/helpers/validation.spec.ts
+import { validateEmail } from '@/helpers/validation';
+
+describe('validateEmail', () => {
+  it('should return true for valid email', () => {
+    expect(validateEmail('test@example.com')).toBe(true);
+  });
+
+  it('should return false for invalid email', () => {
+    expect(validateEmail('invalid')).toBe(false);
+  });
+});
+```
+
+**Ejemplo Frontend (Jest + React Testing Library):**
+
+```typescript
+// frontend/__tests__/utils/format.test.ts
+import { formatDate } from '@/lib/utils/format';
+
+describe('formatDate', () => {
+  it('should format date correctly', () => {
+    expect(formatDate('2025-01-15')).toBe('15/01/2025');
+  });
+});
+```
+
+---
+
+### Tests de Integración
+
+**Objetivo:** Probar interacción entre componentes/módulos
+
+**Backend (Jest + Supertest):**
+- Endpoints API completos (con Guards)
+- Integración con base de datos (test database)
+- Flujos de negocio completos
+
+**Frontend (Jest + React Testing Library):**
+- Integración de componentes
+- Flujos de usuario completos
+- Integración con API (mocks)
+
+**Ejemplo Backend (Jest + Supertest):**
+
+```typescript
+// tests/integration/clients.e2e-spec.ts
+import { Test, TestingModule } from '@nestjs/testing';
+import { INestApplication } from '@nestjs/common';
+import * as request from 'supertest';
+import { AppModule } from '@/app.module';
+
+describe('ClientsController (e2e)', () => {
+  let app: INestApplication;
+
+  beforeEach(async () => {
+    const moduleFixture: TestingModule = await Test.createTestingModule({
+      imports: [AppModule],
+    }).compile();
+
+    app = moduleFixture.createNestApplication();
+    await app.init();
+  });
+
+  it('/api/v1/clients (POST)', () => {
+    return request(app.getHttpServer())
+      .post('/api/v1/clients')
+      .set('Authorization', `Bearer ${token}`)
+      .send({ name: 'Test Client', email: 'test@example.com' })
+      .expect(201)
+      .expect((res) => {
+        expect(res.body.success).toBe(true);
+        expect(res.body.data.name).toBe('Test Client');
+      });
+  });
+});
+```
+
+---
+
+### Tests End-to-End (E2E)
+
+**Objetivo:** Probar flujos completos de usuario (cuando sean viables)
+
+**Herramientas:**
+- **Playwright** (recomendado) o **Cypress**
+- Tests automatizados en navegador real
+
+**Cuándo usar:**
+- Flujos críticos de negocio
+- Flujos que involucran múltiples módulos
+- Flujos que requieren interacción frontend + backend
+
+**Ejemplo (Playwright):**
+
+```typescript
+// tests/e2e/login.spec.ts
+import { test, expect } from '@playwright/test';
+
+test('user can login and access dashboard', async ({ page }) => {
+  await page.goto('/login');
+  await page.fill('[name="email"]', 'user@example.com');
+  await page.fill('[name="password"]', 'password123');
+  await page.click('button[type="submit"]');
+  
+  await expect(page).toHaveURL('/dashboard');
+  await expect(page.locator('h1')).toContainText('Dashboard');
+});
+```
+
+---
+
+## Reglas Mínimas de Cobertura
+
+### Módulos Críticos
+
+**Cobertura mínima requerida:**
+
+- **Multitenancy:** 100% (tests de aislamiento obligatorios)
+- **RBAC:** 100% (tests de permisos obligatorios)
+- **Autenticación:** 100% (tests de login, tokens, etc.)
+- **Validación de entrada:** 80% mínimo
+- **Lógica de negocio crítica:** 80% mínimo
+
+**Módulos no críticos:**
+
+- **Cobertura recomendada:** 60% mínimo
+- **Cobertura ideal:** 80%+
+
+---
+
+## Quality Gates
+
+### Regla Absoluta: No Merge If Red
+
+❌ **NUNCA considerar un build-all completado si los tests no pasan al 100%**
+
+**Definición de Build-All:**
+
+Ejecución de TODOS los tests disponibles en el proyecto:
+- ✅ Todos los tests backend en `/tests/*.spec.ts` (Jest/Vitest)
+- ✅ Todos los tests frontend en `/frontend/__tests__/*.test.tsx` (Jest + React Testing Library)
+- ✅ Tests de aislamiento multitenancy (OBLIGATORIOS)
+- ✅ Tests E2E (Playwright/Cypress) para flujos críticos
+- ✅ Lint + format (ESLint + Prettier)
+- ✅ TypeScript sin errores de tipo
+
+---
+
+### Proceso Obligatorio
+
+**Antes de considerar cualquier tarea `develop-*` completada:**
+
+1. Ejecutar build-all (todos los tests)
+2. Verificar que exit code = 0 para TODOS los tests
+3. Si algún test falla:
+   - ❌ PROHIBIDO considerar la tarea completada
+   - ❌ PROHIBIDO preguntar al usuario qué hacer
+   - ✅ OBLIGATORIO auto-corregir el código automáticamente
+   - ✅ OBLIGATORIO re-ejecutar el test que falló
+   - ✅ OBLIGATORIO repetir hasta que exit code = 0
+   - ✅ OBLIGATORIO re-ejecutar build-all completo después de correcciones
+
+4. Solo cuando build-all completo pasa (exit code 0 para todos):
+   - ✅ Marcar tarea como completada
+   - ✅ Documentar resultado: "Build-All: ✅ Passed (X/X tests)"
+
+---
+
+### Tests Obligatorios en Build-All
+
+**SIEMPRE deben estar incluidos:**
+
+- ✅ `tests/tenancy_isolation.spec.ts` - **CRÍTICO** (aislamiento multitenancy)
+- ✅ Todos los tests relacionados con el cambio
+- ✅ Tests frontend si el cambio afecta frontend
+- ✅ Lint y format check (ESLint + Prettier)
+- ✅ TypeScript type check
+
+---
+
+## Quality Gates por Área
+
+### Check de i18n
+
+**Verificaciones:**
+
+- [ ] ¿Todos los textos visibles usan claves de traducción?
+- [ ] ¿Se crearon traducciones en TODOS los idiomas mínimos (es, de, en)?
+- [ ] ¿No hay texto hardcodeado en código?
+
+**Script de verificación (recomendado):**
+
+```bash
+# Buscar strings literales en TypeScript (backend)
+grep -r "throw new.*Exception.*'[A-Z]" src/ | grep -v "error_key"
+
+# Buscar strings literales en TSX (frontend)
+grep -r ">[A-Z][a-z]" app/ components/ | grep -v "t(" | grep -v "aria-label"
+```
+
+---
+
+### Check de Multitenancy
+
+**Verificaciones:**
+
+- [ ] ¿Todas las queries Prisma incluyen `tenantId` en WHERE?
+- [ ] ¿El `tenantId` viene del TenantGuard (nunca del cliente)?
+- [ ] ¿Tests de aislamiento multitenancy pasan?
+
+**Test obligatorio:**
+
+```typescript
+// tests/tenancy_isolation.spec.ts
+import { Test, TestingModule } from '@nestjs/testing';
+import { PrismaService } from '@/prisma/prisma.service';
+
+describe('Tenant Isolation', () => {
+  let prisma: PrismaService;
+
+  beforeEach(async () => {
+    const module: TestingModule = await Test.createTestingModule({
+      providers: [PrismaService],
+    }).compile();
+
+    prisma = module.get<PrismaService>(PrismaService);
+  });
+
+  it('should isolate resources by tenant', async () => {
+    // Crear dos tenants
+    const tenant1 = await prisma.tenant.create({ data: { name: 'Tenant 1' } });
+    const tenant2 = await prisma.tenant.create({ data: { name: 'Tenant 2' } });
+    
+    // Crear recurso en tenant1
+    const resource1 = await prisma.client.create({
+      data: { name: 'Resource 1', tenantId: tenant1.id },
+    });
+    
+    // Intentar acceder desde tenant2
+    const resource = await prisma.client.findFirst({
+      where: {
+        id: resource1.id,
+        tenantId: tenant2.id, // Diferente tenant
+      },
+    });
+    
+    // Debe retornar null (no encontrado)
+    expect(resource).toBeNull();
+  });
+});
+```
+
+---
+
+### Check de Seguridad Básica
+
+**Verificaciones:**
+
+- [ ] ¿Se usa Prisma Client (NO queries SQL directas)?
+- [ ] ¿Se valida entrada con DTOs y ValidationPipe?
+- [ ] ¿React escapa automáticamente (no dangerouslySetInnerHTML sin sanitizar)?
+- [ ] ¿Los secretos están en variables de entorno (NO hardcodeados)?
+- [ ] ¿TypeScript está sin errores de tipo?
+
+---
+
+### Check de Mobile-First
+
+**Verificaciones:**
+
+- [ ] ¿El diseño es mobile-first (probado en viewport móvil)?
+- [ ] ¿Los tap targets son mínimo 44x44px?
+- [ ] ¿El espaciado es adecuado (mínimo 8px)?
+- [ ] ¿Los modales son fullscreen o bottom sheet en móvil?
+
+**Testing:**
+
+- Probar en dispositivos reales (iOS y Android) cuando sea posible
+- Probar en diferentes tamaños de pantalla (viewport móvil, tablet, desktop)
+- Probar con conexión lenta (3G simulation)
+
+---
+
+### Check de Cumplimiento del Spec/Plan
+
+**Verificaciones:**
+
+- [ ] ¿La implementación sigue el plan aprobado?
+- [ ] ¿Se implementaron todos los pasos del plan?
+- [ ] ¿No se desvió del plan sin crear nuevo plan primero?
+- [ ] ¿Los archivos modificados coinciden con el plan?
+
+---
+
+## Estructura de Tests
+
+### Backend Tests
+
+**Ubicación:** `tests/{modulo}.spec.ts`
+
+**Estructura recomendada (Jest):**
+
+```typescript
+// tests/clients.spec.ts
+import { Test, TestingModule } from '@nestjs/testing';
+import { ClientsService } from '@/modules/clients/clients.service';
+import { PrismaService } from '@/prisma/prisma.service';
+
+describe('ClientsService', () => {
+  let service: ClientsService;
+  let prisma: PrismaService;
+
+  beforeEach(async () => {
+    const module: TestingModule = await Test.createTestingModule({
+      providers: [
+        ClientsService,
+        {
+          provide: PrismaService,
+          useValue: {
+            client: {
+              findFirst: jest.fn(),
+              create: jest.fn(),
+            },
+          },
+        },
+      ],
+    }).compile();
+
+    service = module.get<ClientsService>(ClientsService);
+    prisma = module.get<PrismaService>(PrismaService);
+  });
+
+  it('should create a client', async () => {
+    const dto = { name: 'Test Client', email: 'test@example.com' };
+    const tenantId = 1;
+    
+    jest.spyOn(prisma.client, 'create').mockResolvedValue({
+      id: 1,
+      ...dto,
+      tenantId,
+    } as any);
+
+    const result = await service.create(dto, tenantId);
+    
+    expect(result.success).toBe(true);
+    expect(result.data.name).toBe('Test Client');
+  });
+
+  it('should isolate by tenant', async () => {
+    // Test de aislamiento
+  });
+});
+```
+
+---
+
+### Frontend Tests
+
+**Ubicación:** `frontend/__tests__/{componente}.test.tsx` o `frontend/__tests__/{modulo}.test.tsx`
+
+**Estructura recomendada (Jest + React Testing Library):**
+
+```typescript
+// frontend/__tests__/components/button.test.tsx
+import { render, screen, fireEvent } from '@testing-library/react';
+import { Button } from '@/components/ui/button';
+
+describe('Button', () => {
+  it('should render correctly', () => {
+    render(<Button>Click me</Button>);
+    expect(screen.getByText('Click me')).toBeInTheDocument();
+  });
+
+  it('should call onClick when clicked', () => {
+    const handleClick = jest.fn();
+    render(<Button onClick={handleClick}>Click me</Button>);
+    
+    fireEvent.click(screen.getByText('Click me'));
+    expect(handleClick).toHaveBeenCalledTimes(1);
+  });
+});
+```
+
+---
+
+## Exit Code Obligatorio
+
+**Regla:**
+
+- Cada script de prueba DEBE devolver **exit code 0** si todas las pruebas pasan
+- Si alguna prueba falla, el script DEBE devolver exit code != 0
+- El agente DEBE verificar el exit code y reiterar correcciones hasta lograr 0
+
+---
+
+## Documentación de Resultados
+
+**Después de ejecutar build-all, documentar:**
+
+```
+Build-All: ✅ Passed
+- TypeScript: ✅ (sin errores)
+- Lint: ✅ (sin errores)
+- Format: ✅ (sin errores)
+- Backend tests: ✅ (15/15 tests)
+- Frontend tests: ✅ (12/12 tests)
+- E2E tests: ✅ (3/3 tests)
+- tenancy_isolation.spec.ts: ✅ (exit code 0)
+```
+
+O si falló:
+
+```
+Build-All: ❌ Failed
+- TypeScript: ✅ (sin errores)
+- Lint: ❌ (3 errores)
+- Format: ✅ (sin errores)
+- Backend tests: ❌ (14/15 tests) - clients.spec.ts falló
+- Frontend tests: ✅ (12/12 tests)
+- E2E tests: ✅ (3/3 tests)
+
+[Auto-corrección aplicada...]
+[Re-ejecutando build-all...]
+
+Build-All: ✅ Passed - [Después de corrección]
+```
+
+---
+
+## Excepciones
+
+**NO HAY EXCEPCIONES** excepto:
+
+- Plan explícitamente indica "sin tests" o "tests manuales solamente" (documentar razón)
+- Test temporalmente deshabilitado por refactorización mayor (debe estar documentado con fecha de reactivación)
+
+---
+
+## Checklist de Quality Gates
+
+**Antes de considerar una tarea completada:**
+
+- [ ] ¿Build-all completo pasa (exit code 0 para todos los tests)?
+- [ ] ¿TypeScript sin errores de tipo?
+- [ ] ¿Lint y format pasan (ESLint + Prettier)?
+- [ ] ¿Tests de aislamiento multitenancy pasan?
+- [ ] ¿Check de i18n pasa (sin textos hardcodeados)?
+- [ ] ¿Check de multitenancy pasa (filtro por tenantId en Prisma)?
+- [ ] ¿Check de seguridad básica pasa (Prisma Client, validación DTOs)?
+- [ ] ¿Check de mobile-first pasa (probado en viewport móvil)?
+- [ ] ¿Check de cumplimiento del spec/plan pasa (implementación según plan)?
+- [ ] ¿Calidad de prompts IA verificada (si aplica)?
+
+---
+
+## Referencias
+
+- `IA-Specs/03-multitenancy-rbac-y-privacidad.mdc` - Multitenancy
+- `IA-Specs/04-seguridad-y-compliance.mdc` - Seguridad
+- `IA-Specs/02-internacionalizacion-y-ux.mdc` - i18n
+- `LEER/specs/08-testing-and-acceptance.mdc` - Referencia histórica
+- `LEER/specs/standards/testing.mdc` - Referencia histórica

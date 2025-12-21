@@ -1,0 +1,634 @@
+# Estándares Backend
+
+> **Versión:** 2.0  
+> **Fecha:** 2025-01-XX  
+> **Referencia:** `LEER/specs/06-backend-standards-php.mdc`, `LEER/specs/standards/backend-conventions.mdc`
+
+---
+
+## Stack Tecnológico Backend
+
+### Lenguaje y Framework
+
+- **Lenguaje:** TypeScript (requerido)
+- **Runtime:** Node.js LTS 20+ (requerido)
+- **Framework:** NestJS (arquitectura modular)
+- **ORM:** Prisma (acceso a datos type-safe)
+- **Base de datos:** MySQL 8.0+ (single database, single schema con `tenant_id`)
+
+---
+
+## Patrón de Arquitectura
+
+### Separación por Capas (NestJS)
+
+**Arquitectura recomendada:**
+
+```
+API Layer (Controllers)
+    ↓
+Business Logic / Domain Layer (Services)
+    ↓
+Data Access Layer (Prisma Client / Repositories)
+    ↓
+Database (MySQL)
+```
+
+**Responsabilidades:**
+
+- **Controllers (API Layer):** Validar entrada con DTOs, formatear salida, manejar HTTP
+- **Services (Business Logic):** Reglas de negocio, validaciones complejas
+- **Repositories (Data Access):** Queries Prisma, abstracción de base de datos (opcional)
+- **Database:** Almacenamiento persistente
+
+**Reglas:**
+
+- ✅ Controllers nunca contienen lógica de negocio compleja
+- ✅ Services nunca contienen queries SQL directas
+- ✅ Data Access (Prisma) nunca contiene reglas de negocio
+- ✅ Usar Prisma Client en lugar de queries SQL directas
+
+---
+
+## Estructura de Módulos NestJS
+
+### Organización de Módulos
+
+**Estructura recomendada:**
+
+```
+src/
+├── modules/
+│   ├── tenants/
+│   │   ├── tenants.module.ts
+│   │   ├── tenants.controller.ts
+│   │   ├── tenants.service.ts
+│   │   ├── dto/
+│   │   │   ├── create-tenant.dto.ts
+│   │   │   └── update-tenant.dto.ts
+│   │   └── entities/
+│   │       └── tenant.entity.ts
+│   ├── whatsapp/
+│   │   ├── whatsapp.module.ts
+│   │   ├── whatsapp.controller.ts
+│   │   └── whatsapp.service.ts
+│   └── ...
+├── common/
+│   ├── guards/
+│   │   ├── tenant.guard.ts
+│   │   └── rbac.guard.ts
+│   ├── interceptors/
+│   ├── decorators/
+│   │   └── current-tenant.decorator.ts
+│   └── filters/
+│       └── http-exception.filter.ts
+├── config/
+│   └── configuration.ts
+└── main.ts
+```
+
+**Reglas:**
+
+- ✅ Un módulo por dominio de negocio
+- ✅ Cada módulo tiene su propio Controller, Service, DTOs
+- ✅ Guards, Interceptors, Decorators en `common/`
+- ✅ Configuración centralizada en `config/`
+
+---
+
+## Contratos API
+
+### Formato Estándar de Respuesta JSON
+
+**Formato obligatorio:**
+
+```typescript
+interface ApiResponse<T> {
+  success: boolean;
+  error_key?: string;
+  error_params?: Record<string, any>;
+  data?: T;
+}
+```
+
+**Ejemplos:**
+
+```typescript
+// ✅ Éxito
+{
+  success: true,
+  data: {
+    id: 1,
+    name: "Cliente 1"
+  }
+}
+
+// ✅ Error
+{
+  success: false,
+  error_key: "validation.required",
+  error_params: { field: "email" },
+  data: null
+}
+```
+
+**Reglas:**
+
+- ✅ SIEMPRE usar este formato (consistencia)
+- ✅ `error_key` debe ser una clave de traducción (no texto hardcodeado)
+- ✅ `error_params` para parámetros dinámicos del error
+
+---
+
+### Manejo de Errores HTTP
+
+**Códigos HTTP estándar:**
+
+- `200 OK` - Operación exitosa
+- `201 Created` - Recurso creado exitosamente
+- `400 Bad Request` - Error de validación o entrada inválida
+- `401 Unauthorized` - No autenticado o token inválido
+- `403 Forbidden` - No tiene permisos
+- `404 Not Found` - Recurso no encontrado
+- `409 Conflict` - Conflicto (ej: recurso duplicado)
+- `422 Unprocessable Entity` - Error de validación de negocio
+- `429 Too Many Requests` - Rate limiting
+- `500 Internal Server Error` - Error del servidor
+
+**Ejemplo con NestJS:**
+
+```typescript
+// Validación fallida
+throw new BadRequestException({
+  success: false,
+  error_key: 'validation.required',
+  error_params: { field: 'email' }
+});
+
+// Recurso no encontrado
+throw new NotFoundException({
+  success: false,
+  error_key: 'clients.not_found'
+});
+
+// Sin permisos
+throw new ForbiddenException({
+  success: false,
+  error_key: 'auth.forbidden'
+});
+```
+
+---
+
+## Validación de Entrada
+
+### DTOs con class-validator
+
+**Reglas obligatorias:**
+
+1. **Crear DTOs para cada endpoint:**
+   ```typescript
+   import { IsString, IsEmail, MinLength, MaxLength } from 'class-validator';
+   
+   export class CreateClientDto {
+     @IsString()
+     @MinLength(1)
+     @MaxLength(255)
+     name: string;
+     
+     @IsEmail()
+     email: string;
+   }
+   ```
+
+2. **Validación automática con ValidationPipe:**
+   ```typescript
+   // En main.ts
+   app.useGlobalPipes(new ValidationPipe({
+     whitelist: true,
+     forbidNonWhitelisted: true,
+     transform: true,
+   }));
+   ```
+
+3. **Usar DTOs en Controllers:**
+   ```typescript
+   @Post()
+   async create(@Body() dto: CreateClientDto) {
+     // dto ya está validado automáticamente
+   }
+   ```
+
+**Alternativa: Zod**
+
+Si se prefiere Zod en lugar de class-validator:
+
+```typescript
+import { z } from 'zod';
+
+export const createClientSchema = z.object({
+  name: z.string().min(1).max(255),
+  email: z.string().email(),
+});
+
+export type CreateClientDto = z.infer<typeof createClientSchema>;
+```
+
+---
+
+## Multitenancy y Seguridad Aplicados
+
+### Guards Obligatorios
+
+**TODOS los endpoints DEBEN usar:**
+
+1. **TenantGuard:** Extrae y valida `tenant_id` del JWT
+2. **RBACGuard:** Verifica permisos
+
+**Ejemplo completo:**
+
+```typescript
+// src/modules/clients/clients.controller.ts
+import { Controller, Get, UseGuards } from '@nestjs/common';
+import { TenantGuard } from '@/common/guards/tenant.guard';
+import { RBACGuard } from '@/common/guards/rbac.guard';
+import { RequirePermission } from '@/common/decorators/require-permission.decorator';
+import { CurrentTenant } from '@/common/decorators/current-tenant.decorator';
+import { ClientsService } from './clients.service';
+
+@Controller('api/v1/clients')
+@UseGuards(TenantGuard, RBACGuard)
+export class ClientsController {
+  constructor(private readonly clientsService: ClientsService) {}
+
+  @Get(':id')
+  @RequirePermission('clients.view')
+  async findOne(
+    @Param('id', ParseIntPipe) id: number,
+    @CurrentTenant() tenant: Tenant,
+  ) {
+    return this.clientsService.findOne(id, tenant.id);
+  }
+}
+```
+
+**Ver `IA-Specs/03-multitenancy-rbac-y-privacidad.mdc` para detalles completos.**
+
+---
+
+## Acceso a Datos con Prisma
+
+### Reglas Obligatorias
+
+**SIEMPRE filtrar por `tenant_id`:**
+
+```typescript
+// ✅ CORRECTO
+const client = await this.prisma.client.findFirst({
+  where: {
+    id: clientId,
+    tenantId: tenantId, // Obligatorio
+  },
+});
+
+// ❌ PROHIBIDO
+const client = await this.prisma.client.findUnique({
+  where: { id: clientId }, // Falta tenantId
+});
+```
+
+**NUNCA usar queries SQL directas:**
+
+```typescript
+// ✅ CORRECTO (Prisma)
+const clients = await this.prisma.client.findMany({
+  where: { tenantId },
+});
+
+// ❌ PROHIBIDO
+const clients = await this.prisma.$queryRaw`
+  SELECT * FROM clients WHERE tenant_id = ${tenantId}
+`;
+```
+
+**Reglas:**
+
+- ✅ SIEMPRE usar Prisma Client
+- ✅ SIEMPRE incluir `tenantId` en WHERE
+- ❌ NUNCA concatenar variables en SQL (aunque Prisma lo previene)
+- ✅ Validar y sanitizar entrada antes de usar en queries
+
+### Operaciones Create con Campos Obligatorios
+
+**SIEMPRE usar el helper `createData` para operaciones `create`:**
+
+El schema de Prisma requiere que los campos `id` (String) y `updatedAt` (DateTime) se proporcionen explícitamente en operaciones `create`. Para prevenir errores y mantener consistencia, **SIEMPRE usar el helper `createData`**.
+
+```typescript
+import { createData } from '@/common/prisma/create-data.helper';
+
+// ✅ CORRECTO - Usando helper
+const user = await prisma.user.create({
+  data: createData({
+    email: 'test@example.com',
+    name: 'Test User',
+    tenantId,
+  }),
+});
+
+// ✅ CORRECTO - En transacciones
+const result = await prisma.$transaction(async (tx) => {
+  const user = await tx.user.create({
+    data: createData({
+      email: 'test@example.com',
+      name: 'Test User',
+    }),
+  });
+  
+  const tenant = await tx.tenant.create({
+    data: createData({
+      name: 'Test Tenant',
+      slug: 'test-tenant',
+    }),
+  });
+  
+  return { user, tenant };
+});
+
+// ❌ PROHIBIDO - Sin helper (puede fallar si falta id o updatedAt)
+const user = await prisma.user.create({
+  data: {
+    email: 'test@example.com',
+    name: 'Test User',
+    // Falta id y updatedAt
+  },
+});
+```
+
+**El helper `createData` garantiza:**
+- Genera `id` automáticamente usando `randomUUID()` si no se proporciona
+- Establece `updatedAt: new Date()` si no se proporciona
+- Preserva valores personalizados si se proporcionan explícitamente
+- Mantiene type-safety de TypeScript
+
+**Reglas:**
+
+- ✅ SIEMPRE usar `createData()` en operaciones `create`
+- ✅ El helper está disponible en `@/common/prisma/create-data.helper`
+- ❌ NUNCA crear entidades sin usar el helper (excepto casos especiales documentados)
+- ✅ Para transacciones, usar `createData()` (funciona igual dentro de `$transaction`)
+
+**Referencia:** Ver `PRD-45-prisma-create-fields-standardization.md` y `AI-SPEC-45-prisma-create-fields-standardization.md` para detalles completos.
+
+---
+
+## Reglas de Naming y Organización
+
+### Convenciones de Nomenclatura
+
+**Archivos TypeScript:**
+- `kebab-case.ts` (ej: `whatsapp-instance.service.ts`)
+
+**Clases:**
+- `PascalCase` (ej: `WhatsAppInstanceService`, `TenantGuard`)
+
+**Métodos:**
+- `camelCase` (ej: `getTenantId()`, `validateEmail()`)
+
+**Tablas DB:**
+- `snake_case` (ej: `whatsapp_instances`)
+
+**DTOs:**
+- `{Nombre}Dto` (ej: `CreateWhatsAppInstanceDto`)
+
+**Variables:**
+- `camelCase` (ej: `userId`, `tenantId`)
+
+---
+
+## Convenciones de Endpoints
+
+### Estructura de Rutas
+
+**Formato estándar:**
+
+```
+/api/v1/{recurso}
+/api/v1/{recurso}/{id}
+/api/v1/{recurso}/{id}/{subrecurso}
+```
+
+**Ejemplos:**
+
+- `GET /api/v1/tenants` - Listar tenants
+- `GET /api/v1/tenants/:id` - Obtener tenant
+- `POST /api/v1/tenants` - Crear tenant
+- `PATCH /api/v1/tenants/:id` - Actualizar tenant
+- `DELETE /api/v1/tenants/:id` - Eliminar tenant
+
+**Subrecursos:**
+
+- `GET /api/v1/whatsapp/instances` - Listar instancias
+- `GET /api/v1/whatsapp/instances/:id` - Obtener instancia
+- `POST /api/v1/whatsapp/instances/:id/messages` - Enviar mensaje
+
+---
+
+## Manejo de Errores Unificado
+
+### Exception Filter Global
+
+**Crear Exception Filter para formatear errores:**
+
+```typescript
+// src/common/filters/http-exception.filter.ts
+import { ExceptionFilter, Catch, ArgumentsHost } from '@nestjs/common';
+import { Response } from 'express';
+
+@Catch()
+export class HttpExceptionFilter implements ExceptionFilter {
+  catch(exception: any, host: ArgumentsHost) {
+    const ctx = host.switchToHttp();
+    const response = ctx.getResponse<Response>();
+    
+    const status = exception.getStatus?.() || 500;
+    const message = exception.message || 'Internal server error';
+    
+    response.status(status).json({
+      success: false,
+      error_key: exception.error_key || 'errors.generic',
+      error_params: exception.error_params || {},
+      data: null,
+    });
+  }
+}
+```
+
+**Registrar globalmente:**
+
+```typescript
+// main.ts
+app.useGlobalFilters(new HttpExceptionFilter());
+```
+
+---
+
+## Internacionalización
+
+### Uso Obligatorio de Claves de Traducción
+
+**En respuestas de error:**
+
+```typescript
+// ✅ CORRECTO
+throw new BadRequestException({
+  success: false,
+  error_key: 'validation.required',
+  error_params: { field: 'email' }
+});
+
+// ❌ PROHIBIDO
+throw new BadRequestException({
+  success: false,
+  error: 'El campo email es requerido' // Hardcodeado
+});
+```
+
+**En mensajes de éxito (si aplica):**
+
+```typescript
+// ✅ CORRECTO
+return {
+  success: true,
+  message_key: 'clients.created_success',
+  data: client
+};
+```
+
+**Ver `IA-Specs/02-internacionalizacion-y-ux.mdc` para detalles completos de i18n.**
+
+---
+
+## Ejemplo Completo de Módulo
+
+```typescript
+// src/modules/clients/clients.module.ts
+import { Module } from '@nestjs/common';
+import { ClientsController } from './clients.controller';
+import { ClientsService } from './clients.service';
+import { PrismaModule } from '@/prisma/prisma.module';
+
+@Module({
+  imports: [PrismaModule],
+  controllers: [ClientsController],
+  providers: [ClientsService],
+  exports: [ClientsService],
+})
+export class ClientsModule {}
+
+// src/modules/clients/clients.controller.ts
+import { Controller, Get, Post, Body, Param, ParseIntPipe, UseGuards } from '@nestjs/common';
+import { TenantGuard } from '@/common/guards/tenant.guard';
+import { RBACGuard } from '@/common/guards/rbac.guard';
+import { RequirePermission } from '@/common/decorators/require-permission.decorator';
+import { CurrentTenant } from '@/common/decorators/current-tenant.decorator';
+import { ClientsService } from './clients.service';
+import { CreateClientDto } from './dto/create-client.dto';
+
+@Controller('api/v1/clients')
+@UseGuards(TenantGuard, RBACGuard)
+export class ClientsController {
+  constructor(private readonly clientsService: ClientsService) {}
+
+  @Get(':id')
+  @RequirePermission('clients.view')
+  async findOne(
+    @Param('id', ParseIntPipe) id: number,
+    @CurrentTenant() tenant: Tenant,
+  ) {
+    return this.clientsService.findOne(id, tenant.id);
+  }
+
+  @Post()
+  @RequirePermission('clients.create')
+  async create(
+    @Body() dto: CreateClientDto,
+    @CurrentTenant() tenant: Tenant,
+  ) {
+    return this.clientsService.create(dto, tenant.id);
+  }
+}
+
+// src/modules/clients/clients.service.ts
+import { Injectable, NotFoundException } from '@nestjs/common';
+import { PrismaService } from '@/prisma/prisma.service';
+import { CreateClientDto } from './dto/create-client.dto';
+
+@Injectable()
+export class ClientsService {
+  constructor(private readonly prisma: PrismaService) {}
+
+  async findOne(id: number, tenantId: number) {
+    const client = await this.prisma.client.findFirst({
+      where: {
+        id,
+        tenantId, // Obligatorio
+      },
+    });
+
+    if (!client) {
+      throw new NotFoundException({
+        success: false,
+        error_key: 'clients.not_found',
+      });
+    }
+
+    return {
+      success: true,
+      data: client,
+    };
+  }
+
+  async create(dto: CreateClientDto, tenantId: number) {
+    const client = await this.prisma.client.create({
+      data: {
+        ...dto,
+        tenantId, // Obligatorio
+      },
+    });
+
+    return {
+      success: true,
+      message_key: 'clients.created_success',
+      data: client,
+    };
+  }
+}
+```
+
+---
+
+## Checklist de Backend
+
+**Antes de considerar una tarea completada:**
+
+- [ ] ¿El endpoint usa TenantGuard + RBACGuard?
+- [ ] ¿Todas las queries Prisma incluyen `tenantId` en WHERE?
+- [ ] ¿Se valida entrada con DTOs y ValidationPipe?
+- [ ] ¿Se usa Prisma Client (NO queries SQL directas)?
+- [ ] ¿La respuesta JSON sigue el formato estándar?
+- [ ] ¿Los errores usan claves de traducción (no texto hardcodeado)?
+- [ ] ¿Los códigos HTTP son apropiados?
+- [ ] ¿Se manejan todos los casos de error (404, 403, 400, etc.)?
+- [ ] ¿El módulo está correctamente estructurado (Module, Controller, Service, DTOs)?
+- [ ] ¿Los tipos TypeScript están correctamente definidos?
+
+---
+
+## Referencias
+
+- `IA-Specs/03-multitenancy-rbac-y-privacidad.mdc` - Multitenancy y RBAC
+- `IA-Specs/04-seguridad-y-compliance.mdc` - Seguridad
+- `IA-Specs/02-internacionalizacion-y-ux.mdc` - i18n
+- `IA-Specs/01-saas-architecture-and-stack.mdc` - Arquitectura
+- `LEER/specs/06-backend-standards-php.mdc` - Referencia histórica

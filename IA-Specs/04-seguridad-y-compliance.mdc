@@ -1,0 +1,384 @@
+# Seguridad y Compliance
+
+> **Versión:** 1.0  
+> **Fecha:** 2025-01-XX  
+> **Referencia:** `LEER/specs/02-project-guardrails.mdc`, `LEER/specs/security/privacy-logging.mdc`
+
+---
+
+## Autenticación
+
+### Tokens (JWT/OAuth)
+
+**Requisitos:**
+
+- ✅ Uso de tokens seguros (JWT con firma HMAC o RSA)
+- ✅ Tokens con expiración (access tokens cortos, ej: 15-60 minutos)
+- ✅ Refresh tokens para renovación (expiración larga, ej: 7-30 días)
+- ✅ Revocación de tokens (blacklist o invalidación en BD)
+
+**Estructura JWT recomendada:**
+
+```json
+{
+  "sub": "user_id",
+  "tenant_id": "tenant_id",
+  "role": "user_role",
+  "iat": 1234567890,
+  "exp": 1234571490
+}
+```
+
+**Manejo de expiración:**
+
+- ✅ Verificar expiración en cada request
+- ✅ Retornar 401 Unauthorized si token expirado
+- ✅ Proporcionar endpoint `/api/v1/auth/refresh` para renovar tokens
+
+---
+
+### SSO Implementado
+
+**El sistema soporta SSO con:**
+
+- **Google OAuth 2.0** (implementado)
+- **Microsoft Azure AD / Office 365** (implementado)
+- **SAML 2.0** (preparado para futuras implementaciones)
+
+**Implementación:**
+
+- ✅ Estructura de autenticación modular (facilita añadir proveedores SSO)
+- ✅ Tabla `user_identities` para vincular usuarios con identidades externas
+- ✅ Configuración por tenant de proveedores SSO habilitados
+- ✅ Tokens JWT emitidos por backend con `tenant_id` y `role` en el payload
+
+---
+
+## Autorización
+
+### Basada en RBAC + Tenant
+
+**Ver `IA-Specs/03-multitenancy-rbac-y-privacidad.mdc` para detalles completos.**
+
+**Resumen:**
+
+- ✅ RBACMiddleware obligatorio en todas las rutas API
+- ✅ Verificación de permisos antes de ejecutar acciones
+- ✅ Frontend puede ocultar elementos (UX), pero backend valida siempre
+
+---
+
+## Seguridad de API
+
+### Validación de Entrada
+
+**Reglas obligatorias (NestJS con DTOs):**
+
+1. **Validar tipo de dato con DTOs:**
+   ```typescript
+   // ✅ CORRECTO (DTO con class-validator)
+   export class CreateClientDto {
+     @IsInt()
+     @Min(1)
+     @Max(1000000)
+     id: number;
+     
+     @IsString()
+     @MinLength(1)
+     @MaxLength(255)
+     name: string;
+     
+     @IsEmail()
+     email: string;
+   }
+   
+   // ❌ PROHIBIDO
+   const id = req.body.id; // Sin validar
+   ```
+
+2. **Validación automática con Pipes:**
+   ```typescript
+   @Post()
+   async create(@Body() dto: CreateClientDto) {
+     // dto ya está validado automáticamente
+   }
+   ```
+
+3. **Sanitizar entrada:**
+   - Usar class-transformer para transformar datos
+   - Validar con class-validator
+   - Sanitizar con librerías específicas si es necesario
+
+---
+
+### Protección frente a Ataques Comunes
+
+#### SQL Injection
+
+**Prevención (Prisma):**
+
+- ✅ **Prisma usa prepared statements automáticamente** (NO concatenación)
+  ```typescript
+  // ✅ CORRECTO (Prisma)
+  const user = await prisma.user.findFirst({
+    where: {
+      id: userId,
+      tenantId: tenantId,
+    },
+  });
+  
+  // ❌ PROHIBIDO (nunca usar queries SQL directas)
+  const query = `SELECT * FROM users WHERE id = ${userId} AND tenant_id = ${tenantId}`;
+  ```
+
+- ❌ NUNCA usar `prisma.$queryRaw` con interpolación de strings
+- ✅ Validar y sanitizar entrada antes de usar en queries
+- ✅ Usar Prisma Client en lugar de queries SQL directas
+
+---
+
+#### XSS (Cross-Site Scripting)
+
+**Prevención:**
+
+- ✅ **React escapa automáticamente:**
+  ```tsx
+  // ✅ CORRECTO (React escapa automáticamente)
+  <div>{userInput}</div>
+  
+  // ❌ PROHIBIDO (solo si es absolutamente necesario y sanitizado)
+  <div dangerouslySetInnerHTML={{ __html: sanitizedHtml }} />
+  ```
+
+- ✅ **Content Security Policy (CSP) en Next.js:**
+  ```typescript
+  // next.config.ts
+  const securityHeaders = [
+    {
+      key: 'Content-Security-Policy',
+      value: "default-src 'self'; script-src 'self' 'unsafe-inline';"
+    }
+  ];
+  ```
+
+- ❌ NUNCA usar `dangerouslySetInnerHTML` con datos del usuario sin sanitizar
+- ✅ Usar librerías de sanitización (DOMPurify) si es necesario renderizar HTML
+
+---
+
+#### CSRF (Cross-Site Request Forgery)
+
+**Prevención (Next.js + NestJS):**
+
+- ✅ **Next.js protege automáticamente contra CSRF** en API routes
+- ✅ **SameSite cookies en JWT:**
+  ```typescript
+  // NestJS - Configuración de cookies
+  res.cookie('token', jwt, {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === 'production',
+    sameSite: 'strict',
+  });
+  ```
+
+- ✅ **Verificar origen en API:**
+  ```typescript
+  // Middleware para verificar origen
+  if (req.headers.origin !== process.env.FRONTEND_URL) {
+    throw new ForbiddenException();
+  }
+  ```
+
+---
+
+#### Brute Force
+
+**Prevención (NestJS):**
+
+- ✅ **Rate limiting por IP:**
+  ```typescript
+  // Usar @nestjs/throttler
+  @Throttle(5, 60) // 5 requests por 60 segundos
+  @Post('login')
+  async login(@Body() dto: LoginDto) {
+    // Lógica de login
+  }
+  ```
+
+- ✅ **Lockout de cuenta:**
+  ```typescript
+  // Bloquear cuenta después de N intentos fallidos
+  if (failedAttempts > 5) {
+    await this.lockAccount(userId, 15 * 60); // 15 minutos
+  }
+  ```
+
+- ✅ **CAPTCHA después de N intentos fallidos** (integración con servicio externo)
+
+---
+
+### Gestión de Secretos
+
+**Reglas absolutas:**
+
+- ❌ **NUNCA cometer claves al repositorio**
+- ✅ **Usar variables de entorno:**
+  ```typescript
+  // ✅ CORRECTO (NestJS ConfigModule)
+  @Injectable()
+  export class ConfigService {
+    get dbPassword(): string {
+      return process.env.DB_PASSWORD;
+    }
+  }
+  
+  // ❌ PROHIBIDO
+  const dbPassword = 'mi_password_secreto'; // Hardcodeado
+  ```
+
+- ✅ **Archivo `.env` en `.gitignore`:**
+  ```
+  .env
+  .env.local
+  .env.*.local
+  ```
+
+- ✅ **Archivo `.env.example` con valores de ejemplo:**
+  ```
+  DB_PASSWORD=your_password_here
+  JWT_SECRET=your_jwt_secret_here
+  EVOLUTION_API_KEY=your_evolution_api_key
+  STRIPE_SECRET_KEY=your_stripe_secret_key
+  ```
+
+- ✅ **Rotación de secretos:** Proceso documentado para rotar claves
+- ✅ **Secrets para integraciones:** Evolution API, Stripe, cal.com, Google Calendar, etc.
+
+---
+
+## Auditoría
+
+### Logs de Acciones Críticas
+
+**Acciones que DEBEN ser auditadas:**
+
+- Login/Logout
+- Cambios de permisos
+- Cambios de estado importantes (activar/desactivar tenant, usuario, etc.)
+- Accesos a datos PII (ver `IA-Specs/03-multitenancy-rbac-y-privacidad.mdc`)
+- Operaciones financieras
+- Eliminaciones de datos importantes
+
+**Formato de log:**
+
+```php
+AuditLogger::log($userId, $tenantId, 'action.type', [
+    'resource_type' => 'user',
+    'resource_id' => $targetUserId,
+    'changes' => ['field' => 'old_value' => 'new_value'],
+    'ip_address' => $_SERVER['REMOTE_ADDR'],
+    'user_agent' => $_SERVER['HTTP_USER_AGENT']
+]);
+```
+
+---
+
+### Trazabilidad por Usuario y Tenant
+
+**Requisitos:**
+
+- ✅ Todos los logs DEBEN incluir `user_id` y `tenant_id`
+- ✅ Timestamp preciso (UTC)
+- ✅ IP address y user agent
+- ✅ Cambios antes/después (para operaciones de actualización)
+- ✅ Retención configurable (mínimo 1 año, recomendado 7 años para compliance)
+
+**Estructura de tabla de auditoría:**
+
+```sql
+CREATE TABLE audit_logs (
+    id INT PRIMARY KEY AUTO_INCREMENT,
+    user_id INT,
+    tenant_id INT,
+    action VARCHAR(100),
+    resource_type VARCHAR(50),
+    resource_id INT,
+    changes JSON,
+    ip_address VARCHAR(45),
+    user_agent TEXT,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    INDEX idx_user_tenant (user_id, tenant_id),
+    INDEX idx_created_at (created_at)
+);
+```
+
+---
+
+## Compliance
+
+### GDPR (UE) y nLPD/FADP (Suiza)
+
+**Ver `IA-Specs/03-multitenancy-rbac-y-privacidad.mdc` para detalles de privacidad.**
+
+**Resumen de requisitos:**
+
+- ✅ Exportabilidad de datos (`/api/v1/gdpr/export`)
+- ✅ Derecho al olvido (`/api/v1/gdpr/erase`)
+- ✅ Consentimiento explícito para procesamiento de datos
+- ✅ Política de privacidad accesible
+- ✅ Registro de accesos a datos PII
+- ✅ **Data Residency:** Campo `data_region` en tabla `tenants` (`'EU' | 'CH'`)
+- ✅ Asegurar que datos personales no salen de la región configurada salvo base legal
+- ✅ Storage de archivos debe respetar data residency (S3/Bunny con data centers en región correspondiente)
+
+### n8n como Motor Interno
+
+**Reglas críticas:**
+
+- ⚠️ **n8n se usa únicamente como motor interno de orquestación**
+- ❌ **NO se ofrece n8n como SaaS multi-tenant** (para respetar la licencia de n8n)
+- ✅ Una sola instancia de n8n controlada por nosotros
+- ✅ Nuestro SaaS gestiona qué workflow ejecutar y con qué contexto (tenant, canal, conocimiento)
+- ❌ **NUNCA exponer n8n directamente al cliente final**
+
+---
+
+### OWASP Top 10
+
+**Protección contra vulnerabilidades OWASP Top 10:**
+
+1. **Injection** → Prepared statements, validación de entrada
+2. **Broken Authentication** → Tokens seguros, rate limiting, lockout
+3. **Sensitive Data Exposure** → Encriptación, enmascaramiento, logs seguros
+4. **XML External Entities** → Deshabilitar procesamiento XML externo
+5. **Broken Access Control** → RBACMiddleware, verificación de permisos
+6. **Security Misconfiguration** → Configuración segura por defecto
+7. **XSS** → Escape de salida, CSP
+8. **Insecure Deserialization** → Validar datos deserializados
+9. **Using Components with Known Vulnerabilities** → Actualizar dependencias regularmente
+10. **Insufficient Logging & Monitoring** → Auditoría completa
+
+---
+
+## Checklist de Seguridad
+
+**Antes de considerar una tarea completada:**
+
+- [ ] ¿Se valida y sanitiza toda la entrada?
+- [ ] ¿Se usan prepared statements (NO concatenación SQL)?
+- [ ] ¿Se escapa la salida HTML?
+- [ ] ¿Se implementa protección CSRF?
+- [ ] ¿Se implementa rate limiting para endpoints críticos?
+- [ ] ¿Los secretos están en variables de entorno (NO hardcodeados)?
+- [ ] ¿Se registran acciones críticas en auditoría?
+- [ ] ¿Los logs no exponen datos sensibles?
+- [ ] ¿Los tokens tienen expiración y se pueden revocar?
+
+---
+
+## Referencias
+
+- `IA-Specs/03-multitenancy-rbac-y-privacidad.mdc` - Multitenancy y privacidad
+- `IA-Specs/06-backend-standards.mdc` - Estándares backend
+- OWASP Top 10: https://owasp.org/www-project-top-ten/
+- GDPR: https://gdpr.eu/

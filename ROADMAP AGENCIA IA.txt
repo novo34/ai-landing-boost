@@ -1,0 +1,624 @@
+Perfecto, sigamos 😄
+
+Primero despejo tu duda de n8n y luego arrancamos con el **plan de desarrollo** ya asumiendo que n8n será el “motor interno”.
+
+---
+
+## 1️⃣ Tema legal de n8n y tu SaaS
+
+> **“Prohibición Expresa de Multi-tenancy — El Proveedor NO podrá operar una instancia compartida de n8n para múltiples clientes, ni ofrecer n8n como servicio SaaS multi-inquilino.”**
+
+👉 Esto significa:
+
+* **Lo que NO puedes hacer:**
+
+  * No puedes montar “n8n Cloud versión Klever” donde tus clientes entren a **usar n8n directamente** (crear sus propios workflows, credenciales, etc.) como si fuera tu producto.
+  * No puedes comercializar “acceso a n8n” como servicio.
+
+* **Lo que SÍ puedes hacer sin problema:**
+
+  * Usar **n8n internamente**, como *motor orquestador* de tu producto SaaS.
+  * Tus clientes **nunca ven n8n**, nunca tienen un usuario en n8n:
+    ellos solo ven TU plataforma (Next/Nest), y tú desde dentro llamas a n8n para ejecutar flujos.
+  * Cada tenant (cliente) tiene su **configuración, credenciales e ID** en TU base de datos.
+    Tu backend traduce eso a llamadas a n8n (webhooks, HTTP Request, etc.).
+
+💡 En resumen:
+Tu SaaS vende **“Agentes de WhatsApp + Automatizaciones”**, NO “n8n como producto”.
+Mientras n8n sea **solo un componente interno de tu arquitectura**, no estás violando la cláusula de multi-tenancy.
+
+Obviamente no es asesoría legal formal, pero con ese uso estás en el patrón habitual de “motor interno”.
+
+---
+
+## 2️⃣ Decisiones base del proyecto (dejamos esto YA fijado)
+
+Tomando todo lo que dijiste, te propongo fijar esto como base:
+
+* **Backend:** Node.js + **NestJS**
+
+  * ORM: **Prisma** con MySQL (más moderno y cómodo que TypeORM para multi-tenant + migraciones).
+* **Frontend:** **Next.js** (App Router) + React
+
+  * Razones:
+
+    * Mejor para **SaaS B2B**: SEO, rutas protegidas, SSR/SSG, internacionalización, etc.
+    * Más ordenado para auth, dashboards, área pública de marketing, docs, etc.
+  * Mobile-first con **TailwindCSS** + componente UI (Shadcn UI o similar).
+* **Base de datos:** **MySQL** (multi-tenant)
+
+  * Estrategia principal: **Single-DB, multi-tenant por `tenant_id`**, con:
+
+    * `tenant_id` en todas las tablas de datos sensibles.
+    * Filtros automáticos a nivel de repositorios/servicios en Nest.
+  * **Separación jurídica UE / Suiza:**
+
+    * Opción 1 (mínima viable):
+
+      * Un clúster **principal en la UE (ej: Alemania)**.
+      * Reglamentas en tu política que los datos de CH pueden alojarse en la UE (cumpliendo FADP y acuerdos).
+    * Opción 2 (más estricta, futura pero ya prevista en diseño):
+
+      * Capas de abstracción para poder tener **dos clústeres**: `eu-db` y `ch-db`,
+        seleccionados según `region` del tenant.
+* **Almacenamiento de archivos (conversaciones exportadas, adjuntos, etc.):**
+
+  * NO en la base de datos; en **object storage**:
+
+    * Ej: S3 compatible (Wasabi, Backblaze, Bunny, etc.) o el storage que te ofrezca Hostinger.
+    * Metadatos en MySQL, archivos (JSON, PDF, etc.) en buckets.
+* **SSO:** preparado desde el inicio:
+
+  * **Google** (OAuth2 / OpenID Connect)
+  * **Microsoft** (Entra ID / Azure AD)
+* **Pagos (España + Suiza):**
+
+  * **Stripe** como columna vertebral (acepta EUR y CHF, tarjetas, SEPA, etc.).
+  * Más adelante puedes añadir proveedores locales si hace falta (pero lo dejamos previsto).
+* **WhatsApp provider:**
+
+  * Soportar:
+
+    * **Evolution API** (tu proxy actual).
+    * Conector futuro con proveedor oficial de WhatsApp Cloud API (Ej: Gupshup, 360dialog, Meta Direct).
+* **n8n:** motor interno de automatización
+
+  * Expuesto vía Webhooks / REST desde Nest.
+  * Cada agente/tenant se mapea a un **Workflow ID** + variables de contexto.
+
+Con esto claro, ahora sí vamos a lo que me pediste: **roadmap completo de inicio a fin**, sin dejar cosas “para después”.
+
+---
+
+## 3️⃣ Roadmap completo – de 0 a SaaS profesional
+
+Te lo estructuro en grandes BLOQUES, y dentro de cada uno habrá PRDs/Specs individuales que luego pediremos a Cursor.
+
+### Bloque A — Fundamentos del SaaS (multi-tenant, auth, pagos, tenant panel)
+
+**A1. Arquitectura base & repositorio monorepo**
+
+* Monorepo (Turborepo o Nx) con:
+
+  * `apps/backend` → NestJS
+  * `apps/web` → Next.js
+  * `packages/shared` → tipos, modelos, utils comunes (DTOs, enums, etc.).
+* Configuración de entorno:
+
+  * `.env`, `.env.production`, `.env.local` para:
+
+    * DB (MySQL),
+    * Stripe keys,
+    * OAuth Google/Microsoft,
+    * Evolution API base URL,
+    * n8n base URL y credenciales de API.
+* Pipeline de despliegue (aunque sea manual al inicio) hacia VPS Hostinger.
+
+👉 **PRD futuro:** “Arquitectura monorepo + Setup inicial (Nest + Next + Prisma)”.
+
+---
+
+**A2. Modelo multi-tenant + migraciones**
+
+* Diseño de entidades base:
+
+  * `tenants`
+  * `users`
+  * `tenant_members` (rol: OWNER, ADMIN, AGENT, etc.)
+  * `tenant_settings` (idioma por defecto, zona horaria, país, moneda, etc.).
+* Estrategia multi-tenant:
+
+  * Todas las tablas de datos de negocio tienen `tenant_id`.
+  * Capa en Nest:
+
+    * “TenantContext” que se inyecta en cada request (extraído de dominio, subdominio o JWT).
+* Migraciones:
+
+  * Estándar Prisma:
+
+    * `/prisma/schema.prisma`
+    * `npx prisma migrate dev` (local)
+    * `npx prisma migrate deploy` (prod)
+  * Script inicial para seed:
+
+    * Crear tenant de prueba,
+    * Usuario owner,
+    * Plan gratuito.
+
+👉 **PRD futuro:** “Modelo multi-tenant y estrategia de migraciones con Prisma”.
+
+---
+
+**A3. Autenticación + SSO + gestión de usuarios**
+
+* Registro y login:
+
+  * Email + contraseña (con verificación por email).
+  * Invitación a equipo por email.
+* SSO:
+
+  * Botones “Continuar con Google” y “Continuar con Microsoft”.
+  * Asociación de identidad SSO a un `user` interno.
+* Gestión de sesión:
+
+  * Tokens JWT o cookies firmadas (recomendado con Next).
+  * Middleware para proteger rutas y paneles.
+* Roles:
+
+  * `OWNER`, `ADMIN`, `USER` (operador), `VIEW_ONLY`.
+
+👉 **PRD futuro:** “Auth & SSO multi-tenant (email/password + Google + Microsoft)”.
+
+---
+
+**A4. Billing & suscripciones (Stripe)**
+
+* Planes:
+
+  * Free trial (X días configurable por tenant plan).
+  * Plan básico, plan pro, plan enterprise (editable por ti en código al inicio).
+* Lógica:
+
+  * `subscriptions` table vinculada a `tenant_id`.
+  * Webhooks Stripe para:
+
+    * Activar / suspender / cancelar suscripción.
+  * Estados:
+
+    * `active`, `trialing`, `past_due`, `canceled`, `blocked`.
+* Restricciones:
+
+  * Si `trial` expirado y sin método de pago → limitar agentes activos.
+  * Si `past_due` cierto tiempo → bloquear envíos automáticos de mensajes del bot.
+
+👉 **PRD futuro:** “Facturación y control de acceso por suscripción (España + Suiza)”.
+
+---
+
+**A5. Panel de administración del tenant (panel profesional)**
+
+* Mobile-first, UI pro (no cutre):
+
+  * Dashboard con:
+
+    * Estado de suscripción,
+    * Próxima factura,
+    * Uso del sistema (mensajes, agentes, conversaciones).
+* Apartados:
+
+  * Equipo (invitaciones, roles).
+  * Plan y facturación (upgrade, downgrade, método de pago).
+  * Ajustes generales del tenant (idioma, zona horaria, país, moneda, logo, colores).
+
+👉 **PRD futuro:** “Tenant Panel profesional (UI + UX + lógica)”.
+
+---
+
+### Bloque B — Módulo WhatsApp & Evolución API
+
+**B1. Gestión de proveedores de WhatsApp**
+
+* Entidades:
+
+  * `whatsapp_providers` (Evolution, Official, etc.)
+  * `tenant_whatsapp_accounts`
+
+    * Proveedor
+    * Número de teléfono
+    * Status (connected, pending, revoked)
+    * Tokens / claves cifradas.
+* Flujos:
+
+  * Owner configura y valida tu número:
+
+    * “Conectar WhatsApp” → wizard:
+
+      1. Elegir proveedor (Evolution / Oficial).
+      2. Introducir claves / QR flow.
+      3. Guardar en DB.
+  * Validaciones:
+
+    * 1 número pertenece a 1 tenant.
+    * Posibilidad futura de múltiples números por tenant (pero lo dejamos previsto en el modelo).
+
+👉 **PRD futuro:** “Gestión de cuentas de WhatsApp por tenant”.
+
+---
+
+**B2. Webhooks de mensajes entrantes & salientes**
+
+* Endpoint en Nest:
+
+  * `/webhooks/whatsapp/:providerId`
+* Funciones:
+
+  * Recibir mensajes entrantes y:
+
+    * Resolver `tenant` y `agent` al que pertenece.
+    * Guardar en `conversations` y `messages`.
+    * Enviar esos datos al motor de IA y/o a n8n.
+  * Enviar mensajes salientes:
+
+    * Desde Nest hacia Evolution/Cloud API.
+    * Registrar estado de entrega (sent, delivered, seen, failed).
+
+👉 **PRD futuro:** “Webhooks WhatsApp + almacenamiento de conversaciones”.
+
+---
+
+### Bloque C — Base de conocimiento (IA-first, multi-idioma, configurable por cliente)
+
+Esta es la parte clave para que el agente sea bueno.
+
+**C1. Modelo de base de conocimiento**
+
+* Entidades:
+
+  * `knowledge_sources`:
+
+    * tipo: `FAQ`, `DOC`, `URL_SCRAPE`, `MANUAL_ENTRY`, `CALENDAR`, `CRM`, etc.
+    * idioma.
+  * `knowledge_chunks`:
+
+    * Texto normalizado / vectorizado por chunk.
+    * Referencias a origen.
+  * `knowledge_collections`:
+
+    * Para agrupar contenido: “Servicios & Precios”, “Política de cancelaciones”, etc.
+
+* Arquitectura:
+
+  * Almacenamiento texto: MySQL (contenido original + chunk).
+  * Embeddings:
+
+    * Opciones:
+
+      * Guardar vectores en MySQL (campo JSON/LongText) o
+      * Usar un vector store externo (ej: pgvector, Chroma, Qdrant).
+    * Te propongo: **para v1**, vector store interno simple (tabla `embeddings`) con índices.
+
+👉 **PRD futuro:** “Modelo de base de conocimiento multi-tenant, multi-idioma, con embeddings”.
+
+---
+
+**C2. Interfaces para que el cliente alimente su conocimiento**
+
+* Web App:
+
+  * Sección “Base de conocimiento”:
+
+    * CRUD de FAQs:
+
+      * Pregunta / Respuesta.
+      * Idioma.
+      * Categoría.
+    * Importar desde:
+
+      * Documentos (PDF, DOCX → extracción de texto).
+      * Sitio web (URL + scraping básico).
+  * Configuración:
+
+    * Idioma principal del negocio.
+    * Idiomas adicionales que soportará el bot.
+* Roles:
+
+  * Owner puede editar todo.
+  * Cliente final (si le delegas acceso) puede editar sólo algunas colecciones.
+  * El owner (tú) puede ofrecer servicio de “Set up done-for-you”.
+
+👉 **PRD futuro:** “UI + API para crear/gestionar la base de conocimiento del tenant”.
+
+---
+
+**C3. Pipeline de ingestión y actualización**
+
+* Cada vez que se añade/edita contenido:
+
+  * Normalizar texto.
+  * Trocear en chunks (tamaño óptimo para embeddings).
+  * Generar embedding con OpenAI (u otro modelo).
+  * Guardar embedding vinculado al chunk.
+* Estrategia idiomas:
+
+  * Guardar idioma detectado.
+  * Permitir consultas cross-language (ej: usuario escribe en alemán y contenido está en español → translation layer).
+
+👉 **PRD futuro:** “Pipeline de ingestión + embeddings + detección de idioma”.
+
+---
+
+### Bloque D — Motor del Agente de Citas (WhatsApp Agent)
+
+**D1. Diseño del “Agente” como entidad configurable**
+
+* Entidad `agents`:
+
+  * `tenant_id`
+  * `name` (Ej: “Recepcionista WhatsApp”)
+  * `language_strategy`: `auto_detect`, `fixed`, `multi_language`.
+  * `knowledge_collections` asociados.
+  * `calendar_connectors` usados.
+  * `personality_settings`:
+
+    * Tono (formal, cercano, etc).
+    * Nombre del agente.
+  * `n8n_workflow_id` (si se usa flujo externo).
+  * `status`: active / paused / disabled.
+* UI para que el tenant configure:
+
+  * Idioma por defecto.
+  * Tono de voz.
+  * Qué colecciones de conocimiento usará.
+  * Qué calendario se usa y reglas de cita (duración, huecos, buffers, cancelaciones).
+
+👉 **PRD futuro:** “Modelo y configuración de Agentes por tenant”.
+
+---
+
+**D2. Orquestación de conversación (memoria + IA)**
+
+* Memoria:
+
+  * `conversations` y `messages` tablas:
+
+    * Guardar todo el historial (cumpliendo GDPR/FADP, con opción de eliminación/anónimo).
+  * Mechanismo de “contexto”:
+
+    * Últimos X mensajes relevantes.
+    * Resumen de conversación para contextos largos.
+* Algoritmo del turn:
+
+  1. Llega mensaje → determinar idioma (detección automática).
+  2. Buscar conversación existente con ese número y ese agente.
+  3. Construir contexto:
+
+     * Mensajes recientes,
+     * Resumen (si existe),
+     * Info de usuario (nombre si ya se conoce),
+     * Intent actual (si ya se detectó: “agendar cita, cancelar, info precios…”).
+  4. Llamar al **orquestador IA**:
+
+     * LLM principal (OpenAI).
+     * Consultas a base de conocimiento (RAG).
+     * Llamadas a n8n o a servicios internos (calendar, CRM).
+  5. Devolver respuesta → enviar vía WhatsApp.
+
+👉 **PRD futuro:** “Orquestador del agente de citas con memoria y RAG”.
+
+---
+
+**D3. Integración con calendarios (Cal.com, Google Calendar, CRM propio)**
+
+* Soportar en v1:
+
+  * **Cal.com**:
+
+    * Conexión por API Key + Event Types.
+  * **Google Calendar**:
+
+    * OAuth por usuario / service account según diseño.
+* Estructura:
+
+  * `calendar_integrations` (per tenant).
+  * `agent_calendar_rules`:
+
+    * Duración cita,
+    * Horarios de atención,
+    * Días disponibles,
+    * Buffers,
+    * Política de cancelación.
+* Flujo:
+
+  * Agente propone rango de horas.
+  * Cliente elige slot.
+  * Se crea el evento en el calendar correspondiente.
+  * Se envia confirmación por WhatsApp.
+
+👉 **PRD futuro:** “Módulo de integración de calendarios multi-proveedor”.
+
+---
+
+### Bloque E — Integración con n8n como motor interno
+
+**E1. Patrón de integración con n8n**
+
+* Modelo:
+
+  * `integrations_n8n_flows`:
+
+    * `tenant_id`
+    * `agent_id`
+    * `workflow_id`
+    * Tipo: `lead_intake`, `booking_flow`, `followup`, etc.
+* Estrategia:
+
+  * Para ciertos eventos:
+
+    * `on_new_lead`
+    * `on_booking_confirmed`
+    * `on_payment_failed`, etc.
+  * Nest envía un payload a n8n:
+
+    * vía Webhook HTTP.
+  * n8n hace:
+
+    * Envío de email,
+    * Notificación a dueño,
+    * Inserción en CRM,
+    * Etc.
+
+👉 **PRD futuro:** “Patrón de orquestación n8n interno (sin exposición al cliente)”.
+
+---
+
+**E2. Preparar la plataforma para “sincronizar flujos”**
+
+* Punto importante:
+  Cuando lleguemos aquí, me pedirás:
+
+  > “Pídeme los JSON de los agentes que vamos a integrar en el sistema”
+  > y conectaremos cada uno.
+* En el diseño:
+
+  * Guardar `workflow_id` y `target_event` en la config del Agente.
+  * UI en el panel:
+
+    * Checkboxes tipo:
+
+      * “Activar flujo de bienvenida (n8n)”
+      * “Activar flujo de recordatorio de citas (n8n)”
+
+👉 **PRD futuro:** “UI + modelo para activar/desactivar flujos n8n por agente/tenant”.
+
+---
+
+### Bloque F — Multi-idioma, detección de idioma, cumplimiento legal y automatizaciones
+
+**F1. Multi-idioma completo (plataforma + agente)**
+
+* Plataforma:
+
+  * Internacionalización en Next:
+
+    * Textos en `es-ES`, `de-CH`, `en`, `fr`, etc.
+  * Selector de idioma en la UI.
+* Agente:
+
+  * Detección automática del idioma del usuario (LLM o lib).
+  * Respuesta en:
+
+    * Idioma detectado, o
+    * Idioma por defecto del negocio (según configuración).
+  * Soporte de varios idiomas en la base de conocimiento.
+
+👉 **PRD futuro:** “Sistema multi-idioma (UI + agente)”.
+
+---
+
+**F2. Cumplimiento GDPR + FADP (Suiza)**
+
+* Features mínimas:
+
+  * Consentimiento explícito para uso de datos (texto configurable por tenant).
+  * Opción de “olvidar cliente”:
+
+    * Borrado / anonimización de conversaciones por número.
+  * Retención configurable por tenant (ej: borrar chats después de X meses).
+  * Página legal en la plataforma:
+
+    * Aviso legal, privacidad, cookies.
+* Segmentación región:
+
+  * Campo `region` en tenant: `EU`, `CH`.
+  * Políticas por región:
+
+    * Textos legales adaptados (mínimo).
+  * (Legal profundo se verá con abogado, pero la arquitectura lo soporta).
+
+👉 **PRD futuro:** “Módulo de cumplimiento de privacidad (GDPR + FADP)”.
+
+---
+
+**F3. Automatizaciones operativas (pruebas gratis, bloqueo por impago, etc.)**
+
+* Estados automáticos:
+
+  * Trial:
+
+    * Start trial al registrarse.
+    * Planificación de “trial_end` y tareas:
+
+      * Notificaciones (email, WhatsApp),
+      * Limitaciones si no añade método de pago.
+  * Impago:
+
+    * Webhook Stripe → `past_due`.
+    * Automatización:
+
+      * Reducir capacidades del agente (por ej. solo responder mensajes simples).
+      * Bloquear nuevas conversaciones si se prolonga la deuda.
+* Todo configurable por owner en panel:
+
+  * Duración trial.
+  * Grace period de impago.
+  * Mensajes automáticos predefinidos.
+
+👉 **PRD futuro:** “Automatizaciones de ciclo de vida del cliente (trial, impago, bloqueo)”.
+
+---
+
+### Bloque G — Extensiones futuras ya previstas: Voz, webchat, nuevos canales
+
+Aunque se implementarán después, **la arquitectura** desde ya debe permitir:
+
+* Soportar múltiples `channels`:
+
+  * `whatsapp`, `webchat`, `voice`, `telegram`, etc.
+* Tener tabla:
+
+  * `channels` (por tenant),
+  * `channel_agents` (mapeo agente ↔ canal).
+* Así, cuando quieras agregar:
+
+  * Voz (Twilio, Vonage, etc.).
+  * Chat web embebible.
+* Solo añadimos nuevos connectores reutilizando:
+
+  * Mismo modelo de agente,
+  * Misma base de conocimiento,
+  * Misma orquestación de IA.
+
+👉 **PRD futuro (cuando toque):** “Soporte multicanal: voz/webchat”.
+
+---
+
+## 4️⃣ ¿Qué hacemos AHORA mismo?
+
+Tu última frase fue: **“Seguir usando N8N como motor interno, empecemos con el desarrollo”**.
+
+El siguiente paso lógico es:
+
+### Paso 1: PRD + Spec para “Fundamentos del SaaS” (Bloque A1 + A2)
+
+Te propongo que empecemos por ahí con Cursor.
+
+En la próxima respuesta, si quieres, te doy **el primer prompt para Cursor** algo así como:
+
+> “Genera el PRD y AI-Spec para el Bloque A1 + A2...”
+
+Pero antes de eso, te dejo claro:
+
+* El roadmap ya está **completo y de inicio a fin** (hasta extensiones de voz/canales).
+* Incluye:
+
+  * Node/NestJS, Next.js, MySQL
+  * Multi-tenant completo
+  * SSO Google/Microsoft
+  * Billing para España y Suiza
+  * WhatsApp con EvolutionAPI
+  * Base de conocimiento IA-first
+  * n8n como motor interno
+  * Multi-idioma y cumplimiento GDPR+FADP
+  * Automatizaciones (trial, impago, bloqueo)
+  * Preparado para futuros canales.
+

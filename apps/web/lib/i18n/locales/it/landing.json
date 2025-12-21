@@ -1,0 +1,171 @@
+{
+  "nav": {
+    "producto": "Prodotto",
+    "comoFunciona": "Come funziona",
+    "beneficios": "Vantaggi",
+    "roi": "Calcolatore ROI",
+    "faq": "FAQ",
+    "calcularRoi": "Calcola ROI",
+    "login": "Accedi",
+    "menu": "Menu",
+    "cerrarMenu": "Chiudi menu",
+    "abrirMenu": "Apri menu"
+  },
+  "hero": {
+    "badge": "Agenzia di Automatizzazione IA",
+    "title": "Automatizza la tua attività con",
+    "titleHighlight": "Intelligenza Artificiale",
+    "subtitle": "Sviluppiamo agenti IA personalizzati che automatizzano compiti ripetitivi, servono i clienti 24/7 e riducono i costi operativi fino al 70%.",
+    "ctaPrimary": "Calcola il mio ROI",
+    "ctaSecondary": "Parla con un esperto",
+    "trustCompanies": "Aziende automatizzate",
+    "trustSavings": "Riduzione dei costi",
+    "trustSupport": "Supporto automatico"
+  },
+  "product": {
+    "title": "Soluzioni di",
+    "titleHighlight": "Automatizzazione IA",
+    "subtitle": "Tre pilastri fondamentali per trasformare le operazioni della tua azienda con l'intelligenza artificiale.",
+    "whatsapp": {
+      "title": "Automatizzazione WhatsApp",
+      "description": "Agenti conversazionali che gestiscono richieste, programmano appuntamenti e gestiscono ordini 24/7 su WhatsApp Business."
+    },
+    "processes": {
+      "title": "Automatizzazione dei processi",
+      "description": "Flussi di lavoro intelligenti che collegano i tuoi strumenti ed eliminano compiti manuali ripetitivi."
+    },
+    "compliance": {
+      "title": "Conformità GDPR",
+      "description": "Tutte le nostre soluzioni sono conformi alla normativa europea sulla protezione dei dati e la privacy."
+    }
+  },
+  "howItWorks": {
+    "title": "Come funziona",
+    "titleHighlight": "Il nostro processo",
+    "subtitle": "Un processo strutturato in 6 fasi per garantire il successo del tuo progetto di automatizzazione.",
+    "step1": {
+      "title": "Analisi dei processi",
+      "description": "Identifichiamo i compiti ripetitivi e i colli di bottiglia nelle tue operazioni attuali."
+    },
+    "step2": {
+      "title": "Progettazione della soluzione",
+      "description": "Creiamo un'architettura di automatizzazione personalizzata per la tua attività."
+    },
+    "step3": {
+      "title": "Sviluppo dell'agente",
+      "description": "Costruiamo e addestriamo il tuo agente IA con le tue conoscenze aziendali."
+    },
+    "step4": {
+      "title": "Integrazione",
+      "description": "Colleghiamo l'agente ai tuoi sistemi esistenti: CRM, ERP, WhatsApp, ecc."
+    },
+    "step5": {
+      "title": "Test e ottimizzazione",
+      "description": "Testiamo accuratamente e ottimizziamo le prestazioni prima del lancio."
+    },
+    "step6": {
+      "title": "Distribuzione e supporto",
+      "description": "Attiviamo la soluzione in produzione con monitoraggio e supporto continui."
+    }
+  },
+  "benefits": {
+    "title": "Vantaggi dell'",
+    "titleHighlight": "automatizzazione con IA",
+    "subtitle": "Trasforma le tue operazioni aziendali e ottieni vantaggi competitivi reali e misurabili.",
+    "benefit1": "Riduzione del 70% nei compiti amministrativi ripetitivi",
+    "benefit2": "Servizio clienti automatizzato 24 ore su 24, 7 giorni su 7",
+    "benefit3": "Risposte istantanee senza tempi di attesa",
+    "benefit4": "Scalabilità senza aumentare il personale",
+    "benefit5": "Integrazione con sistemi esistenti (CRM, ERP, ecc.)",
+    "benefit6": "Analisi e reporting automatici delle metriche",
+    "benefit7": "Conformità normativa GDPR garantita",
+    "benefit8": "ROI positivo in meno di 6 mesi",
+    "useCasesTitle": "Casi d'uso principali",
+    "useCase1": "Servizio clienti",
+    "useCase2": "Gestione appuntamenti",
+    "useCase3": "Elaborazione ordini",
+    "useCase4": "Supporto tecnico",
+    "useCase5": "Qualificazione lead",
+    "useCase6": "Onboarding clienti"
+  },
+  "roi": {
+    "title": "Calcola il tuo",
+    "titleHighlight": "Ritorno sull'investimento",
+    "subtitle": "Scopri quanto puoi risparmiare automatizzando i compiti ripetitivi del tuo team.",
+    "calculatorTitle": "Calcolatore ROI",
+    "numPeople": "Persone in compiti ripetitivi",
+    "hoursPerWeek": "Ore/settimana in compiti automatizzabili",
+    "hourlyCost": "Costo/ora dipendente (con SS)",
+    "automationRate": "Percentuale di automatizzazione",
+    "currentYearlyCost": "Costo annuo attuale",
+    "estimatedSavings": "Risparmi annui potenziali",
+    "projectBudgetMin": "Investimento iniziale minimo",
+    "projectBudgetMax": "Investimento iniziale massimo",
+    "monthlyRetainer": "Manutenzione mensile",
+    "cta": "Richiedi preventivo personalizzato",
+    "note": "Stima indicativa. I valori saranno adeguati nella sessione di analisi personalizzata.",
+    "calculate": "Calcola",
+    "sector": "Settore (opzionale)",
+    "sectorPlaceholder": "Seleziona il tuo settore",
+    "sectorRetail": "Retail / E-commerce",
+    "sectorHealthcare": "Sanità / Cliniche",
+    "sectorLegal": "Legale / Studi legali",
+    "sectorRealEstate": "Immobiliare",
+    "sectorOther": "Altro"
+  },
+  "faq": {
+    "title": "Domande",
+    "titleHighlight": "Frequenti",
+    "subtitle": "Risposte alle domande più comuni sull'automatizzazione con IA.",
+    "q1": "Quanto tempo ci vuole per implementare un agente IA?",
+    "a1": "Il tempo di implementazione varia in base alla complessità del progetto. Un agente WhatsApp di base può essere operativo in 2-4 settimane, mentre una soluzione di automatizzazione più complessa può richiedere 6-12 settimane. Durante la consultazione iniziale, forniamo un calendario dettagliato per il tuo caso specifico.",
+    "q2": "Ho bisogno di conoscenze tecniche per usare la soluzione?",
+    "a2": "No, le nostre soluzioni sono progettate per essere utilizzate da personale non tecnico. Forniamo un'interfaccia intuitiva per gestire e monitorare gli agenti, oltre a una formazione completa per il tuo team. Il supporto tecnico è incluso per risolvere qualsiasi domanda.",
+    "q3": "Come si integra con i miei sistemi attuali?",
+    "a3": "I nostri agenti IA si integrano con la maggior parte dei sistemi aziendali: CRM (Salesforce, HubSpot, Pipedrive), ERP, piattaforme e-commerce, sistemi di ticketing e altro ancora. Utilizziamo API standard e sviluppiamo connettori personalizzati quando necessario.",
+    "q4": "Quali garanzie di sicurezza e privacy offrite?",
+    "a4": "Tutte le nostre soluzioni sono conformi al GDPR e alla LOPDGDD. Implementiamo crittografia end-to-end, archiviazione sicura su server europei e controlli di accesso rigorosi. Firmiamo accordi di riservatezza e possiamo adattarci a requisiti di sicurezza specifici del tuo settore.",
+    "q5": "Cosa succede se l'agente non sa rispondere a qualcosa?",
+    "a5": "Gli agenti sono progettati per scalare automaticamente a un umano quando rilevano richieste fuori dal loro ambito o quando l'utente lo richiede. Inoltre, il sistema impara continuamente da queste interazioni per migliorare le risposte future.",
+    "q6": "Qual è il costo di manutenzione dopo l'implementazione?",
+    "a6": "Offriamo piani di manutenzione mensili che includono: monitoraggio 24/7, aggiornamenti di sicurezza, ottimizzazioni delle prestazioni e supporto tecnico. Il costo tipico è tra il 10-15% del valore iniziale del progetto all'anno, sebbene vari in base all'ambito del servizio richiesto.",
+    "noAnswer": "Non trovi la risposta che cerchi?",
+    "contact": "Contattaci direttamente"
+  },
+  "footer": {
+    "description": "Agenzia specializzata nell'automatizzazione aziendale con intelligenza artificiale. Trasformiamo le operazioni della tua attività.",
+    "services": "Servizi",
+    "company": "Azienda",
+    "legal": "Legale",
+    "service1": "Automatizzazione WhatsApp",
+    "service2": "Agenti IA",
+    "service3": "Integrazioni",
+    "service4": "Consulenza",
+    "company1": "Chi siamo",
+    "company2": "Storie di successo",
+    "company3": "Blog",
+    "company4": "Carriere",
+    "legal1": "Politica sulla privacy",
+    "legal2": "Termini di servizio",
+    "legal3": "Politica sui cookie",
+    "legal4": "Note legali",
+    "copyright": "Tutti i diritti riservati.",
+    "compliance": "Soluzioni conformi al GDPR, LOPDGDD e alla normativa europea sulla protezione dei dati. Server ubicati nell'Unione Europea."
+  },
+  "common": {
+    "loading": "Caricamento...",
+    "error": "Errore",
+    "success": "Successo",
+    "submit": "Invia",
+    "cancel": "Annulla",
+    "save": "Salva",
+    "name": "Nome",
+    "email": "Email",
+    "phone": "Telefono",
+    "company": "Azienda",
+    "message": "Messaggio",
+    "required": "Obbligatorio",
+    "invalidEmail": "Email non valida"
+  }
+}
+

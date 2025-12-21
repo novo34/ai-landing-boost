@@ -1,0 +1,35 @@
+{
+  "emails": {
+    "verification": {
+      "subject": "Verifica tu email - AutomAI",
+      "greeting": "¡Hola {{name}}!",
+      "message": "Gracias por registrarte en AutomAI. Para completar tu registro, por favor verifica tu dirección de email haciendo clic en el botón siguiente:",
+      "button": "Verificar Email",
+      "link_text": "O copia y pega este enlace en tu navegador:",
+      "expiry": "Este enlace expirará en 24 horas. Si no solicitaste este registro, puedes ignorar este email.",
+      "footer": "© 2025 AutomAI. Todos los derechos reservados."
+    },
+    "invitation": {
+      "subject": "Invitación a unirse a {{tenantName}} - AutomAI",
+      "greeting": "¡Has sido invitado!",
+      "message": "{{inviterName}} te ha invitado a unirte al equipo {{tenantName}} en AutomAI.",
+      "action": "Para aceptar la invitación y comenzar a trabajar con el equipo, haz clic en el botón siguiente:",
+      "button": "Aceptar Invitación",
+      "link_text": "O copia y pega este enlace en tu navegador:",
+      "expiry": "Esta invitación expirará en 7 días. Si no deseas unirte al equipo, puedes ignorar este email.",
+      "footer": "© 2025 AutomAI. Todos los derechos reservados."
+    },
+    "role_change": {
+      "subject": "Tu rol ha cambiado en {{tenantName}} - AutomAI",
+      "greeting": "Hola {{userName}},",
+      "message": "Te informamos que tu rol en {{tenantName}} ha sido actualizado:",
+      "previous_role": "Rol anterior:",
+      "new_role": "Nuevo rol:",
+      "contact": "Si tienes alguna pregunta sobre este cambio, por favor contacta con el administrador del equipo.",
+      "button": "Ver configuración del equipo",
+      "footer": "Este es un email automático. Por favor no respondas a este mensaje."
+    }
+  }
+}
+
+

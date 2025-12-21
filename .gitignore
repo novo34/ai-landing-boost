@@ -12,6 +12,18 @@ dist
 dist-ssr
 *.local
 
+# Next.js
+.next
+apps/web/.next
+apps/web/.next/**
+
+# Environment variables
+.env
+.env.local
+.env.*.local
+apps/api/.env
+apps/web/.env
+
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json

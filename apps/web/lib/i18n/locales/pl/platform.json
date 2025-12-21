@@ -1,0 +1,628 @@
+{
+  "title": "Panel Administracyjny Platformy",
+  "nav": {
+    "dashboard": "Dashboard",
+    "tenants": "Najemcy",
+    "billing": "Rozliczenia",
+    "plans": "Plany",
+    "tickets": "Zgłoszenia Wsparcia",
+    "chat": "Czat z Klientami",
+    "instances": "Instancje",
+    "regions": "Regiony Danych",
+    "audit": "Audyt",
+    "operations": {
+      "title": "Własne Operacje",
+      "agents": "Moi Agenci",
+      "channels": "Moje Kanały",
+      "conversations": "Moje Konwersacje",
+      "leads": "Moje Potencjalne Klienty",
+      "n8n": "Moje Przepływy N8N"
+    },
+    "settings": "Ustawienia"
+  },
+  "dashboard": {
+    "title": "Dashboard Platformy",
+    "metrics": {
+      "tenants": {
+        "total": "Łącznie Najemców",
+        "active": "Aktywni Najemcy",
+        "trial": "W Trakcie Próby",
+        "suspended": "Zawieszeni",
+        "new_last_30_days": "Nowi (30 dni)"
+      },
+      "users": {
+        "total": "Łącznie Użytkowników",
+        "active_last_30_days": "Aktywni (30 dni)"
+      },
+      "revenue": {
+        "mrr": "MRR",
+        "arr": "ARR",
+        "current_month": "Bieżący Miesiąc",
+        "previous_month": "Poprzedni Miesiąc",
+        "growth": "Wzrost"
+      },
+      "usage": {
+        "agents": "Aktywni Agenci",
+        "channels": "Skonfigurowane Kanały",
+        "conversations": "Konwersacje",
+        "messages": "Przetworzone Wiadomości"
+      },
+      "health": {
+        "payment_failed": "Nieudane Płatności",
+        "near_limits": "Blisko Limitów",
+        "avg_response_time": "Średni Czas Odpowiedzi"
+      }
+    }
+  },
+  "tenants": {
+    "title": "Zarządzanie Najemcami",
+    "list": {
+      "title": "Lista Najemców",
+      "search_placeholder": "Szukaj po nazwie, emailu lub slug...",
+      "filters": {
+        "status": "Status",
+        "plan": "Plan",
+        "country": "Kraj",
+        "date_range": "Zakres Dat",
+        "subscription_status": "Status Subskrypcji"
+      },
+      "columns": {
+        "name": "Nazwa",
+        "slug": "Slug",
+        "status": "Status",
+        "plan": "Plan",
+        "subscription_status": "Status Subskrypcji",
+        "country": "Kraj",
+        "users": "Użytkownicy",
+        "agents": "Agenci",
+        "created_at": "Utworzono",
+        "last_activity": "Ostatnia Aktywność",
+        "actions": "Akcje"
+      },
+      "actions": {
+        "view": "Zobacz Szczegóły",
+        "edit": "Edytuj",
+        "suspend": "Zawieś",
+        "reactivate": "Reaktywuj",
+        "delete": "Usuń",
+        "configure": "Skonfiguruj"
+      }
+    },
+    "create": {
+      "title": "Utwórz Nowego Najemcę",
+      "form": {
+        "name": "Nazwa Najemcy",
+        "name_placeholder": "Moja Firma",
+        "slug": "Slug",
+        "slug_placeholder": "moja-firma",
+        "country": "Kraj",
+        "data_region": "Region Danych",
+        "default_locale": "Domyślny Język",
+        "time_zone": "Strefa Czasowa",
+        "owner_email": "Email Właściciela",
+        "owner_name": "Nazwa Właściciela",
+        "initial_plan": "Plan Początkowy",
+        "initial_status": "Status Początkowy",
+        "trial_ends_at": "Koniec Próby"
+      },
+      "success": "Najemca utworzony pomyślnie",
+      "error": "Błąd podczas tworzenia najemcy"
+    },
+    "edit": {
+      "title": "Edytuj Najemcę",
+      "success": "Najemca zaktualizowany pomyślnie",
+      "error": "Błąd podczas aktualizacji najemcy"
+    },
+    "details": {
+      "title": "Szczegóły Najemcy",
+      "basic_info": "Podstawowe Informacje",
+      "subscription": "Subskrypcja",
+      "metrics": "Metryki",
+      "users": "Użytkownicy",
+      "history": "Historia",
+      "logs": "Logi Aktywności"
+    },
+    "suspend": {
+      "title": "Zawieś Najemcę",
+      "confirm": "Czy na pewno chcesz zawiesić tego najemcę?",
+      "reason": "Powód zawieszenia",
+      "reason_placeholder": "Wprowadź powód zawieszenia...",
+      "success": "Najemca zawieszony pomyślnie",
+      "error": "Błąd podczas zawieszania najemcy"
+    },
+    "reactivate": {
+      "title": "Reaktywuj Najemcę",
+      "confirm": "Czy na pewno chcesz reaktywować tego najemcę?",
+      "success": "Najemca reaktywowany pomyślnie",
+      "error": "Błąd podczas reaktywowania najemcy"
+    },
+    "delete": {
+      "title": "Usuń Najemcę",
+      "confirm": "Czy na pewno chcesz usunąć tego najemcę? Ta akcja nie może być cofnięta.",
+      "warning": "Zostanie usunięte:",
+      "warning_users": "{{count}} użytkowników",
+      "warning_conversations": "{{count}} konwersacji",
+      "warning_data": "Wszystkie powiązane dane",
+      "success": "Najemca usunięty pomyślnie",
+      "error": "Błąd podczas usuwania najemcy"
+    },
+    "status": {
+      "active": "Aktywny",
+      "trial": "Próba",
+      "suspended": "Zawieszony",
+      "cancelled": "Anulowany"
+    }
+  },
+  "billing": {
+    "title": "Zarządzanie Rozliczeniami",
+    "subscription": {
+      "title": "Subskrypcja",
+      "plan": "Bieżący Plan",
+      "status": "Status",
+      "start_date": "Data Rozpoczęcia",
+      "next_billing": "Następna Płatność",
+      "payment_method": "Metoda Płatności",
+      "change_plan": "Zmień Plan",
+      "apply_adjustment": "Zastosuj Korektę"
+    },
+    "payment_failed": {
+      "title": "Nieudane Płatności",
+      "days_since_payment": "Dni od ostatniej płatności",
+      "failed_attempts": "Nieudane próby",
+      "amount_due": "Należna kwota",
+      "extend_grace": "Przedłuż Okres Karencji",
+      "mark_paid": "Oznacz jako Opłacone",
+      "contact": "Skontaktuj się z Klientem"
+    },
+    "adjustment": {
+      "title": "Zastosuj Korektę",
+      "type": "Typ",
+      "amount": "Kwota",
+      "reason": "Powód",
+      "apply_date": "Data Zastosowania",
+      "types": {
+        "discount": "Zniżka",
+        "credit": "Kredyt",
+        "adjustment": "Korekta"
+      }
+    }
+  },
+  "plans": {
+    "title": "Zarządzanie Planami",
+    "list": {
+      "title": "Plany Subskrypcji",
+      "columns": {
+        "name": "Nazwa",
+        "price_monthly": "Cena Miesięczna",
+        "price_yearly": "Cena Roczna",
+        "limits": "Limity",
+        "status": "Status",
+        "tenants": "Subskrybowani Najemcy",
+        "revenue": "Przychód",
+        "actions": "Akcje"
+      }
+    },
+    "create": {
+      "title": "Utwórz Plan",
+      "form": {
+        "name": "Nazwa",
+        "description": "Opis",
+        "price_monthly": "Cena Miesięczna (grosze)",
+        "price_yearly": "Cena Roczna (grosze)",
+        "currency": "Waluta",
+        "max_agents": "Maks Agenci",
+        "max_channels": "Maks Kanały",
+        "max_messages": "Maks Wiadomości",
+        "features": "Funkcje"
+      },
+      "success": "Plan utworzony pomyślnie"
+    },
+    "edit": {
+      "title": "Edytuj Plan",
+      "success": "Plan zaktualizowany pomyślnie"
+    },
+    "delete": {
+      "title": "Usuń Plan",
+      "confirm": "Czy na pewno chcesz usunąć ten plan?",
+      "warning": "Nie można usunąć, jeśli są subskrybowani najemcy",
+      "success": "Plan usunięty pomyślnie"
+    }
+  },
+  "tickets": {
+    "title": "Zgłoszenia Wsparcia",
+    "list": {
+      "title": "Lista Zgłoszeń",
+      "filters": {
+        "status": "Status",
+        "category": "Kategoria",
+        "priority": "Priorytet",
+        "assigned_to": "Przypisane do",
+        "tenant": "Najemca"
+      },
+      "columns": {
+        "id": "ID",
+        "subject": "Temat",
+        "tenant": "Najemca",
+        "category": "Kategoria",
+        "priority": "Priorytet",
+        "status": "Status",
+        "assigned_to": "Przypisane do",
+        "created_at": "Utworzono",
+        "last_activity": "Ostatnia Aktywność",
+        "actions": "Akcje"
+      }
+    },
+    "create": {
+      "title": "Utwórz Zgłoszenie",
+      "form": {
+        "subject": "Temat",
+        "description": "Opis",
+        "category": "Kategoria",
+        "priority": "Priorytet",
+        "tenant": "Najemca (opcjonalne)"
+      },
+      "success": "Zgłoszenie utworzone pomyślnie"
+    },
+    "details": {
+      "title": "Szczegóły Zgłoszenia",
+      "messages": "Wiadomości",
+      "add_message": "Dodaj Wiadomość",
+      "internal_note": "Notatka Wewnętrzna",
+      "assign": "Przypisz",
+      "change_status": "Zmień Status",
+      "close": "Zamknij"
+    },
+    "status": {
+      "open": "Otwarte",
+      "in_progress": "W Trakcie",
+      "waiting_client": "Oczekiwanie na Klienta",
+      "resolved": "Rozwiązane",
+      "closed": "Zamknięte"
+    },
+    "priority": {
+      "low": "Niska",
+      "medium": "Średnia",
+      "high": "Wysoka",
+      "critical": "Krytyczna"
+    },
+    "category": {
+      "technical": "Techniczne",
+      "billing": "Rozliczenia",
+      "configuration": "Konfiguracja",
+      "feature_request": "Żądanie Funkcji",
+      "other": "Inne"
+    }
+  },
+  "leads": {
+    "title": "CRM Leadów",
+    "list": {
+      "title": "Lista Leadów",
+      "filters": {
+        "status": "Status",
+        "stage": "Etap",
+        "source": "Źródło",
+        "assigned_to": "Przypisany do"
+      },
+      "columns": {
+        "name": "Nazwa",
+        "email": "Email",
+        "phone": "Telefon",
+        "source": "Źródło",
+        "status": "Status",
+        "stage": "Etap",
+        "assigned_to": "Przypisany do",
+        "created_at": "Utworzono",
+        "updated_at": "Zaktualizowano",
+        "actions": "Akcje"
+      }
+    },
+    "pipeline": {
+      "title": "Lejek Sprzedaży",
+      "metrics": {
+        "total": "Razem",
+        "conversion_rate": "Współczynnik Konwersji",
+        "by_stage": "Według Etapu",
+        "by_source": "Według Źródła"
+      }
+    },
+    "details": {
+      "title": "Szczegóły Leada",
+      "info": "Informacje",
+      "notes": "Notatki",
+      "history": "Historia",
+      "add_note": "Dodaj Notatkę"
+    },
+    "status": {
+      "new": "Nowy",
+      "contacted": "Skontaktowany",
+      "qualified": "Zakwalifikowany",
+      "opportunity": "Szansa",
+      "customer": "Klient",
+      "lost": "Utracony"
+    },
+    "stage": {
+      "lead_captured": "Lead Przechwycony",
+      "contacted": "Skontaktowany",
+      "qualified": "Zakwalifikowany",
+      "demo": "Demo",
+      "proposal": "Propozycja",
+      "negotiation": "Negocjacje",
+      "closed_won": "Zamknięty - Wygrany",
+      "closed_lost": "Zamknięty - Przegrany"
+    },
+    "source": {
+      "whatsapp": "WhatsApp",
+      "webchat": "Webchat",
+      "landing": "Strona Docelowa",
+      "manual": "Ręczny",
+      "import": "Import"
+    }
+  },
+  "n8n_flows": {
+    "title": "Przepływy N8N Platformy",
+    "list": {
+      "title": "Przepływy Automatyzacji",
+      "filters": {
+        "category": "Kategoria",
+        "is_active": "Status"
+      },
+      "columns": {
+        "name": "Nazwa",
+        "category": "Kategoria",
+        "status": "Status",
+        "created_at": "Utworzono",
+        "actions": "Akcje"
+      }
+    },
+    "create": {
+      "title": "Utwórz Przepływ",
+      "form": {
+        "name": "Nazwa",
+        "description": "Opis",
+        "category": "Kategoria",
+        "workflow": "Workflow (JSON)"
+      },
+      "success": "Przepływ utworzony pomyślnie"
+    },
+    "details": {
+      "title": "Szczegóły Przepływu",
+      "workflow": "Workflow",
+      "executions": "Wykonania",
+      "logs": "Logi"
+    },
+    "categories": {
+      "onboarding": "Onboarding",
+      "notifications": "Powiadomienia",
+      "leads": "Leady",
+      "reports": "Raporty",
+      "operations": "Operacje"
+    }
+  },
+  "chat": {
+    "title": "Czat z Klientami",
+    "conversations": {
+      "title": "Aktywne Konwersacje",
+      "no_conversations": "Brak aktywnych konwersacji",
+      "start_conversation": "Rozpocznij Konwersację",
+      "with_tenant": "z {{tenant}}"
+    },
+    "messages": {
+      "type_message": "Wpisz wiadomość...",
+      "send": "Wyślij",
+      "file": "Plik",
+      "image": "Obraz",
+      "typing": "pisze...",
+      "online": "Online",
+      "offline": "Offline"
+    }
+  },
+  "instances": {
+    "title": "Zarządzanie Instancjami",
+    "list": {
+      "title": "Instancje SaaS",
+      "columns": {
+        "name": "Nazwa",
+        "domain": "Domena",
+        "status": "Status",
+        "tenants": "Najemcy",
+        "created_at": "Utworzono",
+        "actions": "Akcje"
+      }
+    },
+    "create": {
+      "title": "Utwórz Instancję",
+      "form": {
+        "name": "Nazwa",
+        "domain": "Domena",
+        "database_url": "URL Bazy Danych",
+        "stripe_key": "Klucz Stripe",
+        "n8n_url": "URL N8N"
+      },
+      "success": "Instancja utworzona pomyślnie"
+    },
+    "switch": {
+      "title": "Zmień Instancję",
+      "current": "Bieżąca Instancja",
+      "select": "Wybierz Instancję"
+    }
+  },
+  "regions": {
+    "title": "Regiony Danych",
+    "list": {
+      "title": "Rozkład według Regionu",
+      "columns": {
+        "region": "Region",
+        "tenants": "Najemcy",
+        "compliance": "Zgodność",
+        "actions": "Akcje"
+      }
+    },
+    "migrate": {
+      "title": "Migruj Najemcę do Innego Regionu",
+      "confirm": "Czy na pewno chcesz migrować tego najemcę?",
+      "warning": "Ta operacja może zająć kilka minut",
+      "success": "Migracja rozpoczęta pomyślnie"
+    },
+    "regions": {
+      "eu": "Europa (RODO)",
+      "ch": "Szwajcaria (nLPD)",
+      "us": "Stany Zjednoczone",
+      "apac": "Azja-Pacyfik"
+    }
+  },
+  "audit": {
+    "title": "Logi Audytu",
+    "list": {
+      "title": "Historia Akcji",
+      "filters": {
+        "action": "Akcja",
+        "resource_type": "Typ Zasobu",
+        "resource_id": "ID Zasobu",
+        "user": "Użytkownik",
+        "date_range": "Zakres Dat"
+      },
+      "columns": {
+        "timestamp": "Znacznik Czasu",
+        "user": "Użytkownik",
+        "action": "Akcja",
+        "resource": "Zasób",
+        "details": "Szczegóły",
+        "ip": "IP"
+      },
+      "export": "Eksportuj Logi"
+    },
+    "actions": {
+      "create_tenant": "Utwórz Najemcę",
+      "update_tenant": "Aktualizuj Najemcę",
+      "suspend_tenant": "Zawieś Najemcę",
+      "reactivate_tenant": "Reaktywuj Najemcę",
+      "delete_tenant": "Usuń Najemcę",
+      "change_plan": "Zmień Plan",
+      "apply_adjustment": "Zastosuj Korektę"
+    }
+  },
+  "operations": {
+    "agents": {
+      "title": "Moi Agenci",
+      "description": "Agenci do generowania potencjalnych klientów i sprzedaży SaaS"
+    },
+    "channels": {
+      "title": "Moje Kanały",
+      "description": "Kanały skonfigurowane do własnych operacji"
+    },
+    "conversations": {
+      "title": "Moje Konwersacje",
+      "description": "Konwersacje z własnego najemcy SaaS"
+    },
+    "leads": {
+      "title": "Moje Potencjalne Klienty",
+      "description": "CRM potencjalnych klientów generowanych przez własnych agentów",
+      "pipeline": {
+        "title": "Lejek Sprzedaży",
+        "stages": {
+          "lead_captured": "Potencjalny Klient Złapany",
+          "contacted": "Skontaktowany",
+          "qualified": "Zakwalifikowany",
+          "demo": "Demo",
+          "proposal": "Propozycja",
+          "negotiation": "Negocjacje",
+          "closed_won": "Zamknięte - Wygrane",
+          "closed_lost": "Zamknięte - Przegrane"
+        }
+      },
+      "create": {
+        "title": "Utwórz Potencjalnego Klienta",
+        "form": {
+          "name": "Nazwa",
+          "email": "Email",
+          "phone": "Telefon",
+          "source": "Źródło",
+          "interest": "Zainteresowanie",
+          "notes": "Notatki"
+        }
+      },
+      "add_note": {
+        "title": "Dodaj Notatkę",
+        "placeholder": "Napisz notatkę..."
+      }
+    },
+    "n8n": {
+      "title": "Przepływy N8N",
+      "description": "Automatyzacja procesów wewnętrznych",
+      "categories": {
+        "onboarding": "Onboarding",
+        "notifications": "Powiadomienia",
+        "leads": "Potencjalni Klienci",
+        "reports": "Raporty",
+        "operations": "Operacje"
+      },
+      "create": {
+        "title": "Utwórz Przepływ",
+        "form": {
+          "name": "Nazwa",
+          "description": "Opis",
+          "category": "Kategoria",
+          "workflow": "Workflow (JSON)"
+        }
+      },
+      "activate": "Aktywuj",
+      "deactivate": "Deaktywuj",
+      "logs": "Zobacz Logi"
+    }
+  },
+  "errors": {
+    "unauthorized": "Nie masz uprawnień do dostępu do tej sekcji",
+    "tenant_not_found": "Najemca nie znaleziony",
+    "slug_exists": "Slug już istnieje",
+    "invalid_email": "Nieprawidłowy email",
+    "invalid_country": "Nieprawidłowy kraj",
+    "cannot_suspend_self": "Nie możesz zawiesić własnego najemcy",
+    "cannot_delete_self": "Nie możesz usunąć własnego najemcy",
+    "plan_in_use": "Nie można usunąć, jeśli są subskrybowani najemcy",
+    "migration_failed": "Migracja danych nie powiodła się",
+    "instance_not_found": "Instancja nie znaleziona",
+    "instance_domain_exists": "Domena instancji już istnieje",
+    "instance_has_tenants": "Nie można usunąć, jeśli są przypisani najemcy",
+    "ticket_not_found": "Zgłoszenie nie znalezione",
+    "ticket_already_closed": "Zgłoszenie jest już zamknięte",
+    "lead_not_found": "Potencjalny klient nie znaleziony",
+    "flow_not_found": "Przepływ nie znaleziony",
+    "flow_already_active": "Przepływ jest już aktywny",
+    "flow_already_inactive": "Przepływ jest już nieaktywny",
+    "flow_not_found_or_not_activated": "Przepływ nie znaleziony lub nie aktywowany",
+    "n8n_not_configured": "N8N nie jest skonfigurowany",
+    "n8n_connection_error": "Błąd połączenia N8N",
+    "n8n_activation_failed": "Niepowodzenie aktywacji przepływu w N8N",
+    "plan_not_found": "Plan nie znaleziony",
+    "plan_slug_exists": "Slug planu już istnieje",
+    "plan_has_subscriptions": "Nie można usunąć, jeśli są aktywne subskrypcje"
+  },
+  "success": {
+    "tenant_created": "Najemca utworzony pomyślnie",
+    "tenant_updated": "Najemca zaktualizowany pomyślnie",
+    "tenant_suspended": "Najemca zawieszony pomyślnie",
+    "tenant_reactivated": "Najemca reaktywowany pomyślnie",
+    "tenant_deleted": "Najemca usunięty pomyślnie",
+    "plan_changed": "Plan zmieniony pomyślnie",
+    "plan_created": "Plan utworzony pomyślnie",
+    "plan_updated": "Plan zaktualizowany pomyślnie",
+    "plan_deleted": "Plan usunięty pomyślnie",
+    "adjustment_applied": "Korekta zastosowana pomyślnie",
+    "ticket_created": "Zgłoszenie utworzone pomyślnie",
+    "ticket_updated": "Zgłoszenie zaktualizowane pomyślnie",
+    "ticket_closed": "Zgłoszenie zamknięte pomyślnie",
+    "message_sent": "Wiadomość wysłana pomyślnie",
+    "lead_created": "Potencjalny klient utworzony pomyślnie",
+    "lead_updated": "Potencjalny klient zaktualizowany pomyślnie",
+    "note_added": "Notatka dodana pomyślnie",
+    "flow_created": "Przepływ utworzony pomyślnie",
+    "flow_updated": "Przepływ zaktualizowany pomyślnie",
+    "flow_activated": "Przepływ aktywowany pomyślnie",
+    "flow_deactivated": "Przepływ dezaktywowany pomyślnie",
+    "flow_deleted": "Przepływ usunięty pomyślnie",
+    "instance_created": "Instancja utworzona pomyślnie",
+    "instance_updated": "Instancja zaktualizowana pomyślnie",
+    "instance_deleted": "Instancja usunięta pomyślnie",
+    "tenant_assigned_to_instance": "Najemca przypisany do instancji pomyślnie"
+  }
+}

@@ -1,0 +1,347 @@
+# Multitenancy, RBAC y Privacidad
+
+> **Versión:** 1.0  
+> **Fecha:** 2025-01-XX  
+> **Referencia:** `LEER/specs/07-privacy-multitenancy-rbac.mdc`, `LEER/specs/standards/multitenancy-rbac.mdc`
+
+---
+
+## Estándares de Multitenancy
+
+### Principio Fundamental
+
+✅ **`tenant_id` obligatorio en todas las entidades de negocio**
+
+❌ **NUNCA confiar en `tenant_id` enviado por el cliente**
+
+✅ **SIEMPRE derivar `tenant_id` de autenticación/middleware**
+
+---
+
+### Aislamiento de Datos
+
+**Reglas absolutas:**
+
+1. **Todas las tablas de negocio DEBEN tener `tenant_id`:**
+   ```sql
+   CREATE TABLE clients (
+       id INT PRIMARY KEY,
+       tenant_id INT NOT NULL,
+       name VARCHAR(255),
+       -- ...
+       FOREIGN KEY (tenant_id) REFERENCES tenants(id)
+   );
+   ```
+
+2. **Todas las queries DEBEN filtrar por `tenant_id`:**
+   ```typescript
+   // ✅ CORRECTO (Prisma)
+   const client = await prisma.client.findFirst({
+     where: {
+       id: clientId,
+       tenantId: tenantId, // Obligatorio
+     },
+   });
+   
+   // ❌ PROHIBIDO
+   const client = await prisma.client.findUnique({
+     where: { id: clientId }, // Falta tenantId
+   });
+   ```
+
+3. **Middleware obligatorio:**
+   - TenantMiddleware DEBE extraer `tenant_id` de JWT/sesión/cabecera
+   - TenantMiddleware DEBE validar `tenant_id` antes de cualquier query
+   - TenantMiddleware DEBE estar presente en TODAS las rutas API
+
+---
+
+### Extracción de tenant_id
+
+**Prioridad de extracción (NestJS):**
+
+1. **JWT (Authorization header)** - Prioridad más alta
+   - Extraído del payload del JWT por TenantGuard
+2. **Decorator @CurrentTenant()** - Inyectado automáticamente por TenantGuard
+3. **Cabecera HTTP** (`X-Tenant-ID`) - Solo para casos especiales (no recomendado)
+
+**Validación obligatoria (TenantGuard):**
+- JWT válido y no expirado
+- `tenant_id` existe en base de datos
+- `tenant_id` está activo
+- Usuario pertenece al tenant
+
+---
+
+### Verificación en Queries
+
+**Checklist obligatorio antes de cada query:**
+
+- [ ] ¿La query incluye `tenant_id` en WHERE?
+- [ ] ¿El `tenant_id` viene del middleware (nunca del cliente)?
+- [ ] ¿Se valida que el recurso pertenece al tenant antes de operar?
+
+**Ejemplo completo (NestJS + Prisma):**
+
+```typescript
+// En Service
+async findOne(id: number, tenantId: number) {
+  // Validar tenant_id
+  if (!tenantId) {
+    throw new UnauthorizedException('auth.tenant_required');
+  }
+  
+  // Query con tenant_id (obligatorio)
+  const client = await this.prisma.client.findFirst({
+    where: {
+      id,
+      tenantId, // Obligatorio
+    },
+  });
+  
+  // Validar que el recurso pertenece al tenant
+  if (!client) {
+    throw new NotFoundException('clients.not_found');
+  }
+  
+  return client;
+}
+```
+
+---
+
+## Estándares de RBAC (Role-Based Access Control)
+
+### Estructura de Roles
+
+**Roles específicos para SaaS de agencias de IA:**
+
+- **owner:** Dueño del SaaS (admin global del sistema)
+- **tenant_owner:** Dueño de cada cuenta/empresa cliente (administrador del tenant)
+- **admin:** Administrador con permisos amplios dentro del tenant
+- **agent:** Usuario que gestiona agentes de IA (configuración, monitoreo)
+- **viewer:** Solo lectura (sin permisos de modificación)
+
+**Nota:** Los roles son configurables y extensibles según necesidades del negocio, pero estos son los roles mínimos requeridos.
+
+---
+
+### Permisos Granulares
+
+**Formato de permisos:**
+
+- `{recurso}.{accion}` (ej: `projects.view`, `projects.create`, `projects.update`, `projects.delete`)
+- `{recurso}.*` (wildcard para todos los permisos de un recurso)
+
+**Matriz de permisos:**
+
+- Almacenada en base de datos (tabla `role_permissions` o equivalente)
+- Mapeo: Rol → Permisos → Módulos/Acciones
+- Verificación obligatoria en backend (nunca solo en frontend)
+
+---
+
+### Guards Obligatorios (NestJS)
+
+**RBACGuard DEBE:**
+
+1. Extraer rol del usuario desde JWT (inyectado por AuthGuard)
+2. Verificar permiso requerido antes de ejecutar acción
+3. Lanzar `ForbiddenException` (403) si no tiene permiso
+
+**Uso obligatorio:**
+
+```typescript
+// En TODOS los controllers
+@Controller('api/v1/projects')
+@UseGuards(TenantGuard, RBACGuard)
+export class ProjectsController {
+  @Post()
+  @RequirePermission('projects.create')
+  async create(@Body() dto: CreateProjectDto, @CurrentTenant() tenant: Tenant) {
+    // Lógica
+  }
+  
+  @Patch(':id')
+  @RequirePermission('projects.update')
+  async update(@Param('id') id: number, @Body() dto: UpdateProjectDto) {
+    // Lógica
+  }
+}
+```
+
+---
+
+### RBAC en Frontend
+
+**Reglas:**
+
+- ✅ Frontend puede ocultar elementos según permisos (UX)
+- ❌ Frontend NO puede confiar en permisos sin validación de backend
+- ✅ Backend DEBE verificar permisos en TODOS los endpoints
+
+**Implementación frontend (Next.js/React):**
+
+```typescript
+// Hook personalizado para permisos
+const { hasPermission } = usePermissions();
+
+// En componente
+{hasPermission('projects.create') && (
+  <Button onClick={handleCreate}>Crear Proyecto</Button>
+)}
+
+// O con componente condicional
+<PermissionGuard permission="projects.create">
+  <Button onClick={handleCreate}>Crear Proyecto</Button>
+</PermissionGuard>
+```
+
+---
+
+## Estándares de Privacidad
+
+### Protección de PII (Personally Identifiable Information)
+
+**Datos considerados PII:**
+- Nombres completos
+- Direcciones de email
+- Números de teléfono
+- Direcciones físicas
+- Documentos de identificación
+- Información financiera
+
+**Reglas:**
+- ✅ Registrar TODOS los accesos a datos PII
+- ✅ Enmascarar datos según configuración del tenant
+- ✅ Configuración por tenant del nivel de visibilidad de PII
+
+---
+
+### Logs de Acceso a PII
+
+**Registro obligatorio:**
+
+```php
+// Registrar acceso a datos PII
+AuditLogger::log($userId, $tenantId, 'pii.access', [
+    'data_type' => 'phone',
+    'resource_id' => $clientId,
+    'purpose' => 'contact_client'
+]);
+```
+
+**Campos mínimos:**
+- `user_id` - Quién accedió
+- `tenant_id` - Tenant del usuario
+- `timestamp` - Cuándo accedió
+- `data_type` - Tipo de dato PII (phone, email, etc.)
+- `resource_id` - Recurso accedido
+- `purpose` - Propósito del acceso
+
+---
+
+### Enmascaramiento de Datos
+
+**Configuración por tenant:**
+
+- `oculto`: No visible hasta confirmación explícita
+- `visible_al_confirmar`: Visible cuando se confirma propuesta/asignación
+- `oculto_tras_cierre`: Oculto después de cerrar trabajo/proyecto
+
+**Ejemplo de enmascaramiento:**
+
+```php
+function maskPhone($phone, $visibility) {
+    if ($visibility === 'oculto') {
+        return '+41 ** *** ** **';
+    } else if ($visibility === 'visible_al_confirmar') {
+        // Lógica según estado
+    }
+    return $phone;
+}
+```
+
+---
+
+### Logs sin Exponer Datos Sensibles
+
+**Reglas:**
+
+- ❌ NUNCA loguear contraseñas (ni en texto plano ni hasheadas)
+- ❌ NUNCA loguear tokens completos (solo primeros/last caracteres)
+- ❌ NUNCA loguear datos financieros completos
+- ✅ Loguear solo metadatos necesarios para auditoría
+
+**Ejemplo:**
+
+```php
+// ✅ CORRECTO
+AuditLogger::log($userId, $tenantId, 'payment.processed', [
+    'amount' => $amount,
+    'currency' => $currency,
+    'payment_method' => 'card', // No el número completo
+    'last4' => substr($cardNumber, -4) // Solo últimos 4 dígitos
+]);
+
+// ❌ PROHIBIDO
+AuditLogger::log($userId, $tenantId, 'payment.processed', [
+    'card_number' => $cardNumber // ❌ NUNCA
+]);
+```
+
+---
+
+### Cumplimiento GDPR (UE) y nLPD/FADP (Suiza)
+
+**Funcionalidades requeridas:**
+
+1. **Exportabilidad de datos:**
+   - Endpoint `/api/v1/gdpr/export` - Exportar todos los datos del usuario/tenant
+   - Formato JSON o CSV
+   - Incluir historial de conversaciones, configuraciones, etc.
+
+2. **Derecho al olvido:**
+   - Endpoint `/api/v1/gdpr/erase` - Eliminar datos del usuario
+   - Soft-delete donde aplique (mantener para auditoría)
+   - Anonimización de datos cuando no se pueda eliminar (ej: conversaciones para memoria)
+
+3. **Retención configurable:**
+   - Configuración por tenant de períodos de retención
+   - Limpieza automática de datos antiguos
+   - Historial de conversaciones con retención configurable
+
+4. **Data Residency:**
+   - Campo `data_region` en tabla `tenants`: `'EU' | 'CH'`
+   - Asegurar que datos personales no salen de la región configurada salvo base legal
+   - Storage de archivos debe respetar data residency (S3/Bunny con data centers en región correspondiente)
+
+5. **Consentimiento:**
+   - Registro de consentimiento explícito para procesamiento de datos
+   - Consentimiento para uso de IA en conversaciones
+   - Política de privacidad accesible y actualizada
+
+---
+
+## Checklist de Multitenancy, RBAC y Privacidad
+
+**Antes de considerar una tarea completada:**
+
+- [ ] ¿Todas las queries incluyen `tenant_id` en WHERE?
+- [ ] ¿El `tenant_id` viene del middleware (nunca del cliente)?
+- [ ] ¿Se valida que el recurso pertenece al tenant antes de operar?
+- [ ] ¿TenantMiddleware está presente en todas las rutas API?
+- [ ] ¿RBACMiddleware verifica permisos antes de ejecutar acciones?
+- [ ] ¿Los permisos se verifican en backend (no solo frontend)?
+- [ ] ¿Se registran accesos a datos PII?
+- [ ] ¿Los logs no exponen datos sensibles?
+- [ ] ¿La configuración de privacidad es por tenant?
+
+---
+
+## Referencias
+
+- `IA-Specs/04-seguridad-y-compliance.mdc` - Seguridad detallada
+- `IA-Specs/06-backend-standards.mdc` - Estándares backend
+- `LEER/specs/07-privacy-multitenancy-rbac.mdc` - Referencia histórica
+- `LEER/specs/standards/multitenancy-rbac.mdc` - Referencia histórica
