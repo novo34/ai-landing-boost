@@ -54,11 +54,6 @@ export function validateEnv() {
     );
   }
 
-  // ✅ Validación estricta de JWT_REFRESH_SECRET (reforzar validación existente)
-  if (!process.env.JWT_REFRESH_SECRET) {
-    throw new Error('JWT_REFRESH_SECRET es obligatorio. Por favor, configura esta variable de entorno.');
-  }
-
   // ✅ Validar que JWT_REFRESH_SECRET no sea valor por defecto
   const defaultSecrets = [
     'your-secret-key-change-in-production',
@@ -98,6 +93,28 @@ export function validateEnv() {
   // Validar que JWT_SECRET tiene longitud mínima
   if (process.env.JWT_SECRET && process.env.JWT_SECRET.length < 32) {
     console.warn('⚠️ JWT_SECRET should be at least 32 characters long');
+  }
+
+  // ✅ AGREGAR: Validación estricta de JWT_REFRESH_SECRET (reforzar validación existente)
+  if (!process.env.JWT_REFRESH_SECRET) {
+    throw new Error('JWT_REFRESH_SECRET es obligatorio. Por favor, configura esta variable de entorno.');
+  }
+
+  // ✅ AGREGAR: Validar que JWT_REFRESH_SECRET no sea valor por defecto
+  const defaultRefreshSecrets = [
+    'your-secret-key-change-in-production',
+    'your-super-secret-jwt-key-change-in-production-min-32-chars',
+  ];
+  
+  if (defaultRefreshSecrets.includes(process.env.JWT_REFRESH_SECRET)) {
+    throw new Error(
+      'JWT_REFRESH_SECRET no puede ser un valor por defecto. Genera un secreto seguro con: openssl rand -base64 64'
+    );
+  }
+
+  // ✅ AGREGAR: Validar longitud mínima de JWT_REFRESH_SECRET
+  if (process.env.JWT_REFRESH_SECRET.length < 32) {
+    console.warn('⚠️ JWT_REFRESH_SECRET should be at least 32 characters long');
   }
 
   console.log('✅ Environment variables validated');
