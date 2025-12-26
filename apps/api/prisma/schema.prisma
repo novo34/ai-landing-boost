@@ -602,6 +602,8 @@ model refreshtoken {
   expiresAt         DateTime
   revokedAt         DateTime? // NULL = activo, NOT NULL = revocado
   replacedByTokenId String? // ID del token que lo reemplazó (rotación)
+  userAgent         String? // Opcional, para auditoría
+  ip                String? // Opcional, para auditoría
   createdAt         DateTime  @default(now())
   updatedAt         DateTime  @updatedAt
 
@@ -614,6 +616,7 @@ model refreshtoken {
   @@index([expiresAt], map: "Refreshtoken_expiresAt_idx")
   @@index([revokedAt], map: "Refreshtoken_revokedAt_idx")
   @@index([userId, revokedAt], map: "Refreshtoken_userId_revokedAt_idx")
+  @@index([tenantId], map: "Refreshtoken_tenantId_idx")
   @@map("Refreshtoken")
 }
 

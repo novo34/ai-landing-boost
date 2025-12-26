@@ -385,10 +385,14 @@ export class AuthService {
     email: string,
     tenantId: string,
   ): Promise<AuthTokens> {
+    // Crear jti (JWT ID) único para cada refresh token
+    const jti = randomUUID();
+    
     const payload = {
       sub: userId,
       email,
       tenantId,
+      jti, // JWT ID único
     };
 
     // @ts-expect-error - expiresIn accepts string values like '15m', '7d' which are valid
