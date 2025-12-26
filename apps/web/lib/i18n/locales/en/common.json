@@ -186,7 +186,9 @@
     "connection_refused": "Connection refused",
     "connection_refused_message": "Could not connect to the server. Please check your internet connection.",
     "unknown_error": "Unknown error",
-    "unknown_error_message": "An unexpected error occurred. Please try again later."
+    "unknown_error_message": "An unexpected error occurred. Please try again later.",
+    "CRYPTO_KEY_MISSING": "Encryption key missing",
+    "CRYPTO_KEY_MISSING_message": "The encryption key is not configured. Please contact the system administrator."
   },
   "invitations": {
     "error": "Error",
@@ -668,6 +670,21 @@
     "reconnect": "Reconnect",
     "validate": "Validate",
     "delete": "Delete",
+    "connect": "Connect",
+    "disconnect": "Disconnect",
+    "show_qr": "Show QR",
+    "refresh_status": "Refresh Status",
+    "connect_success": "Connection initiated",
+    "connect_initiated": "Connection has been initiated. Scan the QR code to continue.",
+    "disconnect_success": "Disconnected successfully",
+    "disconnect_initiated": "The account has been disconnected successfully.",
+    "already_disconnected": "The account was already disconnected.",
+    "sync": "Sync",
+    "sync_success": "Instances synchronized successfully",
+    "qr_code": "QR Code",
+    "qr_instructions": "Scan this QR code with WhatsApp to connect your account",
+    "refresh_qr": "Refresh QR",
+    "status_refreshed": "Status updated",
     "credentials": "Credentials",
     "connected_at": "Connected on",
     "providers": {
@@ -705,7 +722,22 @@
       "access_token": "Access Token",
       "phone_number_id": "Phone Number ID",
       "api_key": "API Key"
-    }
+    },
+    "account_already_exists": "A WhatsApp account with this name already exists.",
+    "go_to_existing_account": "Go to existing account",
+    "persistence_error": "Could not save the account (internal error). Please try again.",
+    "instance_not_owned": "You do not have permissions over this instance.",
+    "legacy_delete_allowed": "Legacy account deletable for maintenance.",
+    "legacy_account_warning": "This account cannot be used. It must be deleted and recreated.",
+    "delete_legacy_account": "Delete legacy account",
+    "invalid_credentials_format": "The credentials are in an old format. Please create a new account.",
+    "confirm_delete": "Are you sure you want to delete this account?",
+    "cannot_decrypt_credentials": "Could not decrypt the account credentials. The account may be in legacy format.",
+    "must_disconnect_first": "The account is connected. It must be disconnected before deletion.",
+    "validation_error": "Error validating credentials with the provider.",
+    "reconnect_error": "Unexpected error reconnecting the account.",
+    "evolution_connection_not_found": "Evolution API connection was not found. The account may already be disconnected.",
+    "disconnected_already": "The account was already disconnected or the connection does not exist in Evolution API."
   },
   "gdpr": {
     "title": "GDPR/FADP Compliance",

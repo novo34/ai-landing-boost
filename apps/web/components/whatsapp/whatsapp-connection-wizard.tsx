@@ -1,6 +1,7 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useRef } from 'react';
+import { useRouter } from 'next/navigation';
 import {
   Dialog,
   DialogContent,
@@ -15,7 +16,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { apiClient } from '@/lib/api/client';
 import { useToast } from '@/hooks/use-toast';
 import { useTranslation } from '@/lib/i18n/client';
-import { Loader2, CheckCircle2, XCircle, QrCode } from 'lucide-react';
+import { Loader2, CheckCircle2, XCircle, QrCode, ExternalLink } from 'lucide-react';
 import Image from 'next/image';
 
 type Provider = 'EVOLUTION_API' | 'WHATSAPP_CLOUD' | null;
@@ -37,17 +38,21 @@ interface WhatsAppCloudCredentials {
 export default function WhatsAppConnectionWizard({
   open,
   onClose,
+  onSuccess,
 }: {
   open: boolean;
   onClose: () => void;
+  onSuccess?: () => void;
 }) {
   const { toast } = useToast();
   const { t } = useTranslation('common');
+  const router = useRouter();
   const [step, setStep] = useState<Step>('provider');
   const [provider, setProvider] = useState<Provider>(null);
   const [loading, setLoading] = useState(false);
   const [validating, setValidating] = useState(false);
-  const [validationResult, setValidationResult] = useState<{ success: boolean; qrCodeUrl?: string | null } | null>(null);
+  const [validationResult, setValidationResult] = useState<{ success: boolean; qrCodeUrl?: string | null; existingAccountId?: string; instanceName?: string } | null>(null);
+  const successNotifiedRef = useRef(false);
 
   // Evolution API credentials
   const [evolutionCreds, setEvolutionCreds] = useState<EvolutionCredentials>({
@@ -76,16 +81,66 @@ export default function WhatsAppConnectionWizard({
     setValidationResult(null);
 
     try {
-      const credentials = provider === 'EVOLUTION_API' 
-        ? evolutionCreds 
-        : whatsappCloudCreds;
-
-      // Validar credenciales llamando al endpoint de creación
-      // El backend validará automáticamente
-      const response = await apiClient.createWhatsAppAccount({
-        provider,
-        credentials,
-      });
+      let response;
+      
+      if (provider === 'EVOLUTION_API') {
+        // Para Evolution API, primero verificar si el tenant tiene conexión configurada
+        const connectionStatus = await apiClient.getEvolutionConnectionStatus();
+        
+        if (connectionStatus.success && connectionStatus.data?.status === 'CONNECTED') {
+          // Tenant tiene conexión Evolution → usar createEvolutionInstance (crea instancia real)
+          // El instanceName se normaliza automáticamente en backend (agrega prefijo si falta)
+          if (process.env.NEXT_PUBLIC_DEBUG_API === 'true') {
+            console.log('[WhatsApp Wizard] Creating instance with Evolution connection:', {
+              instanceName: evolutionCreds.instanceName || 'auto-generated',
+              endpoint: '/whatsapp/accounts',
+              payload: { instanceName: evolutionCreds.instanceName || undefined },
+            });
+          }
+          response = await apiClient.createEvolutionInstance({
+            instanceName: evolutionCreds.instanceName || undefined,
+            phoneNumber: undefined, // Se puede agregar después si es necesario
+          });
+        } else {
+          // Tenant NO tiene conexión → usar flujo legacy para conectar Evolution primero
+          // Esto crea/actualiza TenantEvolutionConnection
+          if (process.env.NEXT_PUBLIC_DEBUG_API === 'true') {
+            console.log('[WhatsApp Wizard] Connecting Evolution API first:', {
+              baseUrl: evolutionCreds.baseUrl,
+              endpoint: '/whatsapp/evolution/connect',
+            });
+          }
+          const connectResponse = await apiClient.connectEvolution({
+            baseUrl: evolutionCreds.baseUrl,
+            apiKey: evolutionCreds.apiKey,
+            testConnection: true,
+          });
+          
+          if (!connectResponse.success) {
+            throw new Error(connectResponse.error_key || 'whatsapp.evolution_connection_failed');
+          }
+          
+          // Después de conectar, crear la instancia
+          if (process.env.NEXT_PUBLIC_DEBUG_API === 'true') {
+            console.log('[WhatsApp Wizard] Creating instance after connecting Evolution:', {
+              instanceName: evolutionCreds.instanceName || 'auto-generated',
+              endpoint: '/whatsapp/accounts',
+              payload: { instanceName: evolutionCreds.instanceName || undefined },
+            });
+          }
+          response = await apiClient.createEvolutionInstance({
+            instanceName: evolutionCreds.instanceName || undefined,
+            phoneNumber: undefined,
+          });
+        }
+      } else {
+        // WhatsApp Cloud API usa el flujo legacy
+        const credentials = whatsappCloudCreds;
+        response = await apiClient.createWhatsAppAccount({
+          provider: 'WHATSAPP_CLOUD',
+          credentials,
+        });
+      }
 
       if (response.success) {
         setValidationResult({
@@ -93,27 +148,39 @@ export default function WhatsAppConnectionWizard({
           qrCodeUrl: response.data?.qrCodeUrl || null,
         });
         setStep('success');
+        // Notificar al padre que se creó exitosamente la cuenta (solo una vez)
+        if (onSuccess && !successNotifiedRef.current) {
+          successNotifiedRef.current = true;
+          onSuccess();
+        }
       } else {
+        // Detectar error 409 (Conflict) con existingAccountId
+        const isConflict = response.error_key === 'whatsapp.account_already_exists' && response.existingAccountId;
+        
         setValidationResult({
           success: false,
+          existingAccountId: response.existingAccountId,
+          instanceName: response.instanceName,
         });
         
-        // Mostrar mensaje de error más descriptivo
-        // Usar error_key traducido o mensaje genérico
+        // Mostrar mensaje de error m?s descriptivo
+        // Usar error_key traducido o mensaje gen?rico
         let errorMessage = t('whatsapp.invalid_credentials');
-        if (response.error_key) {
+        if (isConflict) {
+          errorMessage = t('whatsapp.account_already_exists');
+        } else if (response.error_key) {
           // Intentar traducir el error_key, o usar el error_key como mensaje
           try {
             const translated = t(response.error_key);
-            // Si la traducción existe y no es igual al error_key, usarla
+            // Si la traducci?n existe y no es igual al error_key, usarla
             if (translated !== response.error_key) {
               errorMessage = translated;
             } else {
-              // Si no hay traducción, usar el error_key como mensaje
+              // Si no hay traducci?n, usar el error_key como mensaje
               errorMessage = response.error_key;
             }
           } catch {
-            // Si falla la traducción, usar el error_key como mensaje
+            // Si falla la traducci?n, usar el error_key como mensaje
             errorMessage = response.error_key;
           }
         }
@@ -124,41 +191,69 @@ export default function WhatsAppConnectionWizard({
             response,
             errorMessage,
             error_key: response.error_key,
+            existingAccountId: response.existingAccountId,
           });
         }
         
         toast({
-          title: t('whatsapp.validation_failed'),
+          title: isConflict ? t('whatsapp.validation_failed') : t('whatsapp.validation_failed'),
           description: errorMessage,
           variant: 'destructive',
         });
       }
     } catch (error: any) {
       console.error('Error validating credentials:', error);
+      
+      // El cliente API puede devolver errores como excepciones o como objetos ApiResponse
+      // Si el error tiene response.data, es una excepci?n de fetch
+      // Si el error tiene error_key directamente, es un ApiResponse con error
+      const errorData = error.response?.data || error;
+      const status = error.response?.status || error.status;
+      const isConflict = errorData?.error_key === 'whatsapp.account_already_exists' && errorData?.existingAccountId;
+      const isPersistenceError = errorData?.error_key === 'whatsapp.persistence_error' || status >= 500;
+      const existingAccountId = errorData?.existingAccountId;
+      const instanceName = errorData?.instanceName;
+      
       setValidationResult({
         success: false,
+        existingAccountId,
+        instanceName,
       });
       
-      // Extraer mensaje de error más descriptivo
+      // Extraer mensaje de error m?s descriptivo
       let errorMessage = t('errors.validation_failed');
-      if (error.message) {
+      let errorTitle = t('whatsapp.validation_failed');
+      
+      if (isConflict && existingAccountId) {
+        // Error de cuenta duplicada
+        errorMessage = t('whatsapp.account_already_exists');
+        errorTitle = t('whatsapp.validation_failed');
+      } else if (isPersistenceError) {
+        // Error de persistencia (500+): mostrar mensaje de error interno
+        errorMessage = t('whatsapp.persistence_error');
+        errorTitle = t('errors.generic');
+      } else if (status === 400 || status === 401 || status === 403) {
+        // Errores de validaci?n: mostrar "credenciales inv?lidas"
+        errorMessage = t('whatsapp.invalid_credentials');
+        errorTitle = t('whatsapp.validation_failed');
+      } else if (error.message) {
         errorMessage = error.message;
-      } else if (error.response?.data?.error_key) {
+      } else if (errorData?.error_key) {
         // Intentar traducir el error_key
         try {
-          const translated = t(error.response.data.error_key);
-          if (translated !== error.response.data.error_key) {
+          const translated = t(errorData.error_key);
+          if (translated !== errorData.error_key) {
             errorMessage = translated;
           } else {
-            errorMessage = error.response.data.error_key;
+            errorMessage = errorData.error_key;
           }
         } catch {
-          errorMessage = error.response.data.error_key;
+          errorMessage = errorData.error_key;
         }
       }
       
       toast({
-        title: t('errors.generic'),
+        title: errorTitle,
         description: errorMessage,
         variant: 'destructive',
       });
@@ -183,6 +278,7 @@ export default function WhatsAppConnectionWizard({
       appSecret: '',
     });
     setValidationResult(null);
+    successNotifiedRef.current = false; // Reset flag para la próxima vez
     onClose();
   };
 
@@ -190,7 +286,8 @@ export default function WhatsAppConnectionWizard({
     if (!provider) return false;
     
     if (provider === 'EVOLUTION_API') {
-      return evolutionCreds.apiKey.trim() !== '' && evolutionCreds.instanceName.trim() !== '';
+      // instanceName es opcional, solo requiere apiKey
+      return evolutionCreds.apiKey.trim() !== '';
     } else {
       return whatsappCloudCreds.accessToken.trim() !== '' && whatsappCloudCreds.phoneNumberId.trim() !== '';
     }
@@ -289,13 +386,16 @@ export default function WhatsAppConnectionWizard({
                     />
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="instanceName">Instance Name *</Label>
+                    <Label htmlFor="instanceName">Nombre de instancia (opcional)</Label>
                     <Input
                       id="instanceName"
                       value={evolutionCreds.instanceName}
                       onChange={(e) => setEvolutionCreds({ ...evolutionCreds, instanceName: e.target.value })}
-                      placeholder="mi-instancia"
+                      placeholder="Se generará automáticamente si se deja vacío"
                     />
+                    <p className="text-xs text-muted-foreground">
+                      Si proporcionas un nombre, se normalizará automáticamente con el prefijo del tenant
+                    </p>
                   </div>
                   <div className="space-y-2">
                     <Label htmlFor="baseUrl">{t('whatsapp.wizard.base_url')}</Label>
@@ -413,8 +513,43 @@ export default function WhatsAppConnectionWizard({
                     </h3>
                   </div>
                   <p className="text-sm text-muted-foreground">
-                    {t('whatsapp.wizard.error_description')}
+                    {validationResult.existingAccountId 
+                      ? t('whatsapp.account_already_exists')
+                      : t('whatsapp.wizard.error_description')}
                   </p>
+                  {validationResult.existingAccountId && (
+                    <div className="p-4 bg-muted rounded-lg">
+                      <p className="text-sm font-medium mb-2">
+                        {validationResult.instanceName 
+                          ? `${t('whatsapp.wizard.instance_name')}: ${validationResult.instanceName}`
+                          : t('whatsapp.account_already_exists')}
+                      </p>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => {
+                          handleClose();
+                          router.push('/app/settings/whatsapp');
+                          // Scroll a la cuenta despu?s de un breve delay para que la p?gina cargue
+                          setTimeout(() => {
+                            const element = document.querySelector(`[data-account-id="${validationResult.existingAccountId}"]`);
+                            if (element) {
+                              element.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                              // Highlight temporal
+                              element.classList.add('ring-2', 'ring-primary', 'ring-offset-2');
+                              setTimeout(() => {
+                                element.classList.remove('ring-2', 'ring-primary', 'ring-offset-2');
+                              }, 3000);
+                            }
+                          }, 500);
+                        }}
+                        className="w-full"
+                      >
+                        <ExternalLink className="h-4 w-4 mr-2" />
+                        {t('whatsapp.go_to_existing_account')}
+                      </Button>
+                    </div>
+                  )}
                   <div className="flex justify-end gap-2">
                     <Button variant="outline" onClick={() => setStep('credentials')}>
                       {t('whatsapp.wizard.try_again')}

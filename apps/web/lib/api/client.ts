@@ -77,6 +77,8 @@ export interface ApiResponse<T> {
   success: boolean;
   error_key?: string;
   error_params?: Record<string, unknown>;
+  existingAccountId?: string;
+  instanceName?: string;
   data?: T;
 }
 
@@ -623,6 +625,29 @@ class ApiClient {
           return {
             success: false,
             error_key: 'errors.bad_request',
+          };
+        }
+        
+        // Manejar 409 (Conflict) - recurso ya existe (ej: cuenta WhatsApp duplicada)
+        if (response.status === 409) {
+          const contentType = response.headers.get('content-type');
+          if (contentType && contentType.includes('application/json')) {
+            const errorData = await response.json().catch(() => ({
+              success: false,
+              error_key: 'errors.conflict',
+            }));
+            // Preservar existingAccountId e instanceName si están presentes
+            return {
+              success: false,
+              error_key: errorData.error_key || 'errors.conflict',
+              error_params: errorData.error_params,
+              existingAccountId: errorData.existingAccountId,
+              instanceName: errorData.instanceName,
+            };
+          }
+          return {
+            success: false,
+            error_key: 'errors.conflict',
           };
         }
         
@@ -1723,6 +1748,108 @@ class ApiClient {
    */
   async getWhatsAppQRCode(id: string): Promise<ApiResponse<{ qrCodeUrl: string | null }>> {
     return this.get(`/whatsapp/accounts/${id}/qr`);
+  }
+
+  /**
+   * Conecta Evolution API del tenant
+   */
+  async connectEvolution(data: {
+    baseUrl: string;
+    apiKey: string;
+    testConnection?: boolean;
+  }): Promise<ApiResponse<{
+    id: string;
+    tenantId: string;
+    status: string;
+    statusReason: string | null;
+    lastTestAt: Date | null;
+    createdAt: Date;
+  }>> {
+    return this.post('/whatsapp/evolution/connect', data);
+  }
+
+  /**
+   * Testa conexión Evolution API del tenant
+   */
+  async testEvolutionConnection(): Promise<ApiResponse<{
+    status: string;
+    statusReason: string | null;
+    lastTestAt: Date;
+  }>> {
+    return this.post('/whatsapp/evolution/test');
+  }
+
+  /**
+   * Obtiene estado de conexión Evolution del tenant
+   */
+  async getEvolutionConnectionStatus(): Promise<ApiResponse<{
+    status: string;
+    statusReason: string | null;
+    lastTestAt: Date | null;
+  }>> {
+    return this.get('/whatsapp/evolution/status');
+  }
+
+  /**
+   * Crea una nueva instancia de Evolution API
+   */
+  async createEvolutionInstance(data: {
+    instanceName?: string;
+    phoneNumber?: string;
+  }): Promise<ApiResponse<WhatsAppAccount>> {
+    return this.post<WhatsAppAccount>('/whatsapp/accounts', data);
+  }
+
+  /**
+   * Elimina una instancia (BD + Evolution API)
+   */
+  async deleteEvolutionInstance(id: string): Promise<ApiResponse<{
+    id: string;
+    instanceName: string;
+    deleted: boolean;
+  }>> {
+    return this.delete(`/whatsapp/accounts/${id}`);
+  }
+
+  /**
+   * Conecta una instancia (obtiene nuevo QR)
+   */
+  async connectEvolutionInstance(id: string): Promise<ApiResponse<{
+    id: string;
+    qrCodeUrl: string | null;
+    status: string;
+  }>> {
+    return this.post(`/whatsapp/accounts/${id}/connect`);
+  }
+
+  /**
+   * Desconecta una instancia
+   */
+  async disconnectEvolutionInstance(id: string): Promise<ApiResponse<{
+    id: string;
+    status: string;
+    reason?: string;
+  }>> {
+    return this.post(`/whatsapp/accounts/${id}/disconnect`);
+  }
+
+  /**
+   * Sincroniza instancias con Evolution API del tenant
+   */
+  async syncEvolutionInstances(): Promise<ApiResponse<{
+    synced: number;
+    updated: number;
+    orphaned: number;
+    errors: Array<{ instanceName: string; error: string }>;
+  }>> {
+    return this.post('/whatsapp/accounts/sync');
+  }
+
+  /**
+   * Obtiene estado detallado de una instancia
+   */
+  async getEvolutionInstanceStatus(id: string): Promise<ApiResponse<WhatsAppAccount>> {
+    return this.get(`/whatsapp/accounts/${id}/status`);
   }
 
   // ============================================

@@ -268,7 +268,9 @@
     "connection_refused": "Conexión rechazada",
     "connection_refused_message": "No se pudo conectar al servidor. Por favor, verifica tu conexión a internet.",
     "unknown_error": "Error desconocido",
-    "unknown_error_message": "Ocurrió un error inesperado. Por favor, intenta de nuevo más tarde."
+    "unknown_error_message": "Ocurrió un error inesperado. Por favor, intenta de nuevo más tarde.",
+    "CRYPTO_KEY_MISSING": "Clave de cifrado faltante",
+    "CRYPTO_KEY_MISSING_message": "La clave de cifrado no está configurada. Por favor, contacta al administrador del sistema."
   },
   "dashboard": {
     "title": "Dashboard",
@@ -633,6 +635,21 @@
     "reconnect": "Reconectar",
     "validate": "Validar",
     "delete": "Eliminar",
+    "connect": "Conectar",
+    "disconnect": "Desconectar",
+    "show_qr": "Mostrar QR",
+    "refresh_status": "Actualizar estado",
+    "connect_success": "Conexión iniciada",
+    "connect_initiated": "La conexión ha sido iniciada. Escanea el código QR para continuar.",
+    "disconnect_success": "Desconexión exitosa",
+    "disconnect_initiated": "La cuenta ha sido desconectada correctamente.",
+    "already_disconnected": "La cuenta ya estaba desconectada.",
+    "sync": "Sincronizar",
+    "sync_success": "Instancias sincronizadas correctamente",
+    "qr_code": "Código QR",
+    "qr_instructions": "Escanea este código QR con WhatsApp para conectar tu cuenta",
+    "refresh_qr": "Actualizar QR",
+    "status_refreshed": "Estado actualizado",
     "credentials": "Credenciales",
     "connected_at": "Conectado el",
     "providers": {
@@ -670,7 +687,22 @@
       "access_token": "Token de Acceso",
       "phone_number_id": "ID de Número de Teléfono",
       "api_key": "Clave API"
-    }
+    },
+    "account_already_exists": "Ya existe una cuenta de WhatsApp con ese nombre.",
+    "go_to_existing_account": "Ir a la cuenta existente",
+    "persistence_error": "No se pudo guardar la cuenta (error interno). Por favor, intenta nuevamente.",
+    "instance_not_owned": "No tienes permisos sobre esta instancia.",
+    "legacy_delete_allowed": "Cuenta legacy eliminable por mantenimiento.",
+    "legacy_account_warning": "Esta cuenta no puede usarse. Debe eliminarse y recrearse.",
+    "delete_legacy_account": "Eliminar cuenta legacy",
+    "invalid_credentials_format": "Las credenciales están en formato antiguo. Por favor, crea una nueva cuenta.",
+    "confirm_delete": "¿Estás seguro de que deseas eliminar esta cuenta?",
+    "cannot_decrypt_credentials": "No se pudieron desencriptar las credenciales de la cuenta. La cuenta puede estar en formato legacy.",
+    "must_disconnect_first": "La cuenta está conectada. Debe desconectarse antes de eliminarla.",
+    "validation_error": "Error al validar las credenciales con el proveedor.",
+    "reconnect_error": "Error inesperado al reconectar la cuenta.",
+    "evolution_connection_not_found": "La conexión de Evolution API no fue encontrada. La cuenta puede estar ya desconectada.",
+    "disconnected_already": "La cuenta ya estaba desconectada o la conexión no existe en Evolution API."
   },
   "gdpr": {
     "title": "Cumplimiento GDPR/FADP",
