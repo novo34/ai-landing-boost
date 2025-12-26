@@ -4,7 +4,10 @@ import cookieParser from 'cookie-parser';
 import helmet from 'helmet';
 import { AppModule } from './app.module';
 import { JwtAuthGuard } from './modules/auth/guards/jwt-auth.guard';
-import { validateEnv } from './config/env.validation';
+import { validateEnv, loadEnvLocal } from './config/env.validation';
+
+// Cargar .env.local si existe (para DEV) antes de validar
+loadEnvLocal();
 
 async function bootstrap() {
   // Validar variables de entorno antes de iniciar

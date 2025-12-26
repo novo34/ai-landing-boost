@@ -103,7 +103,7 @@ export class S3StorageService extends StorageService {
     
     if (filePath.startsWith('http')) {
       // Extraer región y bucket de URL S3
-      const urlMatch = filePath.match(/https?:\/\/([^\.]+)\.s3\.([^\.]+)\.amazonaws\.com\/(.+)$/);
+      const urlMatch = filePath.match(/https?:\/\/([^.]+)\.s3\.([^.]+)\.amazonaws\.com\/(.+)$/);
       if (urlMatch) {
         bucket = urlMatch[1];
         region = urlMatch[2];

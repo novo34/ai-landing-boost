@@ -382,39 +382,41 @@ model teaminvitation {
 }
 
 model tenant {
-  id                    String                  @id
-  name                  String
-  slug                  String                  @unique(map: "Tenant_slug_key")
-  country               String?
-  defaultLocale         String?
-  dataRegion            String?
-  trialEndsAt           DateTime?
-  status                tenant_status           @default(ACTIVE)
-  instanceId            String?
-  createdAt             DateTime                @default(now())
-  updatedAt             DateTime
-  agent                 agent[]
-  appointment           appointment[]
-  calendarintegration   calendarintegration[]
-  channel               channel[]
-  consentlog            consentlog[]
-  conversation          conversation[]
-  dataretentionpolicy   dataretentionpolicy[]
-  knowledgecollection   knowledgecollection[]
-  knowledgesource       knowledgesource[]
-  n8nflow               n8nflow[]
-  teaminvitation        teaminvitation[]
-  tenantmembership      tenantmembership[]
-  tenantsettings        tenantsettings?
-  tenantsubscription    tenantsubscription?
-  tenantwhatsappaccount tenantwhatsappaccount[]
-  notification          notification[]
-  supporttickets        supportticket[]
-  platformchatmessages  platformchatmessage[]
-  platforminstance      platforminstance?       @relation(fields: [instanceId], references: [id], onDelete: SetNull)
-  tenantsmtpsettings    tenantsmtpsettings?
-  emailoutbox           emailoutbox[]
-  
+  id                        String                     @id
+  name                      String
+  slug                      String                     @unique(map: "Tenant_slug_key")
+  country                   String?
+  defaultLocale             String?
+  dataRegion                String?
+  trialEndsAt               DateTime?
+  status                    tenant_status              @default(ACTIVE)
+  instanceId                String?
+  createdAt                 DateTime                   @default(now())
+  updatedAt                 DateTime
+  agent                     agent[]
+  appointment               appointment[]
+  calendarintegration       calendarintegration[]
+  channel                   channel[]
+  consentlog                consentlog[]
+  conversation              conversation[]
+  dataretentionpolicy       dataretentionpolicy[]
+  knowledgecollection       knowledgecollection[]
+  knowledgesource           knowledgesource[]
+  n8nflow                   n8nflow[]
+  teaminvitation            teaminvitation[]
+  tenantmembership          tenantmembership[]
+  tenantsettings            tenantsettings?
+  tenantsubscription        tenantsubscription?
+  tenantwhatsappaccount     tenantwhatsappaccount[]
+  tenantevolutionconnection tenantevolutionconnection?
+  notification              notification[]
+  supporttickets            supportticket[]
+  platformchatmessages      platformchatmessage[]
+  refreshtoken              refreshtoken[]
+  platforminstance          platforminstance?          @relation(fields: [instanceId], references: [id], onDelete: SetNull)
+  tenantsmtpsettings        tenantsmtpsettings?
+  emailoutbox               emailoutbox[]
+
   @@index([instanceId], map: "Tenant_instanceId_idx")
 }
 
@@ -497,54 +499,78 @@ model tenantsubscription {
   @@index([planId], map: "TenantSubscription_planId_fkey")
 }
 
+model tenantevolutionconnection {
+  id                    String                  @id
+  tenantId              String                  @unique(map: "TenantEvolutionConnection_tenantId_key")
+  status                String                  @default("DISCONNECTED")
+  statusReason          String?                 @db.Text
+  encryptedCredentials  String                  @db.LongText
+  normalizedUrl         String? // Base URL normalizada (sin trailing slash)
+  lastTestAt            DateTime?
+  createdAt             DateTime                @default(now())
+  updatedAt             DateTime                @updatedAt
+  tenant                tenant                  @relation(fields: [tenantId], references: [id], onDelete: Cascade, map: "TenantEvolutionConnection_tenantId_fkey")
+  tenantwhatsappaccount tenantwhatsappaccount[]
+
+  @@index([tenantId], map: "TenantEvolutionConnection_tenantId_idx")
+  @@index([status], map: "TenantEvolutionConnection_status_idx")
+  @@map("TenantEvolutionConnection")
+}
+
 model tenantwhatsappaccount {
   id            String                         @id
   tenantId      String
   provider      tenantwhatsappaccount_provider
-  phoneNumber   String
+  phoneNumber   String? // Nullable: no guardar '' vacío
   status        tenantwhatsappaccount_status   @default(PENDING)
-  credentials   String
+  credentials   String // Guardar '{}' si no-nullable, nunca ''
   instanceName  String?
   displayName   String?
   qrCodeUrl     String?
   connectedAt   DateTime?
   lastCheckedAt DateTime?
+  statusReason  String?                        @db.Text
+  lastSyncedAt  DateTime?
+  connectionId  String?
   createdAt     DateTime                       @default(now())
   updatedAt     DateTime
   agent         agent[]
   conversation  conversation[]
   tenant        tenant                         @relation(fields: [tenantId], references: [id], onDelete: Cascade, map: "TenantWhatsAppAccount_tenantId_fkey")
+  connection    tenantevolutionconnection?     @relation(fields: [connectionId], references: [id], onDelete: SetNull, map: "TenantWhatsAppAccount_connectionId_fkey")
 
   @@unique([tenantId, phoneNumber], map: "TenantWhatsAppAccount_tenantId_phoneNumber_key")
   @@index([provider, status], map: "TenantWhatsAppAccount_provider_status_idx")
   @@index([tenantId], map: "TenantWhatsAppAccount_tenantId_idx")
+  @@index([connectionId], map: "TenantWhatsAppAccount_connectionId_idx")
 }
 
 model user {
-  id                    String                 @id
-  email                 String                 @unique(map: "User_email_key")
-  passwordHash          String?
-  name                  String?
-  locale                String?
-  timeZone              String?
-  platformRole          platform_role?
-  createdAt             DateTime               @default(now())
-  updatedAt             DateTime
-  emailVerified         Boolean                @default(false)
+  id                     String                  @id
+  email                  String                  @unique(map: "User_email_key")
+  passwordHash           String?
+  name                   String?
+  locale                 String?
+  timeZone               String?
+  platformRole           platform_role?
+  createdAt              DateTime                @default(now())
+  updatedAt              DateTime
+  emailVerified          Boolean                 @default(false)
   consentlog             consentlog[]
-  emailverification     emailverification?
-  teaminvitation        teaminvitation[]
-  tenantmembership      tenantmembership[]
-  useridentity          useridentity[]
-  notification          notification[]
-  platformauditlog      platformauditlog[]
-  supportTicketsCreated supportticket[]         @relation("TicketCreatedBy")
-  supportTicketsAssigned supportticket[]        @relation("TicketAssignedTo")
-  ticketmessages        ticketmessage[]
-  platformchatmessages  platformchatmessage[]
-  leadsAssigned         lead[]
-  leadnotes             leadnote[]
-  emailsettingsauditlog emailsettingsauditlog[]
+  emailverification      emailverification?
+  teaminvitation         teaminvitation[]
+  tenantmembership       tenantmembership[]
+  useridentity           useridentity[]
+  notification           notification[]
+  platformauditlog       platformauditlog[]
+  supportTicketsCreated  supportticket[]         @relation("TicketCreatedBy")
+  supportTicketsAssigned supportticket[]         @relation("TicketAssignedTo")
+  ticketmessages         ticketmessage[]
+  platformchatmessages   platformchatmessage[]
+  leadsAssigned          lead[]
+  leadnotes              leadnote[]
+  emailsettingsauditlog  emailsettingsauditlog[]
+  refreshtoken           refreshtoken[]
 }
 
 model useridentity {
@@ -566,6 +592,29 @@ model useridentity {
   @@unique([userId, provider], map: "UserIdentity_userId_provider_key")
   @@index([provider, providerId], map: "UserIdentity_provider_providerId_idx")
   @@index([userId], map: "UserIdentity_userId_idx")
+}
+
+model refreshtoken {
+  id                String    @id @default(cuid())
+  userId            String
+  tenantId          String? // Opcional, para multi-tenant
+  tokenHash         String    @db.VarChar(64) // SHA-256 hash (64 chars hex)
+  expiresAt         DateTime
+  revokedAt         DateTime? // NULL = activo, NOT NULL = revocado
+  replacedByTokenId String? // ID del token que lo reemplazó (rotación)
+  createdAt         DateTime  @default(now())
+  updatedAt         DateTime  @updatedAt
+
+  user   user    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  tenant tenant? @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  @@unique([tokenHash], map: "Refreshtoken_tokenHash_key")
+  @@index([userId], map: "Refreshtoken_userId_idx")
+  @@index([tokenHash], map: "Refreshtoken_tokenHash_idx")
+  @@index([expiresAt], map: "Refreshtoken_expiresAt_idx")
+  @@index([revokedAt], map: "Refreshtoken_revokedAt_idx")
+  @@index([userId, revokedAt], map: "Refreshtoken_userId_revokedAt_idx")
+  @@map("Refreshtoken")
 }
 
 enum calendarintegration_provider {
@@ -705,16 +754,16 @@ enum platform_role {
 }
 
 model platformauditlog {
-  id          String        @id @default(cuid())
-  userId      String
-  action      String
+  id           String   @id @default(cuid())
+  userId       String
+  action       String
   resourceType String
-  resourceId  String?
-  metadata    Json?
-  ipAddress   String?
-  userAgent   String?
-  createdAt   DateTime      @default(now())
-  user        user           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  resourceId   String?
+  metadata     Json?
+  ipAddress    String?
+  userAgent    String?
+  createdAt    DateTime @default(now())
+  user         user     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@index([userId], map: "PlatformAuditLog_userId_idx")
   @@index([action], map: "PlatformAuditLog_action_idx")
@@ -761,24 +810,24 @@ enum notification_type {
 
 // Support Tickets
 model supportticket {
-  id            String          @id @default(cuid())
-  tenantId      String?
-  createdById   String?
-  assignedToId  String?
-  subject       String
-  description   String          @db.Text
-  category      String          // TECHNICAL, BILLING, CONFIGURATION, FEATURE_REQUEST, OTHER
-  priority      String          // LOW, MEDIUM, HIGH, CRITICAL
-  status        String          @default("OPEN") // OPEN, IN_PROGRESS, WAITING_CLIENT, RESOLVED, CLOSED
-  createdAt     DateTime        @default(now())
-  updatedAt     DateTime        @updatedAt
-  lastActivityAt DateTime       @default(now())
-  
-  tenant        tenant?         @relation(fields: [tenantId], references: [id], onDelete: SetNull)
-  createdBy     user?           @relation("TicketCreatedBy", fields: [createdById], references: [id], onDelete: SetNull)
-  assignedTo    user?           @relation("TicketAssignedTo", fields: [assignedToId], references: [id], onDelete: SetNull)
-  messages      ticketmessage[]
-  
+  id             String   @id @default(cuid())
+  tenantId       String?
+  createdById    String?
+  assignedToId   String?
+  subject        String
+  description    String   @db.Text
+  category       String // TECHNICAL, BILLING, CONFIGURATION, FEATURE_REQUEST, OTHER
+  priority       String // LOW, MEDIUM, HIGH, CRITICAL
+  status         String   @default("OPEN") // OPEN, IN_PROGRESS, WAITING_CLIENT, RESOLVED, CLOSED
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+  lastActivityAt DateTime @default(now())
+
+  tenant     tenant?         @relation(fields: [tenantId], references: [id], onDelete: SetNull)
+  createdBy  user?           @relation("TicketCreatedBy", fields: [createdById], references: [id], onDelete: SetNull)
+  assignedTo user?           @relation("TicketAssignedTo", fields: [assignedToId], references: [id], onDelete: SetNull)
+  messages   ticketmessage[]
+
   @@index([status], map: "SupportTicket_status_idx")
   @@index([category], map: "SupportTicket_category_idx")
   @@index([priority], map: "SupportTicket_priority_idx")
@@ -789,16 +838,16 @@ model supportticket {
 }
 
 model ticketmessage {
-  id          String        @id @default(cuid())
-  ticketId    String
-  userId      String
-  message     String        @db.Text
-  isInternal  Boolean       @default(false)
-  createdAt   DateTime      @default(now())
-  
-  ticket      supportticket @relation(fields: [ticketId], references: [id], onDelete: Cascade)
-  user        user          @relation(fields: [userId], references: [id], onDelete: Cascade)
-  
+  id         String   @id @default(cuid())
+  ticketId   String
+  userId     String
+  message    String   @db.Text
+  isInternal Boolean  @default(false)
+  createdAt  DateTime @default(now())
+
+  ticket supportticket @relation(fields: [ticketId], references: [id], onDelete: Cascade)
+  user   user          @relation(fields: [userId], references: [id], onDelete: Cascade)
+
   @@index([ticketId], map: "TicketMessage_ticketId_idx")
   @@index([createdAt], map: "TicketMessage_createdAt_idx")
   @@map("TicketMessage")
@@ -811,10 +860,10 @@ model platformchatmessage {
   userId    String
   message   String   @db.Text
   createdAt DateTime @default(now())
-  
-  tenant    tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
-  user      user     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  
+
+  tenant tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  user   user   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
   @@index([tenantId], map: "PlatformChatMessage_tenantId_idx")
   @@index([createdAt], map: "PlatformChatMessage_createdAt_idx")
   @@map("PlatformChatMessage")
@@ -822,23 +871,23 @@ model platformchatmessage {
 
 // CRM Leads
 model lead {
-  id            String     @id @default(cuid())
-  name          String
-  email         String
-  phone         String?
-  source        String     // WHATSAPP, WEBCHAT, LANDING, MANUAL, IMPORT, etc.
-  interest      String?    // Plan de interés
-  status        String     @default("NEW") // NEW, CONTACTED, QUALIFIED, OPPORTUNITY, CUSTOMER, LOST
-  stage         String     @default("LEAD_CAPTURED") // LEAD_CAPTURED, CONTACTED, QUALIFIED, DEMO, PROPOSAL, NEGOTIATION, CLOSED_WON, CLOSED_LOST
-  assignedToId  String?
+  id             String   @id @default(cuid())
+  name           String
+  email          String
+  phone          String?
+  source         String // WHATSAPP, WEBCHAT, LANDING, MANUAL, IMPORT, etc.
+  interest       String? // Plan de interés
+  status         String   @default("NEW") // NEW, CONTACTED, QUALIFIED, OPPORTUNITY, CUSTOMER, LOST
+  stage          String   @default("LEAD_CAPTURED") // LEAD_CAPTURED, CONTACTED, QUALIFIED, DEMO, PROPOSAL, NEGOTIATION, CLOSED_WON, CLOSED_LOST
+  assignedToId   String?
   conversationId String?
-  notes         String?    @db.Text
-  createdAt     DateTime   @default(now())
-  updatedAt     DateTime   @updatedAt
-  
-  assignedTo    user?      @relation(fields: [assignedToId], references: [id], onDelete: SetNull)
-  leadnotes     leadnote[]
-  
+  notes          String?  @db.Text
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  assignedTo user?      @relation(fields: [assignedToId], references: [id], onDelete: SetNull)
+  leadnotes  leadnote[]
+
   @@index([status], map: "Lead_status_idx")
   @@index([stage], map: "Lead_stage_idx")
   @@index([assignedToId], map: "Lead_assignedToId_idx")
@@ -853,10 +902,10 @@ model leadnote {
   userId    String
   note      String   @db.Text
   createdAt DateTime @default(now())
-  
-  lead      lead     @relation(fields: [leadId], references: [id], onDelete: Cascade)
-  user      user     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  
+
+  lead lead @relation(fields: [leadId], references: [id], onDelete: Cascade)
+  user user @relation(fields: [userId], references: [id], onDelete: Cascade)
+
   @@index([leadId], map: "LeadNote_leadId_idx")
   @@map("LeadNote")
 }
@@ -872,9 +921,9 @@ model platforminstance {
   status      String   @default("ACTIVE") // ACTIVE, INACTIVE, MAINTENANCE
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
-  
-  tenants     tenant[]
-  
+
+  tenants tenant[]
+
   @@index([status], map: "PlatformInstance_status_idx")
   @@map("PlatformInstance")
 }
@@ -884,13 +933,13 @@ model platformn8nflow {
   id            String   @id @default(cuid())
   name          String
   description   String?  @db.Text
-  workflow      Json     // Workflow completo de N8N
-  category      String   // ONBOARDING, NOTIFICATIONS, LEADS, REPORTS, OPERATIONS
+  workflow      Json // Workflow completo de N8N
+  category      String // ONBOARDING, NOTIFICATIONS, LEADS, REPORTS, OPERATIONS
   isActive      Boolean  @default(false)
   n8nWorkflowId String?
   createdAt     DateTime @default(now())
   updatedAt     DateTime @updatedAt
-  
+
   @@index([category], map: "PlatformN8NFlow_category_idx")
   @@index([isActive], map: "PlatformN8NFlow_isActive_idx")
   @@map("PlatformN8NFlow")
@@ -902,45 +951,45 @@ model platformn8nflow {
 
 // Configuración SMTP por Tenant
 model tenantsmtpsettings {
-  id          String   @id @default(cuid())
-  tenantId    String   @unique
-  fromName    String
-  fromEmail   String
-  replyTo     String?
-  host        String
-  port        Int
-  secure      Boolean  @default(false)
-  username    String
-  password    String   @db.Text // Cifrado con AES-256-GCM
-  tls         Json?    // Configuración TLS opcional
-  isActive    Boolean  @default(true)
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
-  updatedBy   String?  // userId que actualizó
-  
-  tenant      tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
-  
+  id        String   @id @default(cuid())
+  tenantId  String   @unique
+  fromName  String
+  fromEmail String
+  replyTo   String?
+  host      String
+  port      Int
+  secure    Boolean  @default(false)
+  username  String
+  password  String   @db.Text // Cifrado con AES-256-GCM
+  tls       Json? // Configuración TLS opcional
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  updatedBy String? // userId que actualizó
+
+  tenant tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
   @@index([tenantId])
   @@map("TenantSmtpSettings")
 }
 
 // Configuración SMTP Global del Platform
 model platformsmtpsettings {
-  id          String   @id @default(cuid())
-  fromName    String
-  fromEmail   String
-  replyTo     String?
-  host        String
-  port        Int
-  secure      Boolean  @default(false)
-  username    String
-  password    String   @db.Text // Cifrado con AES-256-GCM
-  tls         Json?    // Configuración TLS opcional
-  isActive    Boolean  @default(true)
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
-  updatedBy   String?  // userId que actualizó
-  
+  id        String   @id @default(cuid())
+  fromName  String
+  fromEmail String
+  replyTo   String?
+  host      String
+  port      Int
+  secure    Boolean  @default(false)
+  username  String
+  password  String   @db.Text // Cifrado con AES-256-GCM
+  tls       Json? // Configuración TLS opcional
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  updatedBy String? // userId que actualizó
+
   @@map("PlatformSmtpSettings")
 }
 
@@ -955,28 +1004,28 @@ enum emailoutboxstatus {
 
 // Cola de Envíos (Outbox Pattern)
 model emailoutbox {
-  id              String              @id @default(cuid())
-  tenantId        String?             // null para emails del platform
-  idempotencyKey  String               @unique
-  to              String
-  cc              Json?                // Array de strings
-  bcc             Json?                // Array de strings
-  subject         String
-  body            String               @db.Text
-  bodyType        String               @default("html") // "html" | "text"
-  status          emailoutboxstatus    @default(QUEUED)
-  attempts        Int                  @default(0)
-  maxAttempts     Int                  @default(5)
-  nextRetryAt     DateTime?
-  lastError       String?              @db.Text
-  sentAt          DateTime?
-  provider        String               @default("TENANT") // "TENANT" | "PLATFORM"
-  metadata        Json?                // Datos adicionales
-  createdAt       DateTime             @default(now())
-  updatedAt       DateTime             @updatedAt
-  
-  tenant          tenant?               @relation(fields: [tenantId], references: [id], onDelete: SetNull)
-  
+  id             String            @id @default(cuid())
+  tenantId       String? // null para emails del platform
+  idempotencyKey String            @unique
+  to             String
+  cc             Json? // Array de strings
+  bcc            Json? // Array de strings
+  subject        String
+  body           String            @db.Text
+  bodyType       String            @default("html") // "html" | "text"
+  status         emailoutboxstatus @default(QUEUED)
+  attempts       Int               @default(0)
+  maxAttempts    Int               @default(5)
+  nextRetryAt    DateTime?
+  lastError      String?           @db.Text
+  sentAt         DateTime?
+  provider       String            @default("TENANT") // "TENANT" | "PLATFORM"
+  metadata       Json? // Datos adicionales
+  createdAt      DateTime          @default(now())
+  updatedAt      DateTime          @updatedAt
+
+  tenant tenant? @relation(fields: [tenantId], references: [id], onDelete: SetNull)
+
   @@index([tenantId, status])
   @@index([status, nextRetryAt])
   @@index([idempotencyKey])
@@ -986,19 +1035,19 @@ model emailoutbox {
 
 // Logs de Auditoría de Configuración SMTP
 model emailsettingsauditlog {
-  id          String   @id @default(cuid())
-  userId      String
-  tenantId    String?  // null si es cambio global
-  action      String   // "CREATE" | "UPDATE" | "DELETE"
-  field       String?  // Campo modificado (opcional)
-  oldValue    String?  @db.Text // Hash para password
-  newValue    String?  @db.Text // Hash para password
-  ipAddress   String?
-  userAgent   String?
-  createdAt   DateTime @default(now())
-  
-  user        user     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  
+  id        String   @id @default(cuid())
+  userId    String
+  tenantId  String? // null si es cambio global
+  action    String // "CREATE" | "UPDATE" | "DELETE"
+  field     String? // Campo modificado (opcional)
+  oldValue  String?  @db.Text // Hash para password
+  newValue  String?  @db.Text // Hash para password
+  ipAddress String?
+  userAgent String?
+  createdAt DateTime @default(now())
+
+  user user @relation(fields: [userId], references: [id], onDelete: Cascade)
+
   @@index([userId])
   @@index([tenantId])
   @@index([action])

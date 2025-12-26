@@ -1,5 +1,6 @@
 import { Module } from '@nestjs/common';
 import { ThrottlerModule, ThrottlerGuard } from '@nestjs/throttler';
+import { ScheduleModule } from '@nestjs/schedule';
 import { APP_GUARD } from '@nestjs/core';
 import { PrismaModule } from './prisma/prisma.module';
 import { MarketingLeadsModule } from './modules/marketing-leads/marketing-leads.module';
@@ -40,6 +41,7 @@ import { CryptoModule } from './modules/crypto/crypto.module';
 @Module({
   imports: [
     CryptoModule, // Módulo global de cifrado
+    ScheduleModule.forRoot(), // Scheduler global
     // Rate Limiting: Configuración global
     ThrottlerModule.forRoot([
       {

@@ -2,7 +2,7 @@ import { Injectable, Logger, BadRequestException, NotFoundException } from '@nes
 import { PrismaService } from '../../../prisma/prisma.service';
 import { Prisma } from '@prisma/client';
 import { randomUUID } from 'crypto';
-// eslint-disable-next-line @typescript-eslint/no-require-imports
+ 
 const pdfParse = require('pdf-parse');
 import * as mammoth from 'mammoth';
 import { detect } from 'langdetect';

@@ -8,7 +8,7 @@ import { N8nIntegrationModule } from '../n8n-integration/n8n-integration.module'
 
 @Module({
   imports: [
-    ScheduleModule.forRoot(),
+    ScheduleModule, // No usar forRoot() aquí, ya está en WhatsAppModule
     PrismaModule,
     N8nIntegrationModule,
   ],

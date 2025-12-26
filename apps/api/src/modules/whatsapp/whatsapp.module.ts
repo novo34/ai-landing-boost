@@ -12,7 +12,10 @@ import { KnowledgeBaseModule } from '../knowledge-base/knowledge-base.module';
 import { NotificationsModule } from '../notifications/notifications.module';
 import { WebhookSignatureGuard } from './guards/webhook-signature.guard';
 import { WhatsAppReconnectSchedulerService } from './services/whatsapp-reconnect-scheduler.service';
+import { WhatsAppSyncService } from './whatsapp-sync.service';
+import { WhatsAppSyncScheduler } from './schedulers/whatsapp-sync.scheduler';
 import { ScheduleModule } from '@nestjs/schedule';
+import { CryptoModule } from '../crypto/crypto.module';
 
 @Module({
   imports: [
@@ -22,6 +25,7 @@ import { ScheduleModule } from '@nestjs/schedule';
     KnowledgeBaseModule,
     NotificationsModule,
     ScheduleModule,
+    CryptoModule,
   ],
   controllers: [WhatsAppController, WhatsAppWebhookController],
   providers: [
@@ -31,6 +35,8 @@ import { ScheduleModule } from '@nestjs/schedule';
     WhatsAppCloudProvider,
     WebhookSignatureGuard,
     WhatsAppReconnectSchedulerService,
+    WhatsAppSyncService,
+    WhatsAppSyncScheduler,
   ],
   exports: [WhatsAppService, WhatsAppMessagingService],
 })

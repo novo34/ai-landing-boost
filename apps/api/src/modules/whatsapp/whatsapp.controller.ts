@@ -15,6 +15,8 @@ import { WhatsAppMessagingService } from './whatsapp-messaging.service';
 import { CreateAccountDto } from './dto/create-account.dto';
 import { UpdateAccountDto } from './dto/update-account.dto';
 import { SendMessageDto } from './dto/send-message.dto';
+import { ConnectEvolutionDto } from './dto/connect-evolution.dto';
+import { CreateInstanceDto } from './dto/create-instance.dto';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { TenantContextGuard } from '../../common/guards/tenant-context.guard';
 import { RbacGuard } from '../../common/guards/rbac.guard';
@@ -54,6 +56,43 @@ export class WhatsAppController {
   }
 
   /**
+   * Conecta Evolution API del tenant
+   */
+  @Post('evolution/connect')
+  @UseGuards(EmailVerifiedGuard)
+  @Roles($Enums.tenantmembership_role.OWNER, $Enums.tenantmembership_role.ADMIN)
+  @HttpCode(HttpStatus.CREATED)
+  async connectEvolution(
+    @CurrentTenant() tenant: { id: string; role: string },
+    @Body() dto: ConnectEvolutionDto,
+  ) {
+    return this.whatsappService.connectEvolution(tenant.id, dto);
+  }
+
+  /**
+   * Testa conexión Evolution API del tenant
+   */
+  @Post('evolution/test')
+  @Roles($Enums.tenantmembership_role.OWNER, $Enums.tenantmembership_role.ADMIN)
+  @HttpCode(HttpStatus.OK)
+  async testEvolutionConnection(
+    @CurrentTenant() tenant: { id: string; role: string },
+  ) {
+    return this.whatsappService.testEvolutionConnection(tenant.id);
+  }
+
+  /**
+   * Obtiene estado de conexión Evolution del tenant
+   */
+  @Get('evolution/status')
+  @Roles($Enums.tenantmembership_role.OWNER, $Enums.tenantmembership_role.ADMIN)
+  async getEvolutionConnectionStatus(
+    @CurrentTenant() tenant: { id: string; role: string },
+  ) {
+    return this.whatsappService.getEvolutionConnectionStatus(tenant.id);
+  }
+
+  /**
    * Crea una nueva cuenta de WhatsApp
    */
   @Post('accounts')
@@ -62,9 +101,16 @@ export class WhatsAppController {
   @HttpCode(HttpStatus.CREATED)
   async createAccount(
     @CurrentTenant() tenant: { id: string; role: string },
-    @Body() dto: CreateAccountDto,
+    @Body() dto: CreateAccountDto | CreateInstanceDto,
   ) {
-    return this.whatsappService.createAccount(tenant.id, dto);
+    // Si tiene provider, es CreateAccountDto (legacy)
+    // Si no tiene provider pero tiene instanceName o phoneNumber, es CreateInstanceDto
+    if ('provider' in dto) {
+      return this.whatsappService.createAccount(tenant.id, dto as CreateAccountDto);
+    } else {
+      // Es CreateInstanceDto para Evolution API
+      return this.whatsappService.createInstance(tenant.id, dto as CreateInstanceDto);
+    }
   }
 
   /**
@@ -82,6 +128,8 @@ export class WhatsAppController {
 
   /**
    * Elimina una cuenta de WhatsApp
+   * NOTA: No usar getAccountById aquí porque filtra por tenantId y puede fallar con legacy huérfana.
+   * deleteInstance y deleteAccount ya validan ownership usando la policy central.
    */
   @Delete('accounts/:id')
   @Roles($Enums.tenantmembership_role.OWNER, $Enums.tenantmembership_role.ADMIN)
@@ -90,7 +138,62 @@ export class WhatsAppController {
     @CurrentTenant() tenant: { id: string; role: string },
     @Param('id') id: string,
   ) {
+    // Obtener solo el provider sin validar ownership (la policy lo hará)
+    const account = await this.whatsappService.getAccountByIdUnsafe(id);
+    if (account?.provider === 'EVOLUTION_API') {
+      return this.whatsappService.deleteInstance(tenant.id, id);
+    }
     return this.whatsappService.deleteAccount(tenant.id, id);
+  }
+
+  /**
+   * Obtiene estado detallado de una instancia
+   */
+  @Get('accounts/:id/status')
+  @Roles($Enums.tenantmembership_role.OWNER, $Enums.tenantmembership_role.ADMIN)
+  async getInstanceStatus(
+    @CurrentTenant() tenant: { id: string; role: string },
+    @Param('id') id: string,
+  ) {
+    return this.whatsappService.getInstanceStatus(tenant.id, id);
+  }
+
+  /**
+   * Conecta una instancia (obtiene nuevo QR)
+   */
+  @Post('accounts/:id/connect')
+  @Roles($Enums.tenantmembership_role.OWNER, $Enums.tenantmembership_role.ADMIN)
+  @HttpCode(HttpStatus.OK)
+  async connectInstance(
+    @CurrentTenant() tenant: { id: string; role: string },
+    @Param('id') id: string,
+  ) {
+    return this.whatsappService.connectInstance(tenant.id, id);
+  }
+
+  /**
+   * Desconecta una instancia
+   */
+  @Post('accounts/:id/disconnect')
+  @Roles($Enums.tenantmembership_role.OWNER, $Enums.tenantmembership_role.ADMIN)
+  @HttpCode(HttpStatus.OK)
+  async disconnectInstance(
+    @CurrentTenant() tenant: { id: string; role: string },
+    @Param('id') id: string,
+  ) {
+    return this.whatsappService.disconnectInstance(tenant.id, id);
+  }
+
+  /**
+   * Sincroniza instancias con Evolution API del tenant
+   */
+  @Post('accounts/sync')
+  @Roles($Enums.tenantmembership_role.OWNER, $Enums.tenantmembership_role.ADMIN)
+  @HttpCode(HttpStatus.OK)
+  async syncInstances(
+    @CurrentTenant() tenant: { id: string; role: string },
+  ) {
+    return this.whatsappService.syncInstances(tenant.id);
   }
 
   /**

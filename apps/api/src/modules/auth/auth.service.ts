@@ -227,22 +227,61 @@ export class AuthService {
 
   async refresh(refreshToken: string): Promise<{ success: boolean; tokens: AuthTokens }> {
     try {
+      // ✅ JWT_REFRESH_SECRET es obligatorio (validado en validateEnv)
+      const refreshSecret = process.env.JWT_REFRESH_SECRET!;
+      
+      // 1. Verificar firma JWT
       const payload = this.jwtService.verify(refreshToken, {
-        secret: process.env.JWT_REFRESH_SECRET || process.env.JWT_SECRET || 'your-secret-key-change-in-production',
+        secret: refreshSecret,
       });
 
-            const user = await this.prisma.user.findUnique({
-        where: { id: payload.sub },
+      // 2. Verificar token en BD (hash SHA-256)
+      const tokenHash = crypto.createHash('sha256').update(refreshToken).digest('hex');
+      const tokenRecord = await this.prisma.refreshtoken.findUnique({
+        where: { tokenHash },
         include: {
-          tenantmembership: {
-            where: {
-              tenantId: payload.tenantId,
+          user: {
+            include: {
+              tenantmembership: {
+                where: {
+                  tenantId: payload.tenantId,
+                },
+                take: 1,
+              },
             },
-            take: 1,
           },
         },
       });
 
+      // 3. Validar que el token existe en BD
+      if (!tokenRecord) {
+        this.logger.warn(`Refresh token no encontrado en BD para hash: ${tokenHash.substring(0, 8)}...`);
+        throw new UnauthorizedException({
+          success: false,
+          error_key: 'auth.refresh_token_not_found',
+        });
+      }
+
+      // 4. Validar que no esté revocado
+      if (tokenRecord.revokedAt) {
+        this.logger.warn(`Refresh token revocado intentó usarse para usuario ${tokenRecord.userId}`);
+        throw new UnauthorizedException({
+          success: false,
+          error_key: 'auth.refresh_token_revoked',
+        });
+      }
+
+      // 5. Validar que no haya expirado
+      if (tokenRecord.expiresAt < new Date()) {
+        this.logger.warn(`Refresh token expirado intentó usarse para usuario ${tokenRecord.userId}`);
+        throw new UnauthorizedException({
+          success: false,
+          error_key: 'auth.refresh_token_expired',
+        });
+      }
+
+      // 6. Validar que el usuario existe
+      const user = tokenRecord.user;
       if (!user) {
         throw new UnauthorizedException({
           success: false,
@@ -250,7 +289,7 @@ export class AuthService {
         });
       }
 
-      // Rotación de refresh token (generar nuevos tokens)
+      // 7. Validar tenant
       const tenantId = payload.tenantId || user.tenantmembership[0]?.tenantId;
       if (!tenantId) {
         throw new UnauthorizedException({
@@ -259,13 +298,38 @@ export class AuthService {
         });
       }
 
-      const tokens = await this.generateTokens(user.id, user.email, tenantId);
+      // 8. ✅ Rotación real: generar nuevos tokens y revocar el anterior
+      const newTokens = await this.generateTokens(user.id, user.email, tenantId);
+      
+      // Obtener el ID del nuevo token para la rotación
+      const newTokenHash = crypto.createHash('sha256').update(newTokens.refreshToken).digest('hex');
+      const newTokenRecord = await this.prisma.refreshtoken.findUnique({
+        where: { tokenHash: newTokenHash },
+      });
+
+      // Revocar el token anterior y marcar que fue reemplazado
+      await this.prisma.refreshtoken.update({
+        where: { id: tokenRecord.id },
+        data: {
+          revokedAt: new Date(),
+          replacedByTokenId: newTokenRecord?.id || null,
+        },
+      });
+
+      this.logger.log(
+        `Refresh token rotado para usuario ${user.id}, token anterior revocado: ${tokenRecord.id}`
+      );
 
       return {
         success: true,
-        tokens,
+        tokens: newTokens,
       };
     } catch (error) {
+      if (error instanceof UnauthorizedException) {
+        throw error;
+      }
+      
+      this.logger.error(`Error en refresh: ${error.message}`, error.stack);
       throw new UnauthorizedException({
         success: false,
         error_key: 'auth.invalid_refresh_token',
@@ -273,10 +337,47 @@ export class AuthService {
     }
   }
 
-  async logout(): Promise<{ success: boolean }> {
-    // Los tokens se invalidan al limpiar las cookies en el controller
-    // En el futuro, si se persisten refresh tokens en BD, aquí se marcarían como revocados
-    return { success: true };
+  async logout(userId: string, refreshToken?: string): Promise<{ success: boolean }> {
+    try {
+      if (refreshToken) {
+        // ✅ Revocar token específico
+        const tokenHash = crypto.createHash('sha256').update(refreshToken).digest('hex');
+        
+        const tokenRecord = await this.prisma.refreshtoken.findUnique({
+          where: { tokenHash },
+        });
+
+        if (tokenRecord && tokenRecord.userId === userId && !tokenRecord.revokedAt) {
+          await this.prisma.refreshtoken.update({
+            where: { id: tokenRecord.id },
+            data: { revokedAt: new Date() },
+          });
+
+          this.logger.log(`Refresh token revocado para usuario ${userId}, motivo: logout`);
+        }
+      } else {
+        // ✅ Revocar todos los tokens activos del usuario
+        const result = await this.prisma.refreshtoken.updateMany({
+          where: {
+            userId,
+            revokedAt: null, // Solo tokens activos
+          },
+          data: {
+            revokedAt: new Date(),
+          },
+        });
+
+        this.logger.log(
+          `Todos los refresh tokens revocados para usuario ${userId}, cantidad: ${result.count}, motivo: logout`
+        );
+      }
+
+      return { success: true };
+    } catch (error) {
+      this.logger.error(`Error en logout: ${error.message}`, error.stack);
+      // No fallar el logout si hay error, solo loguear
+      return { success: true };
+    }
   }
 
   private async generateTokens(
@@ -295,16 +396,61 @@ export class AuthService {
       expiresIn: process.env.JWT_EXPIRES_IN || '15m',
     });
 
+    // ✅ JWT_REFRESH_SECRET es obligatorio (validado en validateEnv)
+    const refreshSecret = process.env.JWT_REFRESH_SECRET!;
+    const refreshExpiresIn = process.env.JWT_REFRESH_EXPIRES_IN || '7d';
+    
     // @ts-expect-error - expiresIn accepts string values like '15m', '7d' which are valid
     const refreshToken = this.jwtService.sign(payload, {
-      secret: process.env.JWT_REFRESH_SECRET || process.env.JWT_SECRET || 'your-secret-key-change-in-production',
-      expiresIn: process.env.JWT_REFRESH_EXPIRES_IN || '7d',
+      secret: refreshSecret,
+      expiresIn: refreshExpiresIn,
     });
+
+    // ✅ Persistir refresh token en BD (hash SHA-256)
+    const tokenHash = crypto.createHash('sha256').update(refreshToken).digest('hex');
+    
+    // Calcular expiresAt desde refreshExpiresIn (ej: '7d' = 7 días)
+    const expiresInMs = this.parseExpiresIn(refreshExpiresIn);
+    const expiresAt = new Date(Date.now() + expiresInMs);
+
+    await this.prisma.refreshtoken.create({
+      data: {
+        userId,
+        tenantId: tenantId || null,
+        tokenHash,
+        expiresAt,
+      },
+    });
+
+    this.logger.log(`Refresh token persistido para usuario ${userId}, tenant ${tenantId || 'N/A'}`);
 
     return {
       accessToken,
       refreshToken,
     };
+  }
+
+  /**
+   * Parsea expiresIn string (ej: '7d', '15m') a milisegundos
+   */
+  private parseExpiresIn(expiresIn: string): number {
+    const match = expiresIn.match(/^(\d+)([smhd])$/);
+    if (!match) {
+      // Default a 7 días si no se puede parsear
+      return 7 * 24 * 60 * 60 * 1000;
+    }
+
+    const value = parseInt(match[1], 10);
+    const unit = match[2];
+
+    const multipliers: Record<string, number> = {
+      s: 1000,
+      m: 60 * 1000,
+      h: 60 * 60 * 1000,
+      d: 24 * 60 * 60 * 1000,
+    };
+
+    return value * (multipliers[unit] || 86400000);
   }
 
   private generateSlug(text: string): string {

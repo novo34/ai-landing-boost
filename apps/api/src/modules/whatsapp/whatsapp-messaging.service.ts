@@ -58,22 +58,74 @@ export class WhatsAppMessagingService {
       });
     }
 
-    // Desencriptar credenciales (soporta formato legacy y nuevo)
+    // Obtener credenciales: usar connectionId -> decrypt si es Evolution API
     let credentials: any;
     try {
-      // Intentar formato nuevo (EncryptedBlobV1)
-      if (account.credentials && typeof account.credentials === 'object' && 'v' in account.credentials) {
-        const blob = account.credentials as EncryptedBlobV1;
-        credentials = this.cryptoService.decryptJson<any>(blob, {
-          tenantId,
-          recordId: account.id,
+      if (account.provider === $Enums.tenantwhatsappaccount_provider.EVOLUTION_API) {
+        // @ts-ignore - Prisma Client regenerado
+        if (!account.connectionId) {
+          throw new BadRequestException({
+            success: false,
+            error_key: 'whatsapp.evolution_connection_not_found',
+            message: 'Evolution API account requires a connection. Please reconnect your Evolution API.',
+          });
+        }
+
+        // Obtener conexión y descifrar credenciales
+        // @ts-ignore - Prisma Client regenerado
+        const connection = await this.prisma.tenantevolutionconnection.findUnique({
+          // @ts-ignore - Prisma Client regenerado
+          where: { id: account.connectionId },
         });
+
+        if (!connection) {
+          throw new NotFoundException({
+            success: false,
+            error_key: 'whatsapp.evolution_connection_not_found',
+          });
+        }
+
+        const encryptedBlob: EncryptedBlobV1 = JSON.parse(connection.encryptedCredentials);
+        const connectionCreds = this.cryptoService.decryptJson<{ baseUrl: string; apiKey: string }>(
+          encryptedBlob,
+          {
+            tenantId: connection.tenantId,
+            recordId: connection.id,
+          }
+        );
+
+        // Construir credenciales para Evolution API (necesita instanceName)
+        if (!account.instanceName) {
+          throw new BadRequestException({
+            success: false,
+            error_key: 'whatsapp.instance_not_configured',
+            message: 'Instance name is required for Evolution API.',
+          });
+        }
+
+        // @ts-ignore - Prisma Client regenerado
+        const normalizedUrl = connection.normalizedUrl || connectionCreds.baseUrl;
+        credentials = {
+          baseUrl: normalizedUrl,
+          apiKey: connectionCreds.apiKey,
+          instanceName: account.instanceName,
+        };
       } else {
-        // Formato legacy (string) - usar método de compatibilidad
-        // Nota: Esto debería migrarse gradualmente
-        throw new Error('Legacy format not supported in messaging service. Please re-create the account.');
+        // WhatsApp Cloud: usar credenciales del account (formato legacy soportado)
+        if (account.credentials && typeof account.credentials === 'object' && 'v' in account.credentials) {
+          const blob = account.credentials as EncryptedBlobV1;
+          credentials = this.cryptoService.decryptJson<any>(blob, {
+            tenantId,
+            recordId: account.id,
+          });
+        } else {
+          throw new Error('Legacy format not supported in messaging service. Please re-create the account.');
+        }
       }
     } catch (error: any) {
+      if (error instanceof BadRequestException || error instanceof NotFoundException) {
+        throw error;
+      }
       this.logger.error(`Failed to decrypt credentials for account ${account.id}: ${error.message}`);
       throw new BadRequestException({
         success: false,

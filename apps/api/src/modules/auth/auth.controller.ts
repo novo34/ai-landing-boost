@@ -161,9 +161,26 @@ export class AuthController {
   @Public() // Permitir logout incluso sin token válido (para limpiar cookies)
   @Throttle({ short: { limit: 20, ttl: 60000 } }) // 20 logouts por minuto (aumentado para evitar 429)
   @HttpCode(HttpStatus.OK)
-  async logout(@Res({ passthrough: false }) res: Response) {
+  async logout(@Req() req: Request, @Res({ passthrough: false }) res: Response) {
     try {
-      const result = await this.authService.logout();
+      const refreshToken = req.cookies?.refresh_token;
+      
+      // Intentar obtener userId del refresh token si está disponible
+      let userId: string | undefined;
+      if (refreshToken) {
+        try {
+          const payload = this.jwtService.decode(refreshToken) as { sub?: string } | null;
+          userId = payload?.sub;
+        } catch (error) {
+          // Si no se puede decodificar, continuar sin userId (se revocarán todos los tokens si se proporciona)
+        }
+      }
+
+      // Si hay userId, revocar tokens; si no, solo limpiar cookies
+      const result = userId 
+        ? await this.authService.logout(userId, refreshToken)
+        : { success: true };
+
       this.clearAuthCookies(res);
       return result;
     } catch (error) {

@@ -3,6 +3,7 @@ import { JwtModule } from '@nestjs/jwt';
 import { PassportModule } from '@nestjs/passport';
 import { AuthController } from './auth.controller';
 import { AuthService } from './auth.service';
+import { RefreshTokenCleanupService } from './refresh-token-cleanup.service';
 import { JwtStrategy } from './strategies/jwt.strategy';
 import { GoogleStrategy } from './strategies/google.strategy';
 import { MicrosoftStrategy } from './strategies/microsoft.strategy';
@@ -44,7 +45,7 @@ if (process.env.MICROSOFT_CLIENT_ID && process.env.MICROSOFT_CLIENT_SECRET) {
     }),
   ],
   controllers: [AuthController],
-  providers: [AuthService, JwtStrategy, ...oauthProviders],
+  providers: [AuthService, RefreshTokenCleanupService, JwtStrategy, ...oauthProviders],
   exports: [AuthService, JwtModule],
 })
 export class AuthModule {}
