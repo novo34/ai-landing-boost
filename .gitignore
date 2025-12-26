@@ -41,3 +41,8 @@ apps/web/.env
 *.njsproj
 *.sln
 *.sw?
+
+# Lockfiles de otros gestores (no permitidos)
+package-lock.json
+bun.lockb
+**/package-lock.json

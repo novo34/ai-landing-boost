@@ -1,0 +1,40 @@
+name: Validate Lockfiles
+
+on:
+  pull_request:
+    paths:
+      - 'package-lock.json'
+      - 'bun.lockb'
+      - 'apps/**/package-lock.json'
+      - 'pnpm-lock.yaml'
+
+jobs:
+  validate-lockfiles:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Check for forbidden lockfiles
+        run: |
+          if [ -f "package-lock.json" ] || [ -f "bun.lockb" ] || [ -f "apps/api/package-lock.json" ]; then
+            echo "❌ ERROR: Se detectaron lockfiles no permitidos"
+            echo "Por favor, elimina estos archivos y usa 'pnpm install'"
+            exit 1
+          fi
+          
+      - name: Verify pnpm-lock.yaml exists
+        run: |
+          if [ ! -f "pnpm-lock.yaml" ]; then
+            echo "❌ ERROR: pnpm-lock.yaml no encontrado"
+            echo "Por favor, ejecuta 'pnpm install' y commitea el lockfile"
+            exit 1
+          fi
+          
+      - name: Install pnpm
+        uses: pnpm/action-setup@v2
+        with:
+          version: 8
+          
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+

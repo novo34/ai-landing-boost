@@ -60,6 +60,38 @@ Esta guía incluye:
 
 **URL**: https://lovable.dev/projects/REPLACE_WITH_PROJECT_ID
 
+## Gestión de Dependencias
+
+Este proyecto usa **pnpm** como gestor de paquetes único.
+
+### Instalación
+```bash
+pnpm install
+```
+
+### Comandos Comunes
+```bash
+# Instalar dependencias
+pnpm install
+
+# Agregar dependencia
+pnpm add <package>
+
+# Agregar dependencia de desarrollo
+pnpm add -D <package>
+
+# Remover dependencia
+pnpm remove <package>
+
+# Actualizar dependencias
+pnpm update
+```
+
+### ⚠️ Importante
+- **NO uses** `npm install` o `bun install`
+- Solo `pnpm-lock.yaml` debe estar versionado
+- Si accidentalmente generas `package-lock.json`, elimínalo antes de commitear
+
 ## How can I edit this code?
 
 There are several ways of editing your application.
@@ -74,7 +106,7 @@ Changes made via Lovable will be committed automatically to this repo.
 
 If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
 
-The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
+The only requirement is having Node.js >= 20.0.0 & pnpm >= 8.0.0 installed - [install pnpm](https://pnpm.io/installation)
 
 Follow these steps:
 
@@ -86,10 +118,10 @@ git clone <YOUR_GIT_URL>
 cd <YOUR_PROJECT_NAME>
 
 # Step 3: Install the necessary dependencies.
-npm i
+pnpm install
 
 # Step 4: Start the development server with auto-reloading and an instant preview.
-npm run dev
+pnpm run dev
 ```
 
 **Edit a file directly in GitHub**
